@@ -1,0 +1,10 @@
+dist
+node_modules
+.env
+yarn-error.log
+yarn.lock
+.vscode
+
+log/*
+
+!*/.gitkeep
