@@ -1,0 +1,8 @@
+{
+  "name": "wws-api-server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/seungho-hub/wws-api-server.git",
+  "author": "seungho-hub <63999413+kangseungho-hub@users.noreply.github.com>",
+  "license": "MIT"
+}
