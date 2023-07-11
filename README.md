@@ -1,1 +1,1 @@
-# Working With Someone API server
+# Working With Someone GraphQL API server
