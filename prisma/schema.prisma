@@ -6,3 +6,31 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id    Int     @id @default(autoincrement())
+  username String
+  pfp  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  oauth Oauth?
+  local Local?
+}
+
+model Oauth {
+  provider      String
+  id            String @unique
+  access_token  String @db.VarChar(255)
+  refresh_token String
+  user_id       Int @unique
+  user          User @relation(fields : [user_id], references: [id], onDelete: Cascade)
+}
+
+model Local{
+  id                  Int @id @default(autoincrement())
+  encrypted_password  String
+  email               String
+  email_verified      Boolean
+  user_id             Int @unique
+  user                User @relation(fields : [user_id], references:[id], onDelete: Cascade)
+}
