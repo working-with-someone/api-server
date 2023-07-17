@@ -3,10 +3,13 @@ import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import RequestLogger from './middleware/requestLogger';
 import router from './routes/v1';
+import cookieParser from 'cookie-parser';
 
 const app = express();
 
 app.use(express.json());
+
+app.use(cookieParser());
 
 app.use(RequestLogger);
 
