@@ -1,1 +1,1 @@
-# Working With Someone GraphQL API server
+# API server for WWS
