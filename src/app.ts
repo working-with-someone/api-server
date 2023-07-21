@@ -5,8 +5,11 @@ import RequestLogger from './middleware/requestLogger';
 import router from './routes/v1';
 import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/auth';
+import helmet from 'helmet';
 
 const app = express();
+
+app.use(helmet());
 
 app.use(express.json());
 
