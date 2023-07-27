@@ -17,7 +17,7 @@ app.use(cookieParser());
 
 app.use(RequestLogger);
 
-app.use(authMiddleware);
+app.use('/v1', authMiddleware);
 
 app.use('/v1', router);
 
