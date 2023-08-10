@@ -9,18 +9,25 @@ import helmet from 'helmet';
 
 const app = express();
 
-app.use(helmet({ crossOriginResourcePolicy: false }));
+//set security headers of response
+app.use(helmet());
 
+//parse json from request body
 app.use(express.json());
 
+//parse cookie from headers
 app.use(cookieParser());
 
+//log request
 app.use(RequestLogger);
 
+//jwt authentication
 app.use('/v1', authMiddleware);
 
+//api v1 routes
 app.use('/v1', router);
 
+//response 404 error for unknown api request
 app.use('*', NotFound);
 
 //error handler
