@@ -6,13 +6,18 @@ import router from './routes/v1';
 import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/auth';
 import helmet from 'helmet';
-
+import cors from 'cors';
 const app = express();
 
 //set security headers of response
 app.use(helmet());
 
-//parse json from request body
+app.use(
+  cors({
+    origin: process.env.CORS_ALLOWED_ORIGIN?.split(' '),
+  })
+);
+
 app.use(express.json());
 
 //parse cookie from headers
