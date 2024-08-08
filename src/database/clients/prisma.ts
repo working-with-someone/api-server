@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { databaseLogger } from '../logger/winston';
-const prisma = new PrismaClient({
+import { databaseLogger } from '../../logger/winston';
+const prismaClient = new PrismaClient({
   log: [
     {
       emit: 'event',
@@ -17,10 +17,10 @@ const prisma = new PrismaClient({
   ],
 });
 
-prisma.$on('query', (e) => {
+prismaClient.$on('query', (e) => {
   const message = `${e.query} / ${e.params} / ${e.duration}`;
 
   databaseLogger.log('info', message);
 });
 
-export default prisma;
+export default prismaClient;
