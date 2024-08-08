@@ -16,6 +16,15 @@ declare namespace NodeJS {
 
     DATABASE_URL: string;
 
+    REDIS_HOST: string;
+    REDIS_PORT: string;
+
+    REDIS_NAME: string;
+    REDIS_DATABASE_NUMBER: string;
+
+    REDIS_USERNAME: string;
+    REDIS_PASSWORD: string;
+
     CORS_ALLOWED_ORIGIN: string;
   }
 }

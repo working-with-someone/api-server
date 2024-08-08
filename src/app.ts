@@ -1,4 +1,5 @@
 import express from 'express';
+import session from 'express-session';
 import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import RequestLogger from './middleware/requestLogger';
@@ -7,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/auth';
 import helmet from 'helmet';
 import cors from 'cors';
+import sessionConfig from './config/session.config';
+
 const app = express();
 
 //set security headers of response
@@ -17,6 +20,8 @@ app.use(
     origin: process.env.CORS_ALLOWED_ORIGIN?.split(' '),
   })
 );
+
+app.use(session(sessionConfig));
 
 app.use(express.json());
 
