@@ -6,8 +6,6 @@ const router = Router();
 
 router
   .route('/:userId')
-  .get(validate(userValidation.getUser), userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(validate(userValidation.getUser), userController.getUser);
 
 export default router;
