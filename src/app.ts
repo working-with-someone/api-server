@@ -25,9 +25,6 @@ app.use(session(sessionConfig));
 
 app.use(express.json());
 
-//parse cookie from headers
-app.use(cookieParser());
-
 //log request
 app.use(RequestLogger);
 
