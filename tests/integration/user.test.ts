@@ -1,4 +1,6 @@
 import prismaClient from '../../src/database/clients/prisma';
+jest.unmock('../../src/database/clients/prisma.ts');
+
 import testUserData from '../data/user.json';
 import redisClient from '../../src/database/clients/redis';
 import cookie from 'cookie';
