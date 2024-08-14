@@ -42,5 +42,7 @@
         }
       }
     }
-  ]
+  ],
+  "notFoundUserId": "0",
+  "invalidUserId": "userId"
 }
