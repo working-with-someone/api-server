@@ -3,7 +3,7 @@ import {
   webServerLoggerConfig,
   sysErrorLoggerConfig,
   databaseLoggerConfig,
-} from './config/config';
+} from '../config/winston.config';
 
 const webServerLogger = winston.createLogger(webServerLoggerConfig);
 
