@@ -1,5 +1,5 @@
-const pick = (object:any, keys:string[]) => {
-  return keys.reduce((obj:any, key) => {
+const pick = (object: any, keys: string[]) => {
+  return keys.reduce((obj: any, key) => {
     if (object && Object.prototype.hasOwnProperty.call(object, key)) {
       // eslint-disable-next-line no-param-reassign
       obj[key] = object[key];
@@ -8,4 +8,4 @@ const pick = (object:any, keys:string[]) => {
   }, {});
 };
 
-export default pick
+export default pick;
