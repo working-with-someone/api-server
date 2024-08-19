@@ -14,8 +14,11 @@ const currUser = testUserData.users[0];
 
 const mockApp = express();
 
+// session object가 생성되도록한다.
 mockApp.use(session(sessionConfig));
 
+// 모든 request에 대해 session object에 userId property를 지정한다.
+// authentication을 수행하는 auth middleware를 우회하기 위함이다.
 mockApp.all('*', (req, res, next) => {
   req.session.userId = currUser.id;
   next();
@@ -40,7 +43,7 @@ describe('User API', () => {
     await prismaClient.user.deleteMany({});
     await redisClient.disconnect();
   });
-  describe('GET v1/users/:userId', () => {
+  describe('GET /v1/users/:userId', () => {
     test('Response_200_With_Public_Current_User_Info', async () => {
       const res = await request(mockApp).get(`/v1/users/${currUser.id}`);
 
