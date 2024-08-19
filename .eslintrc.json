@@ -1,6 +1,6 @@
 {
   "env": {
-    "browser" : true,
+    "browser": true,
     "node": true
   },
   "extends": [
@@ -8,7 +8,9 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -16,8 +18,13 @@
   },
   "rules": {
     // 여기에 추가적인 규칙을 정의할 수 있습니다.
-    "no-console" : "error"
+    "no-console": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "endOfLine": "auto"
+      }
+    ]
   },
-  "ignorePatterns" : [
-  ]
+  "ignorePatterns": []
 }
