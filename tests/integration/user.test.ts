@@ -30,12 +30,11 @@ describe('User API', () => {
   const currUser: Record<string, any> = { ...testUserData.users[0] };
 
   beforeAll(async () => {
-    testUserData.users.forEach(async (user) => {
+    for (const user of testUserData.users) {
       await prismaClient.user.create({
         data: user,
       });
-    });
-
+    }
     await redisClient.connect();
   });
 
@@ -43,6 +42,7 @@ describe('User API', () => {
     await prismaClient.user.deleteMany({});
     await redisClient.disconnect();
   });
+
   describe('GET /v1/users/:userId', () => {
     test('Response_200_With_Public_Current_User_Info', async () => {
       const res = await request(mockApp).get(`/v1/users/${currUser.id}`);
