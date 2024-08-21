@@ -19,11 +19,3 @@ export const getSelf = asyncCatch(async (req: Request, res: Response) => {
 
   return res.status(200).json(user);
 });
-
-export const updateUser = asyncCatch(async (req: Request, res: Response) => {
-  return;
-});
-
-export const deleteUser = asyncCatch(async (req: Request, res: Response) => {
-  return;
-});

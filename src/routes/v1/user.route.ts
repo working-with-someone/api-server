@@ -4,14 +4,10 @@ import userValidation from '../../validations/user.validation';
 import validate from '../../middleware/validate';
 const router = Router();
 
-router
-  .route('/self')
-  .get(userController.getSelf);
-  
+router.route('/self').get(userController.getSelf);
+
 router
   .route('/:userId')
-  .get(validate(userValidation.getUser), userController.getUser)
-  .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .get(validate(userValidation.getUser), userController.getUser);
 
 export default router;
