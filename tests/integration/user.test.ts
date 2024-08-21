@@ -76,4 +76,16 @@ describe('User API', () => {
       expect(res.statusCode).toEqual(400);
     });
   });
+
+  describe('GET /v1/users/self', () => {
+    test('Response_200_With_Current_User', async () => {
+      const user = await prismaClient.user.findUnique({
+        where: { id: currUser.id },
+      });
+      const res = await request(mockApp).get(`/v1/users/self`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.encrypted_password).toEqual(user?.encrypted_password);
+    });
+  });
 });
