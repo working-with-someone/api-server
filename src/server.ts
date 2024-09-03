@@ -3,6 +3,7 @@ import 'dotenv/config';
 import http from 'http';
 import app from './app';
 import redisClient from './database/clients/redis';
+import s3Client from './database/clients/s3';
 
 const server = http.createServer(app);
 
@@ -12,6 +13,7 @@ function serverListening() {
 }
 
 server.on('close', () => {
+  s3Client.destroy();
   redisClient.disconnect();
 });
 
