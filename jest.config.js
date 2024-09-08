@@ -7,4 +7,5 @@ module.exports = {
   testEnvironment: 'node',
   setupFiles: ['<rootDir>/tests/jest/setEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/jest/singleton.ts'],
+  globalTeardown: '<rootDir>/tests/jest/tearDown.ts',
 };
