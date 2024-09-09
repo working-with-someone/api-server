@@ -9,6 +9,7 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  console.log(err);
   //should log errors that occur in other packages.
   if (err.originError) {
     const originError = err.originError;

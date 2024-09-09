@@ -23,6 +23,9 @@ app.use(
 
 app.use(session(sessionConfig));
 
+//urlencoded body parser
+app.use(express.urlencoded({ extended: true }));
+
 app.use(express.json());
 
 //log request
