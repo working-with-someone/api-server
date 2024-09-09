@@ -3,9 +3,13 @@
     {
       "id": 1,
       "username": "testUser1",
-      "pfp": "./pfp.png",
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
       "email": "testEmail1@test.com",
+      "pfp": {
+        "curr": "pfp.png",
+        "is_default": true,
+        "user_id": 1
+      },
       "email_verification": {
         "create": {
           "email_verified": true,
@@ -17,8 +21,12 @@
     {
       "id": 2,
       "username": "testUser2",
-      "pfp": "./pfp.png",
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
+      "pfp": {
+        "curr": "pfp.png",
+        "is_default": true,
+        "user_id": 2
+      },
       "email": "testEmail2@test.com",
       "email_verification": {
         "create": {
@@ -31,8 +39,12 @@
     {
       "id": 3,
       "username": "testUser3",
-      "pfp": "./pfp.png",
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
+      "pfp": {
+        "curr": "pfp.png",
+        "is_default": true,
+        "user_id": 3
+      },
       "email": "testEmail3@test.com",
       "email_verification": {
         "create": {
@@ -43,9 +55,13 @@
       }
     }
   ],
-  "updateUser" : {
-    "username" : "testUpdateUser",
-    "pfp" : "./pfp.png"
+  "defaultPfp": {
+    "curr": "pfp.png",
+    "is_default": true
+  },
+  "updateUser": {
+    "username": "testUpdateUser",
+    "pfp": "./pfp.png"
   },
   "notFoundUserId": "0",
   "invalidUserId": "userId"

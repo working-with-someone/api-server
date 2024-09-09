@@ -34,7 +34,7 @@ describe('User API', () => {
   beforeAll(async () => {
     for (const user of testUserData.users) {
       await prismaClient.user.create({
-        data: user,
+        data: { ...user, pfp: { create: {} } },
       });
     }
     await redisClient.connect();
@@ -100,7 +100,11 @@ describe('User API', () => {
         },
         data: {
           username: testUserData.users[0].username,
-          pfp: testUserData.users[0].pfp,
+          pfp: {
+            update: {
+              ...testUserData.defaultPfp,
+            },
+          },
         },
       });
     });
@@ -118,7 +122,7 @@ describe('User API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+      expect(res.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
     });
 
     // current user의 username, pfp를 update하는 요청에
@@ -138,9 +142,9 @@ describe('User API', () => {
 
       expect(res1.statusCode).toEqual(200);
       expect(res1.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res1.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+      expect(res1.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
-      const pfp1Key = res1.body.user.pfp;
+      const pfp1Key = res1.body.user.pfp.curr;
 
       // 첫번째 req의 image가 upload되었어야함.
       expect((await loadImage(pfp1Key)).$metadata.httpStatusCode).toEqual(200);
@@ -154,11 +158,11 @@ describe('User API', () => {
 
       expect(res2.statusCode).toEqual(200);
       expect(res2.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res2.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+      expect(res2.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
       // 두번째 req의 image가 upload되었어야함.
       expect(
-        (await loadImage(res2.body.user.pfp)).$metadata.httpStatusCode
+        (await loadImage(res2.body.user.pfp.curr)).$metadata.httpStatusCode
       ).toEqual(200);
     });
 
@@ -185,7 +189,7 @@ describe('User API', () => {
         .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+      expect(res.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
     });
   });
 });

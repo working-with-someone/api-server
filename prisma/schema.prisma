@@ -15,11 +15,18 @@ model user {
   username           String
   encrypted_password String
   email              String
-  pfp                String
   created_at         DateTime            @default(now())
   updated_at         DateTime            @updatedAt
   email_verification email_verification?
   oauth_client       oauth_client[]
+  pfp                pfp?
+}
+
+model pfp {
+  user_id    Int     @unique
+  user       user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  curr       String  @default("pfp.png")
+  is_default Boolean @default(true)
 }
 
 model email_verification {
