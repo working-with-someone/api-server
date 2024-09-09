@@ -9,8 +9,10 @@ import express from 'express';
 import request from 'supertest';
 import session from 'express-session';
 import sessionConfig from '../../src/config/session.config';
+import fs from 'fs';
+import { loadImage } from '../../src/lib/s3';
 
-const currUser = testUserData.users[0];
+const currUser = { ...testUserData.users[0] };
 
 const mockApp = express();
 
@@ -86,6 +88,104 @@ describe('User API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.encrypted_password).toEqual(user?.encrypted_password);
+    });
+  });
+
+  describe('PUT /v1/users/self', () => {
+    // update된 user의 정보를 복구한다.
+    afterEach(async () => {
+      await prismaClient.user.update({
+        where: {
+          id: testUserData.users[0].id,
+        },
+        data: {
+          username: testUserData.users[0].username,
+          pfp: testUserData.users[0].pfp,
+        },
+      });
+    });
+
+    // current user의 username, pfp를 update하는 요청에
+    // 200을 응답받아야한다.
+    // response body의 username이 update되었어야한다.
+    // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
+    test('Response_200_With_Updated_Current_User', async () => {
+      const res = await request(mockApp)
+        .put('/v1/users/self')
+        .set('Content-Type', 'multipart/form-data')
+        .field('username', testUserData.updateUser.username)
+        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.user.username).toEqual(testUserData.updateUser.username);
+      expect(res.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+    });
+
+    // current user의 username, pfp를 update하는 요청에
+    // 200을 응답받아야한다.
+    // response body의 username이 update되었어야한다.
+    // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
+    // 두번째 pfp를 update하는 요청에
+    // 첫번째 req에 upload되었던 pfp가 delete되어야한다.
+    // 두번째 req에 update한 pfp가 upload되었어야한다.
+    test('Response_200_With_Updated_Current_User_And_Check_S3_Object', async () => {
+      // 첫번째 request
+      const res1 = await request(mockApp)
+        .put('/v1/users/self')
+        .set('Content-Type', 'multipart/form-data')
+        .field('username', testUserData.updateUser.username)
+        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+
+      expect(res1.statusCode).toEqual(200);
+      expect(res1.body.user.username).toEqual(testUserData.updateUser.username);
+      expect(res1.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+
+      const pfp1Key = res1.body.user.pfp;
+
+      // 첫번째 req의 image가 upload되었어야함.
+      expect((await loadImage(pfp1Key)).$metadata.httpStatusCode).toEqual(200);
+
+      // 두번째 request
+      const res2 = await request(mockApp)
+        .put('/v1/users/self')
+        .set('Content-Type', 'multipart/form-data')
+        .field('username', testUserData.updateUser.username)
+        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+
+      expect(res2.statusCode).toEqual(200);
+      expect(res2.body.user.username).toEqual(testUserData.updateUser.username);
+      expect(res2.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
+
+      // 두번째 req의 image가 upload되었어야함.
+      expect(
+        (await loadImage(res2.body.user.pfp)).$metadata.httpStatusCode
+      ).toEqual(200);
+    });
+
+    // current user의 username을 update하는 요청에
+    // 200을 응답받아야한다.
+    // response body의 username이 update되었어야한다.
+    test('Response_200_With_Updated_Current_User_pfp(x)', async () => {
+      const res = await request(mockApp)
+        .put('/v1/users/self')
+        .set('Content-type', 'multipart/form-data')
+        .field('username', testUserData.updateUser.username);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.user.username).toEqual(testUserData.updateUser.username);
+    });
+
+    // current user의 pfp를 update하는 요청에
+    // 200을 응답받아야한다.
+    // response body의 pfp가 이전의 pfp와 같지 않아야한다.
+    test('Response_200_With_Updated_Current_User_username(x)', async () => {
+      const res = await request(mockApp)
+        .put('/v1/users/self')
+        .set('Content-type', 'multipart/form-data')
+        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.user.pfp).not.toEqual(testUserData.users[0].pfp);
     });
   });
 });

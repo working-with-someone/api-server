@@ -43,6 +43,10 @@
       }
     }
   ],
+  "updateUser" : {
+    "username" : "testUpdateUser",
+    "pfp" : "./pfp.png"
+  },
   "notFoundUserId": "0",
   "invalidUserId": "userId"
 }

@@ -19,3 +19,15 @@ export const getSelf = asyncCatch(async (req: Request, res: Response) => {
 
   return res.status(200).json(user);
 });
+
+export const updateSelf = asyncCatch(async (req: Request, res: Response) => {
+  const updatedUesr = await userService.updateSelf(
+    req.session.userId as number,
+    {
+      ...req.body,
+      pfp: req.file,
+    }
+  );
+
+  return res.status(200).json({ user: updatedUesr });
+});
