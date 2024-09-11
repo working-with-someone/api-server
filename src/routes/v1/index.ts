@@ -1,6 +1,7 @@
 import express from 'express';
 
 import userRoute from './user.route';
+import mediaRoute from './media.route';
 
 const router = express.Router();
 
@@ -8,6 +9,10 @@ const defaultRoutes = [
   {
     path: '/users',
     route: userRoute,
+  },
+  {
+    path: '/media',
+    route: mediaRoute,
   },
 ];
 
