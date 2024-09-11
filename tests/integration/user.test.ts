@@ -118,7 +118,7 @@ describe('User API', () => {
         .put('/v1/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.user.username).toEqual(testUserData.updateUser.username);
@@ -138,7 +138,7 @@ describe('User API', () => {
         .put('/v1/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
       expect(res1.statusCode).toEqual(200);
       expect(res1.body.user.username).toEqual(testUserData.updateUser.username);
@@ -154,7 +154,7 @@ describe('User API', () => {
         .put('/v1/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
       expect(res2.statusCode).toEqual(200);
       expect(res2.body.user.username).toEqual(testUserData.updateUser.username);
@@ -186,7 +186,7 @@ describe('User API', () => {
       const res = await request(mockApp)
         .put('/v1/users/self')
         .set('Content-type', 'multipart/form-data')
-        .attach('pfp', fs.createReadStream('./tests/data/images/pfp.png'));
+        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);

@@ -20,7 +20,8 @@ describe('Environment Variables', () => {
 describe('S3 Commands', () => {
   // read command test를 위한 pre upload object
   const readCommandTestObjectKey = 'test-object';
-  const testImagePath = './tests/data/images.pfp.png';
+  const testImagePath = './tests/data/images/image.png';
+
   beforeAll(async () => {
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -37,7 +38,7 @@ describe('S3 Commands', () => {
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Body: fs.createReadStream('./tests/data/images/pfp.png'),
+      Body: fs.createReadStream(testImagePath),
     });
 
     const res = await s3Client.send(command);
@@ -52,7 +53,7 @@ describe('S3 Commands', () => {
       params: {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: key,
-        Body: fs.createReadStream('./tests/data/images/pfp.png'),
+        Body: fs.createReadStream(testImagePath),
       },
     });
 
