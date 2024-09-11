@@ -3,6 +3,8 @@ import { v4 } from 'uuid';
 import s3Client from '../../database/clients/s3';
 import { File } from '../../middleware/minions';
 import { Upload } from '@aws-sdk/lib-storage';
+import { Readable } from 'stream';
+import { wwsError } from '../../utils/wwsError';
 
 type keys = 'pfp';
 
@@ -31,7 +33,14 @@ export async function loadImage(key: string) {
     Key: key,
   });
 
-  return await s3Client.send(command);
+  try {
+    const res = await s3Client.send(command);
+
+    // type declaration에서는 readable로 명시되어있지 않지만, readable이다.
+    return res.Body as Readable;
+  } catch (err) {
+    throw new wwsError(404, 'can not found image');
+  }
 }
 
 export async function deleteImage(key: string) {
