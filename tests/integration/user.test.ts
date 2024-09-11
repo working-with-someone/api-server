@@ -45,9 +45,9 @@ describe('User API', () => {
     await redisClient.disconnect();
   });
 
-  describe('GET /v1/users/:userId', () => {
+  describe('GET /users/:userId', () => {
     test('Response_200_With_Public_Current_User_Info', async () => {
-      const res = await request(mockApp).get(`/v1/users/${currUser.id}`);
+      const res = await request(mockApp).get(`/users/${currUser.id}`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.user).toEqual(getPublicUserInfo(currUser));
@@ -56,7 +56,7 @@ describe('User API', () => {
     test('Response_200_With_Public_User_Info', async () => {
       const user = testUserData.users[1];
 
-      const res = await request(mockApp).get(`/v1/users/${user.id}`);
+      const res = await request(mockApp).get(`/users/${user.id}`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.user).toEqual(getPublicUserInfo(user));
@@ -64,7 +64,7 @@ describe('User API', () => {
 
     test('Response_404', async () => {
       const res = await request(mockApp).get(
-        `/v1/users/${testUserData.notFoundUserId}`
+        `/users/${testUserData.notFoundUserId}`
       );
 
       expect(res.statusCode).toEqual(404);
@@ -73,25 +73,25 @@ describe('User API', () => {
     test('Response_400_userId(?)', async () => {
       const res = await request(mockApp)
         // string userId is invalid, userId must be number
-        .get(`/v1/users/${testUserData.invalidUserId}`);
+        .get(`/users/${testUserData.invalidUserId}`);
 
       expect(res.statusCode).toEqual(400);
     });
   });
 
-  describe('GET /v1/users/self', () => {
+  describe('GET /users/self', () => {
     test('Response_200_With_Current_User', async () => {
       const user = await prismaClient.user.findUnique({
         where: { id: currUser.id },
       });
-      const res = await request(mockApp).get(`/v1/users/self`);
+      const res = await request(mockApp).get(`/users/self`);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.encrypted_password).toEqual(user?.encrypted_password);
     });
   });
 
-  describe('PUT /v1/users/self', () => {
+  describe('PUT /users/self', () => {
     // update된 user의 정보를 복구한다.
     afterEach(async () => {
       await prismaClient.user.update({
@@ -115,7 +115,7 @@ describe('User API', () => {
     // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
     test('Response_200_With_Updated_Current_User', async () => {
       const res = await request(mockApp)
-        .put('/v1/users/self')
+        .put('/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
         .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
@@ -135,7 +135,7 @@ describe('User API', () => {
     test('Response_200_With_Updated_Current_User_And_Check_S3_Object', async () => {
       // 첫번째 request
       const res1 = await request(mockApp)
-        .put('/v1/users/self')
+        .put('/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
         .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
@@ -151,7 +151,7 @@ describe('User API', () => {
 
       // 두번째 request
       const res2 = await request(mockApp)
-        .put('/v1/users/self')
+        .put('/users/self')
         .set('Content-Type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username)
         .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
@@ -169,7 +169,7 @@ describe('User API', () => {
     // response body의 username이 update되었어야한다.
     test('Response_200_With_Updated_Current_User_pfp(x)', async () => {
       const res = await request(mockApp)
-        .put('/v1/users/self')
+        .put('/users/self')
         .set('Content-type', 'multipart/form-data')
         .field('username', testUserData.updateUser.username);
 
@@ -182,7 +182,7 @@ describe('User API', () => {
     // response body의 pfp가 이전의 pfp와 같지 않아야한다.
     test('Response_200_With_Updated_Current_User_username(x)', async () => {
       const res = await request(mockApp)
-        .put('/v1/users/self')
+        .put('/users/self')
         .set('Content-type', 'multipart/form-data')
         .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 

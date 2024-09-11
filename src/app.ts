@@ -3,7 +3,7 @@ import session from 'express-session';
 import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import RequestLogger from './middleware/requestLogger';
-import router from './routes/v1';
+import router from './routes';
 import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/auth';
 import helmet from 'helmet';
@@ -29,10 +29,10 @@ app.use(express.json());
 app.use(RequestLogger);
 
 //jwt authentication
-app.use('/v1', authMiddleware);
+app.use(authMiddleware);
 
 //api v1 routes
-app.use('/v1', router);
+app.use(router);
 
 //response 404 error for unknown api request
 app.use('*', NotFound);

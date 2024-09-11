@@ -38,7 +38,7 @@ describe('Media API', () => {
   });
 
   describe('Images', () => {
-    describe('GET /v1/media/images/:key', () => {
+    describe('GET /media/images/:key', () => {
       const uploadedImageKey = 'media-test-key';
 
       beforeAll(async () => {
@@ -53,16 +53,14 @@ describe('Media API', () => {
 
       test('Response_200_With_Image', async () => {
         const res = await request(mockApp).get(
-          `/v1/media/images/${uploadedImageKey}`
+          `/media/images/${uploadedImageKey}`
         );
 
         expect(res.statusCode).toEqual(200);
       });
 
       test('Response_404_key', async () => {
-        const res = await request(mockApp).get(
-          `/v1/media/images/deosNotExist'`
-        );
+        const res = await request(mockApp).get(`/media/images/deosNotExist'`);
 
         expect(res.statusCode).toEqual(404);
       });

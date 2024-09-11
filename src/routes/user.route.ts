@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { userController } from '../../controllers';
-import userValidation from '../../validations/user.validation';
-import validate from '../../middleware/validate';
-import minion from '../../middleware/minions';
+import { userController } from '../controllers';
+import userValidation from '../validations/user.validation';
+import validate from '../middleware/validate';
+import minion from '../middleware/minions';
 
 const router = Router();
 
