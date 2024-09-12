@@ -13,7 +13,11 @@ import sessionConfig from './config/session.config';
 const app = express();
 
 //set security headers of response
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'same-site' },
+  })
+);
 
 app.use(
   cors({
