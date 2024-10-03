@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { userController } from '../controllers';
 import userValidation from '../validations/user.validation';
 import validate from '../middleware/validate';
-import minion from '../middleware/minions';
+import upload from 'express-fileupload';
 
 const router = Router();
 
@@ -10,7 +10,7 @@ router
   .route('/self')
   .get(userController.getSelf)
   .put(
-    minion({ limits: { files: 1 } }),
+    upload({ limits: { files: 1 } }),
     validate(userValidation.updateSelf),
     userController.updateSelf
   );

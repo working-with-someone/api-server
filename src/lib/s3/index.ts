@@ -1,14 +1,14 @@
 import { DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 import { v4 } from 'uuid';
 import s3Client from '../../database/clients/s3';
-import { File } from '../../middleware/minions';
 import { Upload } from '@aws-sdk/lib-storage';
 import { Readable } from 'stream';
 import { wwsError } from '../../utils/wwsError';
+import { UploadedFile } from 'express-fileupload';
 
 type keys = 'pfp';
 
-export async function uploadImage(prefix: keys, file: File) {
+export async function uploadImage(prefix: keys, file: UploadedFile) {
   const uuid = v4();
   const key = prefix + '-' + uuid;
 
@@ -17,8 +17,7 @@ export async function uploadImage(prefix: keys, file: File) {
     params: {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Body: file.stream,
-      ContentType: file.mimetype,
+      Body: file.data,
     },
   });
 
