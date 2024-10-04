@@ -7,7 +7,7 @@ import { deleteImage, uploadImage } from '../lib/s3';
 import { Prisma } from '@prisma/client';
 
 export async function getUser(userId: number, isSelf: boolean) {
-  const user = await prismaClient.user.findUnique({
+  const user = await prismaClient.user.findFirst({
     where: { id: userId },
     include: {
       pfp: true,
@@ -30,7 +30,7 @@ export async function updateSelf(userId: number, data: user.updateUserInput) {
     username: data.username,
   };
 
-  const user = await prismaClient.user.findUnique({
+  const user = await prismaClient.user.findFirst({
     where: { id: userId },
     include: { pfp: true },
   });

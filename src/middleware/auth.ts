@@ -8,7 +8,7 @@ const authMiddleware = async (
   res: Response,
   next: NextFunction
 ) => {
-  const user = await prismaClient.user.findUnique({
+  const user = await prismaClient.user.findFirst({
     where: {
       id: req.session.userId,
     },
