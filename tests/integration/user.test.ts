@@ -147,7 +147,11 @@ describe('User API', () => {
       const pfp1Key = res1.body.user.pfp.curr;
 
       // 첫번째 req의 image가 upload되었어야함.
-      expect(loadImage(pfp1Key)).resolves.not.toThrow();
+      expect(
+        loadImage({
+          key: pfp1Key,
+        })
+      ).resolves.not.toThrow();
 
       // 두번째 request
       const res2 = await request(mockApp)
@@ -161,7 +165,11 @@ describe('User API', () => {
       expect(res2.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
       // 두번째 req의 image가 upload되었어야함.
-      expect(loadImage(res2.body.user.pfp.curr)).resolves.not.toThrow();
+      expect(
+        loadImage({
+          key: res2.body.user.pfp.curr,
+        })
+      ).resolves.not.toThrow();
     });
 
     // current user의 username을 update하는 요청에

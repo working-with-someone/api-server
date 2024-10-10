@@ -8,6 +8,11 @@ import { UploadedFile } from 'express-fileupload';
 
 type keys = 'pfp';
 
+interface s3APIOption {
+  bucket_name?: string;
+  key: string;
+}
+
 export async function uploadImage(prefix: keys, file: UploadedFile) {
   const uuid = v4();
   const key = prefix + '-' + uuid;
@@ -26,10 +31,12 @@ export async function uploadImage(prefix: keys, file: UploadedFile) {
   return key;
 }
 
-export async function loadImage(key: string) {
+export async function loadImage(option: s3APIOption) {
   const command = new GetObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key,
+    Bucket: option.bucket_name
+      ? option.bucket_name
+      : process.env.AWS_BUCKET_NAME,
+    Key: option.key,
   });
 
   try {
@@ -42,10 +49,12 @@ export async function loadImage(key: string) {
   }
 }
 
-export async function deleteImage(key: string) {
+export async function deleteImage(option: s3APIOption) {
   const command = new DeleteObjectCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key,
+    Bucket: option.bucket_name
+      ? option.bucket_name
+      : process.env.AWS_BUCKET_NAME,
+    Key: option.key,
   });
 
   return await s3Client.send(command);

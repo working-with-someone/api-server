@@ -41,7 +41,9 @@ export async function updateSelf(userId: number, data: user.updateUserInput) {
     // user는 auth middleware에서 검증된다.
     // user.pfp는 auth server에서 검증된다.
     if (user!.pfp!.is_default) {
-      await deleteImage(user!.pfp!.curr);
+      await deleteImage({
+        key: user!.pfp!.curr,
+      });
     }
 
     // upload pfp
