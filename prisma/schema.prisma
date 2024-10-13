@@ -20,6 +20,8 @@ model user {
   email_verification email_verification?
   oauth_client       oauth_client[]
   pfp                pfp?
+  followers          follow[]           @relation("following")
+  following          follow[]           @relation("follower")
 }
 
 model pfp {
@@ -56,4 +58,13 @@ model oauth_client {
   scope                      String
   user_id                    Int
   user                       user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model follow {
+  follower     user   @relation("follower", fields: [follower_user_id], references: [id], onDelete: Cascade)
+  follower_user_id  Int
+  following    user   @relation("following", fields: [following_user_id], references: [id], onDelete: Cascade)
+  following_user_id Int
+
+  @@id([follower_user_id, following_user_id])
 }
