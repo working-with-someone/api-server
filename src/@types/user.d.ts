@@ -12,5 +12,6 @@ declare namespace user {
   // user data 중 update 가능한 정보는 username
   interface updateUserInput extends Pick<Prisma.userUpdateInput, 'username'> {
     pfp?: UploadedFile;
+    pfpToDefault?: boolean;
   }
 }

@@ -10,6 +10,7 @@ export default {
   updateSelf: {
     body: joi.object().keys({
       username: joi.string().optional(),
+      pfpToDefault: joi.boolean().optional(),
     }),
     files: joi.object().optional().keys({
       pfp: joi.object(),

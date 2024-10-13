@@ -11,6 +11,8 @@ import session from 'express-session';
 import sessionConfig from '../../src/config/session.config';
 import fs from 'fs';
 import { loadImage } from '../../src/lib/s3';
+import { to } from '../../src/config/path.config';
+import path from 'path';
 
 const currUser = { ...testUserData.users[0] };
 
@@ -92,110 +94,196 @@ describe('User API', () => {
   });
 
   describe('PUT /users/self', () => {
-    // update된 user의 정보를 복구한다.
-    afterEach(async () => {
-      await prismaClient.user.update({
-        where: {
-          id: testUserData.users[0].id,
-        },
-        data: {
-          username: testUserData.users[0].username,
-          pfp: {
-            update: {
-              ...testUserData.defaultPfp,
+    describe('single request', () => {
+      // update된 user의 정보를 복구한다.
+      afterEach(async () => {
+        await prismaClient.user.update({
+          where: {
+            id: testUserData.users[0].id,
+          },
+          data: {
+            username: testUserData.users[0].username,
+            pfp: {
+              update: {
+                ...testUserData.defaultPfp,
+              },
             },
           },
-        },
+        });
+      });
+
+      // current user의 username, pfp를 update하는 요청에
+      // 200을 응답받아야한다.
+      // response body의 username이 update되었어야한다.
+      // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
+      test('Response_200_With_Updated_Current_User_username(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.username).toEqual(
+          testUserData.updateUser.username
+        );
+      });
+
+      test('Response_200_With_Updated_Current_User_username(o)_pfp(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username)
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.username).toEqual(
+          testUserData.updateUser.username
+        );
+        expect(res.body.user.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
+
+        const pfpRes = await request(mockApp).get(res.body.user.pfp.curr);
+
+        expect(pfpRes.statusCode).toEqual(200);
+      });
+
+      test('Response_200_With_Updated_Current_User_username(o)_pfpToDefault(true)_pfp(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username)
+          .field('pfpToDefault', true)
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.username).toEqual(
+          testUserData.updateUser.username
+        );
+        expect(res.body.user.pfp.curr).toEqual(
+          path.join(to.media.default.images, 'pfp')
+        );
+      });
+
+      test('Response_200_With_Updated_Current_User_username(o)_pfpToDefault(false)_pfp(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username)
+          .field('pfpToDefault', false)
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.username).toEqual(
+          testUserData.updateUser.username
+        );
+
+        const pfpRes = await request(mockApp).get(res.body.user.pfp.curr);
+
+        expect(pfpRes.statusCode).toEqual(200);
+      });
+
+      test('Response_200_With_Updated_Current_User_username(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.username).toEqual(
+          testUserData.updateUser.username
+        );
+      });
+
+      test('Response_200_With_Updated_Current_User_pfp(o)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-type', 'multipart/form-data')
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.user.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
       });
     });
 
-    // current user의 username, pfp를 update하는 요청에
-    // 200을 응답받아야한다.
-    // response body의 username이 update되었어야한다.
-    // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
-    test('Response_200_With_Updated_Current_User', async () => {
-      const res = await request(mockApp)
-        .put('/users/self')
-        .set('Content-Type', 'multipart/form-data')
-        .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+    describe('continuous request', () => {
+      afterAll(async () => {
+        await prismaClient.user.update({
+          where: {
+            id: testUserData.users[0].id,
+          },
+          data: {
+            username: testUserData.users[0].username,
+            pfp: {
+              update: {
+                ...testUserData.defaultPfp,
+              },
+            },
+          },
+        });
+      });
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
-    });
+      let currUploadedPfpKey = '';
 
-    // current user의 username, pfp를 update하는 요청에
-    // 200을 응답받아야한다.
-    // response body의 username이 update되었어야한다.
-    // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
-    // 두번째 pfp를 update하는 요청에
-    // 첫번째 req에 upload되었던 pfp가 delete되어야한다.
-    // 두번째 req에 update한 pfp가 upload되었어야한다.
-    test('Response_200_With_Updated_Current_User_And_Check_S3_Object', async () => {
-      // 첫번째 request
-      const res1 = await request(mockApp)
-        .put('/users/self')
-        .set('Content-Type', 'multipart/form-data')
-        .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+      // curr user의 username과 pfp를 새로운 image로 update한다.
+      test('1. Response_200_With_Updated_Current_User_pfpToDefault(x)', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
-      expect(res1.statusCode).toEqual(200);
-      expect(res1.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res1.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.statusCode).toEqual(200);
 
-      const pfp1Key = res1.body.user.pfp.curr;
+        // pfp가 default여선 안된다.
+        expect(res.body.user.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
 
-      // 첫번째 req의 image가 upload되었어야함.
-      expect(
-        loadImage({
-          key: pfp1Key,
-        })
-      ).resolves.not.toThrow();
+        // request 1 으로 인해 upload된 pfp key
+        currUploadedPfpKey = res.body.user.pfp.curr;
+      });
 
-      // 두번째 request
-      const res2 = await request(mockApp)
-        .put('/users/self')
-        .set('Content-Type', 'multipart/form-data')
-        .field('username', testUserData.updateUser.username)
-        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+      // curr user의 pfp를 새로운 image로 update한다.
+      test('2. Response_200_With_Updated_Current_User_And_Updated_Pfp_At_1_Must_Be_deleeted', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
-      expect(res2.statusCode).toEqual(200);
-      expect(res2.body.user.username).toEqual(testUserData.updateUser.username);
-      expect(res2.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.statusCode).toEqual(200);
 
-      // 두번째 req의 image가 upload되었어야함.
-      expect(
-        loadImage({
-          key: res2.body.user.pfp.curr,
-        })
-      ).resolves.not.toThrow();
-    });
+        // pfp가 default여선 안된다.
+        expect(res.body.user.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
 
-    // current user의 username을 update하는 요청에
-    // 200을 응답받아야한다.
-    // response body의 username이 update되었어야한다.
-    test('Response_200_With_Updated_Current_User_pfp(x)', async () => {
-      const res = await request(mockApp)
-        .put('/users/self')
-        .set('Content-type', 'multipart/form-data')
-        .field('username', testUserData.updateUser.username);
+        // req1에서 upload되었던 pfp는 delete되었어야한다.
+        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.user.username).toEqual(testUserData.updateUser.username);
-    });
+        // 두번째 req의 image가 upload되었어야함.
 
-    // current user의 pfp를 update하는 요청에
-    // 200을 응답받아야한다.
-    // response body의 pfp가 이전의 pfp와 같지 않아야한다.
-    test('Response_200_With_Updated_Current_User_username(x)', async () => {
-      const res = await request(mockApp)
-        .put('/users/self')
-        .set('Content-type', 'multipart/form-data')
-        .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
+        const pfpRes = await request(mockApp).get(res.body.user.pfp.curr);
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.user.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(pfpRes.statusCode).toEqual(200);
+
+        currUploadedPfpKey = res.body.user.pfp.curr;
+      });
+
+      test('3. Response_200_With_Updated_Current_User_And_Updated_Default_Pfp_At_Req2_Must_Be_deleted', async () => {
+        const res = await request(mockApp)
+          .put('/users/self')
+          .set('Content-Type', 'multipart/form-data')
+          .field('pfpToDefault', true);
+
+        expect(res.statusCode).toEqual(200);
+
+        expect(res.body.user.pfp.curr).toEqual(testUserData.defaultPfp.curr);
+
+        // req1에서 upload되었던 pfp는 delete되었어야한다.
+        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
+      });
     });
   });
 });
