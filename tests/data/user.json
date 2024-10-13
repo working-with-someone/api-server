@@ -6,7 +6,7 @@
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
       "email": "testEmail1@test.com",
       "pfp": {
-        "curr": "pfp.png",
+        "curr": "/media/images/default/pfp",
         "is_default": true,
         "user_id": 1
       },
@@ -23,7 +23,7 @@
       "username": "testUser2",
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
       "pfp": {
-        "curr": "pfp.png",
+        "curr": "/media/images/default/pfp",
         "is_default": true,
         "user_id": 2
       },
@@ -41,7 +41,7 @@
       "username": "testUser3",
       "encrypted_password": "$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2",
       "pfp": {
-        "curr": "pfp.png",
+        "curr": "/media/images/default/pfp",
         "is_default": true,
         "user_id": 3
       },
@@ -56,12 +56,12 @@
     }
   ],
   "defaultPfp": {
-    "curr": "pfp.png",
+    "curr": "/media/images/default/pfp",
     "is_default": true
   },
   "updateUser": {
     "username": "testUpdateUser",
-    "pfp": "./pfp.png"
+    "pfp": "./pfp"
   },
   "notFoundUserId": "0",
   "invalidUserId": "userId"
