@@ -6,4 +6,9 @@ export default {
       key: joi.string().required(),
     }),
   },
+  getDefaultImage: {
+    params: joi.object().keys({
+      key: joi.string().allow('pfp'),
+    }),
+  },
 };

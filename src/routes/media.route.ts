@@ -9,4 +9,11 @@ router
   .route('/images/:key')
   .get(validate(mediaValidation.getImage), mediaController.getImage);
 
+router
+  .route('/images/default/:key')
+  .get(
+    validate(mediaValidation.getDefaultImage),
+    mediaController.getDefaultImage
+  );
+
 export default router;

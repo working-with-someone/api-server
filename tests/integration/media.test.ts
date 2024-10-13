@@ -65,5 +65,25 @@ describe('Media API', () => {
         expect(res.statusCode).toEqual(404);
       });
     });
+
+    describe('GET /media/images/default/:key', () => {
+      const defaultPfpImageKey = 'pfp';
+
+      test('Response_200_With_Image', async () => {
+        const res = await request(mockApp).get(
+          `/media/images/default/${defaultPfpImageKey}`
+        );
+
+        expect(res.statusCode).toEqual(200);
+      });
+
+      test('Response_400', async () => {
+        const res = await request(mockApp).get(
+          `/media/images/default/doesNotExistDefaultObjectKey`
+        );
+
+        expect(res.statusCode).toEqual(404);
+      });
+    });
   });
 });
