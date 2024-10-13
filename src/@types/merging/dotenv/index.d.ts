@@ -29,6 +29,7 @@ declare namespace NodeJS {
 
     AWS_REGION: string;
     AWS_BUCKET_NAME: string;
+    AWS_DEFAULT_BUCKET_NAME: string;
 
     AWS_IAM_ACCESS_KEY: string;
     AWS_IAM_SECRET_ACCESS_KEY: string;
