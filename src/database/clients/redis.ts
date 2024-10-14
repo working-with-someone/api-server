@@ -9,10 +9,6 @@ redisClient.on('ready', () => {
   );
 });
 
-redisClient.on('error', (err) => {
-  console.error('❌ redis client connection error ', err);
-});
-
 redisClient.on('end', () => {
   console.log(`✅  Redis client disconnected`);
 });
