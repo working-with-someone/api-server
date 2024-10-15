@@ -82,4 +82,25 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(409);
     });
   });
+
+  describe('DELETE /users/:user_id/following/:following_user_id', () => {
+    const following = testUserData.users[1];
+
+    beforeEach(async () => {
+      await prismaClient.follow.create({
+        data: {
+          following_user_id: following.id,
+          follower_user_id: currUser.id,
+        },
+      });
+    });
+
+    test('Response_204', async () => {
+      const res = await request(mockApp).delete(
+        `/users/${currUser.id}/following/${following.id}`
+      );
+
+      expect(res.statusCode).toEqual(204);
+    });
+  });
 });

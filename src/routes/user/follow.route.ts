@@ -7,6 +7,10 @@ const followingRouter = Router();
 
 followingRouter
   .route('/:following_user_id')
-  .post(validate(followValidation.createFollow), followController.createFollow);
+  .post(validate(followValidation.createFollow), followController.createFollow)
+  .delete(
+    validate(followValidation.deleteFollow),
+    followController.deleteFollow
+  );
 
 export default followingRouter;

@@ -1,7 +1,7 @@
 import prismaClient from '../database/clients/prisma';
 import { wwsError } from '../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import type { createFollow } from '../@types/follow';
+import type { createFollow, deleteFollow } from '../@types/follow';
 
 export async function createFollow(data: createFollow) {
   const targetUser = await prismaClient.user.findUnique({
@@ -27,9 +27,20 @@ export async function createFollow(data: createFollow) {
     );
   }
 
+  //FIXME;
   const join = await prismaClient.follow.create({
     data,
   });
 
   return join;
+}
+
+export async function deleteFollow(data: deleteFollow) {
+  await prismaClient.follow.delete({
+    where: {
+      follower_user_id_following_user_id: data,
+    },
+  });
+
+  return;
 }

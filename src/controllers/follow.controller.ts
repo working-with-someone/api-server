@@ -10,3 +10,12 @@ export const createFollow = asyncCatch(async (req: Request, res: Response) => {
 
   return res.status(201).json(follow);
 });
+
+export const deleteFollow = asyncCatch(async (req: Request, res: Response) => {
+  followService.deleteFollow({
+    following_user_id: parseInt(req.params.following_user_id),
+    follower_user_id: req.session.userId as number,
+  });
+
+  return res.status(204).json({});
+});
