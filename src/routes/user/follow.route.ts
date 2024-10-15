@@ -8,6 +8,10 @@ const followingRouter = Router({
   mergeParams: true,
 });
 
+const followerRouter = Router({
+  mergeParams: true,
+});
+
 followingRouter
   .route('/')
   .get(
@@ -20,12 +24,16 @@ followingRouter
   .post(
     validate(followValidation.createFollow),
     userPermission(),
-    followController.createFollow
+    followController.createFollowings
   )
   .delete(
     validate(followValidation.deleteFollow),
     userPermission(),
-    followController.deleteFollow
+    followController.deleteFollowings
   );
 
-export default followingRouter;
+followerRouter
+  .route('/')
+  .get(validate(followValidation.getFollowers), followController.getFollowers);
+
+export { followingRouter, followerRouter };

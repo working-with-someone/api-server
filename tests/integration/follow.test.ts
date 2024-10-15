@@ -142,6 +142,8 @@ describe('Follow API', () => {
       });
     });
 
+    afterEach(async () => [await prismaClient.follow.deleteMany()]);
+
     test('Response_204', async () => {
       const res = await request(mockApp).delete(
         `/users/${currUser.id}/followings/${following.id}`
@@ -156,6 +158,43 @@ describe('Follow API', () => {
       );
 
       expect(res.statusCode).toEqual(401);
+    });
+  });
+
+  describe('GET /users/:user_id/followers', () => {
+    beforeAll(async () => {
+      await prismaClient.follow.createMany({
+        data: [
+          {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: currUser.id,
+          },
+        ],
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.follow.deleteMany({});
+    });
+
+    test('Response_200_With_Followers', async () => {
+      const res = await request(mockApp).get(`/users/${currUser.id}/followers`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(2);
+    });
+
+    test('Response_200_With_Other_Users', async () => {
+      const res = await request(mockApp).get(
+        `/users/${testUserData.users[1].id}/followers`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(0);
     });
   });
 });

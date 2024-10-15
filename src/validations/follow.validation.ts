@@ -18,4 +18,10 @@ export default {
       following_user_id: joi.number(),
     }),
   }),
+
+  getFollowers: joi.object().keys({
+    params: joi.object().keys({
+      userId: joi.number(),
+    }),
+  }),
 };

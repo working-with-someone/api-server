@@ -9,20 +9,32 @@ export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
 
   return res.status(200).json(follows);
 });
-export const createFollow = asyncCatch(async (req: Request, res: Response) => {
-  const follow = await followService.createFollow({
-    following_user_id: parseInt(req.params.following_user_id),
-    follower_user_id: req.session.userId as number,
-  });
+export const createFollowings = asyncCatch(
+  async (req: Request, res: Response) => {
+    const follow = await followService.createFollow({
+      following_user_id: parseInt(req.params.following_user_id),
+      follower_user_id: req.session.userId as number,
+    });
 
-  return res.status(201).json(follow);
-});
+    return res.status(201).json(follow);
+  }
+);
 
-export const deleteFollow = asyncCatch(async (req: Request, res: Response) => {
-  followService.deleteFollow({
-    following_user_id: parseInt(req.params.following_user_id),
-    follower_user_id: req.session.userId as number,
-  });
+export const deleteFollowings = asyncCatch(
+  async (req: Request, res: Response) => {
+    followService.deleteFollow({
+      following_user_id: parseInt(req.params.following_user_id),
+      follower_user_id: req.session.userId as number,
+    });
 
-  return res.status(204).json({});
+    return res.status(204).json({});
+  }
+);
+
+export const getFollowers = asyncCatch(async (req: Request, res: Response) => {
+  const followers = await followService.getFollowers(
+    parseInt(req.params.userId)
+  );
+
+  return res.status(200).json(followers);
 });

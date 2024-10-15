@@ -36,7 +36,6 @@ export async function createFollow(data: createFollow) {
     );
   }
 
-  //FIXME;
   const follow = await prismaClient.follow.create({
     data,
   });
@@ -52,4 +51,15 @@ export async function deleteFollow(data: deleteFollow) {
   });
 
   return;
+}
+
+export async function getFollowers(userId: number) {
+  const followers = await prismaClient.follow.findMany({
+    where: {
+      following_user_id: userId,
+    },
+    include: { follower: true },
+  });
+
+  return followers.map((follow) => follow.follower);
 }

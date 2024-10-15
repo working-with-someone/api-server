@@ -3,7 +3,7 @@ import { userController } from '../../controllers';
 import userValidation from '../../validations/user.validation';
 import validate from '../../middleware/validate';
 import upload from 'express-fileupload';
-import followingRouter from './follow.route';
+import { followingRouter, followerRouter } from './follow.route';
 
 const router = Router();
 
@@ -21,5 +21,6 @@ router
   .get(validate(userValidation.getUser), userController.getUser);
 
 router.use('/:userId/followings', followingRouter);
+router.use('/:userId/followers', followerRouter);
 
 export default router;
