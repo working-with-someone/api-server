@@ -129,6 +129,15 @@ describe('User API', () => {
         );
       });
 
+      test('Response_401', async () => {
+        const res = await request(mockApp)
+          .put(`/users/${testUserData.users[1].id}`)
+          .set('Content-Type', 'multipart/form-data')
+          .field('username', testUserData.updateUser.username);
+
+        expect(res.statusCode).toEqual(401);
+      });
+
       test('Response_200_With_Updated_Current_User_username(o)_pfp(o)', async () => {
         const res = await request(mockApp)
           .put(`/users/${currUser.id}`)
