@@ -42,7 +42,7 @@ describe('Follow API', () => {
     await redisClient.disconnect();
   });
 
-  describe('POST /follow/:following_id', () => {
+  describe('POST /users/:user_id/following/:following_user_id', () => {
     afterEach(async () => {
       await prismaClient.follow.deleteMany({});
     });
@@ -50,7 +50,9 @@ describe('Follow API', () => {
     const following = testUserData.users[1];
 
     test('Response_200_With_Following', async () => {
-      const res = await request(mockApp).post(`/follow/${following.id}`);
+      const res = await request(mockApp).post(
+        `/users/${currUser.id}/following/${following.id}`
+      );
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.follower_user_id).toEqual(currUser.id);
@@ -58,7 +60,9 @@ describe('Follow API', () => {
     });
 
     test('Response_404', async () => {
-      const res = await request(mockApp).post('/follow/0');
+      const res = await request(mockApp).post(
+        `/users/${currUser.id}/following/0`
+      );
 
       expect(res.statusCode).toEqual(404);
     });
@@ -71,7 +75,9 @@ describe('Follow API', () => {
         },
       });
 
-      const res = await request(mockApp).post(`/follow/${following.id}`);
+      const res = await request(mockApp).post(
+        `/users/${currUser.id}/following/${following.id}`
+      );
 
       expect(res.statusCode).toEqual(409);
     });
