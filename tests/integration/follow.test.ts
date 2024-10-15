@@ -42,7 +42,46 @@ describe('Follow API', () => {
     await redisClient.disconnect();
   });
 
-  describe('POST /users/:user_id/following/:following_user_id', () => {
+  describe('GET /users/:user_id/followings', () => {
+    beforeAll(async () => {
+      await prismaClient.follow.createMany({
+        data: [
+          {
+            follower_user_id: currUser.id,
+            following_user_id: testUserData.users[1].id,
+          },
+          {
+            follower_user_id: currUser.id,
+            following_user_id: testUserData.users[2].id,
+          },
+        ],
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.follow.deleteMany({});
+    });
+
+    test('Response_200_With_Followings', async () => {
+      const res = await request(mockApp).get(
+        `/users/${currUser.id}/followings`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(2);
+    });
+
+    test('Response_200_With_Other_Users_Followings', async () => {
+      const res = await request(mockApp).get(
+        `/users/${testUserData.users[1].id}/followings`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(0);
+    });
+  });
+
+  describe('POST /users/:user_id/followings/:following_user_id', () => {
     afterEach(async () => {
       await prismaClient.follow.deleteMany({});
     });
@@ -51,7 +90,7 @@ describe('Follow API', () => {
 
     test('Response_200_With_Following', async () => {
       const res = await request(mockApp).post(
-        `/users/${currUser.id}/following/${following.id}`
+        `/users/${currUser.id}/followings/${following.id}`
       );
 
       expect(res.statusCode).toEqual(201);
@@ -61,7 +100,7 @@ describe('Follow API', () => {
 
     test('Response_404', async () => {
       const res = await request(mockApp).post(
-        `/users/${currUser.id}/following/0`
+        `/users/${currUser.id}/followings/0`
       );
 
       expect(res.statusCode).toEqual(404);
@@ -76,14 +115,22 @@ describe('Follow API', () => {
       });
 
       const res = await request(mockApp).post(
-        `/users/${currUser.id}/following/${following.id}`
+        `/users/${currUser.id}/followings/${following.id}`
       );
 
       expect(res.statusCode).toEqual(409);
     });
+
+    test('Response_401', async () => {
+      const res = await request(mockApp).post(
+        `/users/${following.id}/followings/${currUser.id}`
+      );
+
+      expect(res.statusCode).toEqual(401);
+    });
   });
 
-  describe('DELETE /users/:user_id/following/:following_user_id', () => {
+  describe('DELETE /users/:user_id/followings/:following_user_id', () => {
     const following = testUserData.users[1];
 
     beforeEach(async () => {
@@ -97,10 +144,18 @@ describe('Follow API', () => {
 
     test('Response_204', async () => {
       const res = await request(mockApp).delete(
-        `/users/${currUser.id}/following/${following.id}`
+        `/users/${currUser.id}/followings/${following.id}`
       );
 
       expect(res.statusCode).toEqual(204);
+    });
+
+    test('Response_401', async () => {
+      const res = await request(mockApp).delete(
+        `/users/${following.id}/followings/${currUser.id}`
+      );
+
+      expect(res.statusCode).toEqual(401);
     });
   });
 });

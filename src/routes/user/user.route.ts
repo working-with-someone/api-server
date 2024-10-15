@@ -20,6 +20,6 @@ router
   .route('/:userId')
   .get(validate(userValidation.getUser), userController.getUser);
 
-router.use('/:userId/following', followingRouter);
+router.use('/:userId/followings', followingRouter);
 
 export default router;

@@ -3,6 +3,15 @@ import { wwsError } from '../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import type { createFollow, deleteFollow } from '../@types/follow';
 
+export async function getFollowings(userId: number) {
+  const follows = await prismaClient.follow.findMany({
+    where: {
+      follower_user_id: userId,
+    },
+  });
+
+  return follows;
+}
 export async function createFollow(data: createFollow) {
   const targetUser = await prismaClient.user.findUnique({
     where: {
