@@ -7,7 +7,10 @@ export default {
     }),
   },
   // user update 데이터에 username, pfp는 모두 optional이다.
-  updateSelf: {
+  updateUser: {
+    params: joi.object().keys({
+      userId: joi.number().required(),
+    }),
     body: joi.object().keys({
       username: joi.string().optional(),
       pfpToDefault: joi.boolean().optional(),

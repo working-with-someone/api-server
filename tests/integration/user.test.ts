@@ -48,11 +48,12 @@ describe('User API', () => {
   });
 
   describe('GET /users/:userId', () => {
-    test('Response_200_With_Public_Current_User_Info', async () => {
+    test('Response_200_With_Private_Current_User_Info', async () => {
       const res = await request(mockApp).get(`/users/${currUser.id}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.user).toEqual(getPublicUserInfo(currUser));
+      expect(res.body.user.id).toEqual(currUser.id);
+      expect(res.body.user.encrypted_password).toBeDefined();
     });
 
     test('Response_200_With_Public_User_Info', async () => {
@@ -93,7 +94,7 @@ describe('User API', () => {
     });
   });
 
-  describe('PUT /users/self', () => {
+  describe('PUT /users/:userId', () => {
     describe('single request', () => {
       // update된 user의 정보를 복구한다.
       afterEach(async () => {
@@ -118,7 +119,7 @@ describe('User API', () => {
       // response body의 pfp가 이전의 pfp와 같지 않아야한다. (== update 되었어야한다.)
       test('Response_200_With_Updated_Current_User_username(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username);
 
@@ -130,7 +131,7 @@ describe('User API', () => {
 
       test('Response_200_With_Updated_Current_User_username(o)_pfp(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username)
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
@@ -150,7 +151,7 @@ describe('User API', () => {
 
       test('Response_200_With_Updated_Current_User_username(o)_pfpToDefault(true)_pfp(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username)
           .field('pfpToDefault', true)
@@ -167,7 +168,7 @@ describe('User API', () => {
 
       test('Response_200_With_Updated_Current_User_username(o)_pfpToDefault(false)_pfp(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username)
           .field('pfpToDefault', false)
@@ -185,7 +186,7 @@ describe('User API', () => {
 
       test('Response_200_With_Updated_Current_User_username(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username);
 
@@ -197,7 +198,7 @@ describe('User API', () => {
 
       test('Response_200_With_Updated_Current_User_pfp(o)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-type', 'multipart/form-data')
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
@@ -230,7 +231,7 @@ describe('User API', () => {
       // curr user의 username과 pfp를 새로운 image로 update한다.
       test('1. Response_200_With_Updated_Current_User_pfpToDefault(x)', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
@@ -248,7 +249,7 @@ describe('User API', () => {
       // curr user의 pfp를 새로운 image로 update한다.
       test('2. Response_200_With_Updated_Current_User_And_Updated_Pfp_At_1_Must_Be_deleeted', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
@@ -273,7 +274,7 @@ describe('User API', () => {
 
       test('3. Response_200_With_Updated_Current_User_And_Updated_Default_Pfp_At_Req2_Must_Be_deleted', async () => {
         const res = await request(mockApp)
-          .put('/users/self')
+          .put(`/users/${currUser.id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('pfpToDefault', true);
 
