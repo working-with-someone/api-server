@@ -8,11 +8,13 @@ export default {
   }),
   createFollow: joi.object().keys({
     params: joi.object().keys({
+      userId: joi.number(),
       following_user_id: joi.number(),
     }),
   }),
   deleteFollow: joi.object().keys({
     params: joi.object().keys({
+      userId: joi.number(),
       following_user_id: joi.number(),
     }),
   }),
