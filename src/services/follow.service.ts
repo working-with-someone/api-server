@@ -28,11 +28,11 @@ export async function createFollow(data: createFollow) {
   }
 
   //FIXME;
-  const join = await prismaClient.follow.create({
+  const follow = await prismaClient.follow.create({
     data,
   });
 
-  return join;
+  return follow;
 }
 
 export async function deleteFollow(data: deleteFollow) {
