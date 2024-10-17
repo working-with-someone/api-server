@@ -26,7 +26,7 @@ export const updateSelf = asyncCatch(async (req: Request, res: Response) => {
     req.session.userId as number,
     {
       ...req.body,
-      pfp: req.files?.pfp,
+      pfp: req.file,
     }
   );
 

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { userController } from '../../controllers';
 import { userValidationSchema } from '../../validations';
 import validate from '../../middleware/validate';
-import upload from 'express-fileupload';
+import multer from 'multer';
 import { followingRouter, followerRouter } from './follow.route';
 import { userPermission } from '../../middleware/permission';
 
@@ -14,7 +14,7 @@ router
   .route('/:userId')
   .get(validate(userValidationSchema.getUser), userController.getUser)
   .put(
-    upload({ limits: { files: 1 } }),
+    multer().single('pfp'),
     validate(userValidationSchema.updateUser),
     userPermission(),
     userController.updateSelf

@@ -15,10 +15,7 @@ export const updateUser: RequestSchema = {
   body: joi.object().keys({
     username: joi.string().optional(),
     pfpToDefault: joi.boolean().optional(),
+    pfp: joi.optional(),
   }),
-  files: joi
-    .object({
-      pfp: joi.object().optional(),
-    })
-    .allow(null),
+  file: joi.object().optional(),
 };

@@ -9,6 +9,7 @@ export interface RequestSchema {
   query?: Schema;
   params?: Schema;
   body?: Schema;
+  file?: Schema;
   files?: Schema;
 }
 

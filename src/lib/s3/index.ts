@@ -4,7 +4,6 @@ import s3Client from '../../database/clients/s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { Readable } from 'stream';
 import { wwsError } from '../../utils/wwsError';
-import { UploadedFile } from 'express-fileupload';
 
 type keys = 'pfp';
 
@@ -13,7 +12,7 @@ interface s3APIOption {
   key: string;
 }
 
-export async function uploadImage(prefix: keys, file: UploadedFile) {
+export async function uploadImage(prefix: keys, file: Express.Multer.File) {
   const uuid = v4();
   const key = prefix + '-' + uuid;
 
@@ -22,7 +21,7 @@ export async function uploadImage(prefix: keys, file: UploadedFile) {
     params: {
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Body: file.data,
+      Body: file.buffer,
     },
   });
 

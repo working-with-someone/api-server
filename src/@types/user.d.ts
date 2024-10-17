@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client';
-import type { UploadedFile } from 'express-fileupload';
 
 declare namespace user {
   interface PublicUserInfo {
@@ -11,7 +10,7 @@ declare namespace user {
 
   // user data 중 update 가능한 정보는 username
   interface updateUserInput extends Pick<Prisma.userUpdateInput, 'username'> {
-    pfp?: UploadedFile;
+    pfp?: Express.Multer.File;
     pfpToDefault?: boolean;
   }
 }
