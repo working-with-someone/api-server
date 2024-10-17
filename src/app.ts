@@ -4,7 +4,6 @@ import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import RequestLogger from './middleware/requestLogger';
 import router from './routes';
-import cookieParser from 'cookie-parser';
 import { authMiddleware } from './middleware/auth';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -22,6 +21,7 @@ app.use(
 app.use(
   cors({
     origin: process.env.CORS_ALLOWED_ORIGIN?.split(' '),
+    credentials: true,
   })
 );
 
