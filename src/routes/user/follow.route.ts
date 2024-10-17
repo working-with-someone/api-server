@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import followValidation from '../../validations/follow.validation';
+import { followValidationSchema } from '../../validations';
 import { followController } from '../../controllers';
 import validate from '../../middleware/validate';
 import { userPermission } from '../../middleware/permission';
@@ -15,25 +15,28 @@ const followerRouter = Router({
 followingRouter
   .route('/')
   .get(
-    validate(followValidation.getFollowings),
+    validate(followValidationSchema.getFollowings),
     followController.getFollowings
   );
 
 followingRouter
   .route('/:following_user_id')
   .post(
-    validate(followValidation.createFollow),
+    validate(followValidationSchema.createFollow),
     userPermission(),
     followController.createFollowings
   )
   .delete(
-    validate(followValidation.deleteFollow),
+    validate(followValidationSchema.deleteFollow),
     userPermission(),
     followController.deleteFollowings
   );
 
 followerRouter
   .route('/')
-  .get(validate(followValidation.getFollowers), followController.getFollowers);
+  .get(
+    validate(followValidationSchema.getFollowers),
+    followController.getFollowers
+  );
 
 export { followingRouter, followerRouter };

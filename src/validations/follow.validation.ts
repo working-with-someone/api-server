@@ -1,27 +1,28 @@
 import joi from 'joi';
+import { RequestSchema } from '../middleware/validate';
 
-export default {
-  getFollowings: joi.object().keys({
-    params: joi.object().keys({
-      userId: joi.number(),
-    }),
+export const getFollowings: RequestSchema = {
+  params: joi.object().keys({
+    userId: joi.number(),
   }),
-  createFollow: joi.object().keys({
-    params: joi.object().keys({
-      userId: joi.number(),
-      following_user_id: joi.number(),
-    }),
-  }),
-  deleteFollow: joi.object().keys({
-    params: joi.object().keys({
-      userId: joi.number(),
-      following_user_id: joi.number(),
-    }),
-  }),
+};
 
-  getFollowers: joi.object().keys({
-    params: joi.object().keys({
-      userId: joi.number(),
-    }),
+export const createFollow: RequestSchema = {
+  params: joi.object().keys({
+    userId: joi.number(),
+    following_user_id: joi.number(),
+  }),
+};
+
+export const deleteFollow: RequestSchema = {
+  params: joi.object().keys({
+    userId: joi.number(),
+    following_user_id: joi.number(),
+  }),
+};
+
+export const getFollowers: RequestSchema = {
+  params: joi.object().keys({
+    userId: joi.number(),
   }),
 };

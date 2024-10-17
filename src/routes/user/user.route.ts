@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { userController } from '../../controllers';
-import userValidation from '../../validations/user.validation';
+import { userValidationSchema } from '../../validations';
 import validate from '../../middleware/validate';
 import upload from 'express-fileupload';
 import { followingRouter, followerRouter } from './follow.route';
@@ -12,10 +12,10 @@ router.route('/self').get(userController.getSelf);
 
 router
   .route('/:userId')
-  .get(validate(userValidation.getUser), userController.getUser)
+  .get(validate(userValidationSchema.getUser), userController.getUser)
   .put(
     upload({ limits: { files: 1 } }),
-    validate(userValidation.updateUser),
+    validate(userValidationSchema.updateUser),
     userPermission(),
     userController.updateSelf
   );

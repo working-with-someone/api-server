@@ -1,22 +1,37 @@
 import Joi from 'joi';
 import pick from '../utils/pick';
 import HttpStatusCode from 'http-status-codes';
-import {wwsError} from "../utils/wwsError";
-import {Request, Response, NextFunction} from 'express';
+import { wwsError } from '../utils/wwsError';
+import { Request, Response, NextFunction } from 'express';
+import { Schema } from 'joi';
 
-const validate = (schema:any) => (req:Request, res:Response, next:NextFunction) => {
-  const validSchema = pick(schema, ['params', 'query', 'body']);
-  const object = pick(req, Object.keys(validSchema));
-  const { value, error } = Joi.compile(validSchema)
-    .prefs({ errors: { label: 'key' }, abortEarly: false })
-    .validate(object);
+export interface RequestSchema {
+  query?: Schema;
+  params?: Schema;
+  body?: Schema;
+  files?: Schema;
+}
 
-  if (error) {
-    const errorMessage = error.details.map((details) => details.message).join(', ');
-    return next(new wwsError(HttpStatusCode.BAD_REQUEST, errorMessage));
-  }
-  Object.assign(req, value);
-  return next();
-};
+const validate =
+  (requestSchema: RequestSchema) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const object = pick(req, Object.keys(requestSchema));
+    const schema = Joi.compile(requestSchema);
 
-export default validate
+    const { error } = schema.validate(object, {
+      errors: { label: 'key' },
+      abortEarly: false,
+    });
+
+    if (error) {
+      const errorMessage = error.details
+        .map((details) => details.message)
+        .join(', ');
+
+      return next(new wwsError(HttpStatusCode.BAD_REQUEST, errorMessage));
+    }
+
+    return next();
+  };
+
+export default validate;

@@ -1,4 +1,5 @@
-import userValidation from './user.validation';
-import mediaValidation from './media.validation';
+import * as userValidationSchema from './user.validation';
+import * as mediaValidationSchema from './media.validation';
+import * as followValidationSchema from './follow.validation';
 
-export { userValidation, mediaValidation };
+export { userValidationSchema, mediaValidationSchema, followValidationSchema };

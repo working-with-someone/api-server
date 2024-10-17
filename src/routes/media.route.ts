@@ -1,18 +1,18 @@
 import { Router } from 'express';
 import { mediaController } from '../controllers';
-import { mediaValidation } from '../validations';
+import { mediaValidationSchema } from '../validations';
 import validate from '../middleware/validate';
 
 const router = Router();
 
 router
   .route('/images/:key')
-  .get(validate(mediaValidation.getImage), mediaController.getImage);
+  .get(validate(mediaValidationSchema.getImage), mediaController.getImage);
 
 router
   .route('/images/default/:key')
   .get(
-    validate(mediaValidation.getDefaultImage),
+    validate(mediaValidationSchema.getDefaultImage),
     mediaController.getDefaultImage
   );
 
