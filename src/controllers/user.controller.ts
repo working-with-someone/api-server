@@ -7,10 +7,11 @@ export const getUser = asyncCatch(async (req: Request, res: Response) => {
   const publicUserInfo = await userService.getUser(
     // contoller로 넘어왔다면, user api validation에서 req.params.userId가 number인 것이 검증된다.
     parseInt(req.params.userId),
+
     req.session.userId == parseInt(req.params.userId)
   );
 
-  return res.status(200).json({ user: publicUserInfo });
+  return res.status(200).json(publicUserInfo);
 });
 
 export const getSelf = asyncCatch(async (req: Request, res: Response) => {
@@ -29,5 +30,5 @@ export const updateSelf = asyncCatch(async (req: Request, res: Response) => {
     }
   );
 
-  return res.status(200).json({ user: updatedUesr });
+  return res.status(200).json(updatedUesr);
 });
