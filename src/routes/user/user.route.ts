@@ -8,11 +8,18 @@ import { userPermission } from '../../middleware/permission';
 
 const router = Router();
 
-router.route('/self').get(userController.getSelf);
+// /users/self
+router
+  .route('/self')
+  // authenticated user의 private한 정보를 가져온다.
+  .get(userController.getSelf);
 
+// /users/:userId
 router
   .route('/:userId')
+  // 사용자의 정보를 가져온다 self라면 /self와 동일한 응답, 아니라면 public한 정보만을 응답한다.
   .get(validate(userValidationSchema.getUser), userController.getUser)
+  // 사용자의 정보를 업데이트한다.
   .put(
     multer().single('pfp'),
     validate(userValidationSchema.updateUser),
@@ -20,7 +27,9 @@ router
     userController.updateSelf
   );
 
+// /users/:userId/followings
 router.use('/:userId/followings', followingRouter);
+// /users/:userId/followers
 router.use('/:userId/followers', followerRouter);
 
 export default router;

@@ -12,28 +12,35 @@ const followerRouter = Router({
   mergeParams: true,
 });
 
+// /users/:userId/followings
 followingRouter
   .route('/')
+  // 사용자가 following하는 사용자들을 가져온다.
   .get(
     validate(followValidationSchema.getFollowings),
     followController.getFollowings
   );
 
+// /users/:userId/followings/:following_user_id
 followingRouter
   .route('/:following_user_id')
+  // 사용자의 다른 사용자 following을 생성한다.
   .post(
     validate(followValidationSchema.createFollow),
     userPermission(),
     followController.createFollowings
   )
+  // 사용자의 다른 사용자 following을 제거한다.
   .delete(
     validate(followValidationSchema.deleteFollow),
     userPermission(),
     followController.deleteFollowings
   );
 
+// /users/:userId/followers
 followerRouter
   .route('/')
+  // 사용자를 following하는 사용자들을 가져온다.
   .get(
     validate(followValidationSchema.getFollowers),
     followController.getFollowers
