@@ -19,10 +19,12 @@ const validate =
     const object = pick(req, Object.keys(requestSchema));
     const schema = Joi.compile(requestSchema);
 
-    const { error } = schema.validate(object, {
+    const { value, error } = schema.validate(object, {
       errors: { label: 'key' },
       abortEarly: false,
     });
+
+    Object.assign(req, value);
 
     if (error) {
       const errorMessage = error.details
