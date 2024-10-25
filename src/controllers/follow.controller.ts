@@ -25,7 +25,7 @@ export const createFollowings = asyncCatch(
 
 export const deleteFollowings = asyncCatch(
   async (req: Request, res: Response) => {
-    followService.deleteFollow({
+    await followService.deleteFollow({
       following_user_id: parseInt(req.params.following_user_id),
       follower_user_id: req.session.userId as number,
     });
