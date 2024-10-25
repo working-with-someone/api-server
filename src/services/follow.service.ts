@@ -1,12 +1,15 @@
 import prismaClient from '../database/clients/prisma';
 import { wwsError } from '../utils/wwsError';
+import { PrismaError } from 'prisma-error-enum';
 import httpStatusCode from 'http-status-codes';
+
 import type {
   createFollow,
   deleteFollow,
   getFollowers,
   getFollowings,
 } from '../@types/follow';
+import { Prisma } from '@prisma/client';
 
 export async function getFollowings(data: getFollowings) {
   const follows = await prismaClient.follow.findMany({
@@ -30,32 +33,67 @@ export async function createFollow(data: createFollow) {
     throw new wwsError(404, 'can not found target user');
   }
 
-  const followExist = await prismaClient.follow.findUnique({
-    where: {
-      follower_user_id_following_user_id: data,
-    },
-  });
+  // follow record 생성과 user들의 following_count increment, follower count increment가 문제 없이 실행된다면
+  // 생성된 follow record를 반환한다.
+  try {
+    const [follow] = await prismaClient.$transaction([
+      prismaClient.follow.create({
+        data,
+      }),
+      // follower user의 following count를 감소시킨다.
+      prismaClient.user.update({
+        where: {
+          id: data.follower_user_id,
+        },
+        data: {
+          followings_count: { increment: 1 },
+        },
+      }),
 
-  if (followExist) {
-    throw new wwsError(
-      httpStatusCode.CONFLICT,
-      `${data.follower_user_id} user already following ${data.following_user_id}`
-    );
+      // following user의 follower count를 감소시킨다.
+      prismaClient.user.update({
+        where: { id: data.following_user_id },
+        data: {
+          followers_count: { increment: 1 },
+        },
+      }),
+    ]);
+
+    return follow;
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError) {
+      if (err.code === PrismaError.UniqueConstraintViolation) {
+        throw new wwsError(httpStatusCode.CONFLICT, 'already following');
+      }
+    }
   }
-
-  const follow = await prismaClient.follow.create({
-    data,
-  });
-
-  return follow;
 }
 
 export async function deleteFollow(data: deleteFollow) {
-  await prismaClient.follow.delete({
-    where: {
-      follower_user_id_following_user_id: data,
-    },
-  });
+  await prismaClient.$transaction([
+    prismaClient.follow.delete({
+      where: {
+        follower_user_id_following_user_id: data,
+      },
+    }),
+    // follower user의 following count를 감소시킨다.
+    prismaClient.user.update({
+      where: {
+        id: data.follower_user_id,
+      },
+      data: {
+        followings_count: { increment: 1 },
+      },
+    }),
+
+    // following user의 follower count를 감소시킨다.
+    prismaClient.user.update({
+      where: { id: data.following_user_id },
+      data: {
+        followers_count: { increment: 1 },
+      },
+    }),
+  ]);
 
   return;
 }

@@ -142,6 +142,17 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(201);
       expect(res.body.follower_user_id).toEqual(currUser.id);
       expect(res.body.following_user_id).toEqual(following.id);
+
+      const followerUser = (await request(mockApp).get(`/users/${currUser.id}`))
+        .body;
+      const followingUser = (
+        await request(mockApp).get(`/users/${following.id}`)
+      ).body;
+
+      expect(followerUser.followings_count).toEqual(1);
+      expect(followerUser.followers_count).toEqual(0);
+      expect(followingUser.followings_count).toEqual(0);
+      expect(followingUser.followers_count).toEqual(1);
     });
 
     test('Response_404', async () => {

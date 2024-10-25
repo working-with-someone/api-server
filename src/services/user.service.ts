@@ -93,4 +93,12 @@ export async function updateSelf(userId: number, data: user.updateUserInput) {
 
 export const getPublicUserInfo = (
   user: Record<string, any>
-): user.PublicUserInfo => pick(user, ['id', 'username', 'pfp', 'email']);
+): user.PublicUserInfo =>
+  pick(user, [
+    'id',
+    'username',
+    'pfp',
+    'email',
+    'followers_count',
+    'followings_count',
+  ]);

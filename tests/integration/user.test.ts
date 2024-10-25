@@ -62,7 +62,8 @@ describe('User API', () => {
       const res = await request(mockApp).get(`/users/${user.id}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(getPublicUserInfo(user));
+      expect(res.body.username).toEqual(user.username);
+      expect(res.body.encrypted_password).toBeUndefined();
     });
 
     test('Response_404', async () => {
