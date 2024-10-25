@@ -54,6 +54,22 @@ describe('Follow API', () => {
             follower_user_id: currUser.id,
             following_user_id: testUserData.users[2].id,
           },
+          {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: testUserData.users[2].id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: testUserData.users[1].id,
+          },
         ],
       });
     });
@@ -62,22 +78,52 @@ describe('Follow API', () => {
       await prismaClient.follow.deleteMany({});
     });
 
-    test('Response_200_With_Followings', async () => {
-      const res = await request(mockApp).get(
-        `/users/${currUser.id}/followings`
-      );
+    test('Response_200_With_Single_Following', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${currUser.id}/followings`)
+        .query({
+          per_page: 1,
+          page: 1,
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(1);
+    });
+
+    test('Response_200_With_Multiple_Followings', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${currUser.id}/followings`)
+        .query({
+          per_page: 2,
+          page: 1,
+        });
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveLength(2);
     });
 
-    test('Response_200_With_Other_Users_Followings', async () => {
-      const res = await request(mockApp).get(
-        `/users/${testUserData.users[1].id}/followings`
-      );
+    test('Response_200_With_Other_Users_Single_Following', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${testUserData.users[1].id}/followings`)
+        .query({
+          per_page: 1,
+          page: 2,
+        });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(0);
+      expect(res.body).toHaveLength(1);
+    });
+
+    test('Response_200_With_Other_Users_Multiple_Followings', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${testUserData.users[1].id}/followings`)
+        .query({
+          per_page: 2,
+          page: 1,
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(2);
     });
   });
 
@@ -166,12 +212,28 @@ describe('Follow API', () => {
       await prismaClient.follow.createMany({
         data: [
           {
+            follower_user_id: currUser.id,
+            following_user_id: testUserData.users[1].id,
+          },
+          {
+            follower_user_id: currUser.id,
+            following_user_id: testUserData.users[2].id,
+          },
+          {
             follower_user_id: testUserData.users[1].id,
             following_user_id: currUser.id,
           },
           {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: testUserData.users[2].id,
+          },
+          {
             follower_user_id: testUserData.users[2].id,
             following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: testUserData.users[1].id,
           },
         ],
       });
@@ -181,20 +243,52 @@ describe('Follow API', () => {
       await prismaClient.follow.deleteMany({});
     });
 
-    test('Response_200_With_Followers', async () => {
-      const res = await request(mockApp).get(`/users/${currUser.id}/followers`);
+    test('Response_200_With_Single_Follower', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${currUser.id}/followers`)
+        .query({
+          per_page: 1,
+          page: 1,
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(1);
+    });
+
+    test('Response_200_With_Multiple_Followers', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${currUser.id}/followers`)
+        .query({
+          per_page: 2,
+          page: 1,
+        });
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveLength(2);
     });
 
-    test('Response_200_With_Other_Users', async () => {
-      const res = await request(mockApp).get(
-        `/users/${testUserData.users[1].id}/followers`
-      );
+    test('Response_200_With_Other_Users_Single_Follower', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${testUserData.users[1].id}/followers`)
+        .query({
+          per_page: 1,
+          page: 2,
+        });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(0);
+      expect(res.body).toHaveLength(1);
+    });
+
+    test('Response_200_With_Other_Users_Multiple_Followers', async () => {
+      const res = await request(mockApp)
+        .get(`/users/${testUserData.users[1].id}/followers`)
+        .query({
+          per_page: 2,
+          page: 1,
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveLength(2);
     });
   });
 });

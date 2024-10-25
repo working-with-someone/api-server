@@ -1,3 +1,13 @@
+import type { PageNationData } from './pagenation';
+
+export interface getFollowers extends PageNationData {
+  userId: number;
+}
+
+export interface getFollowings extends PageNationData {
+  userId: number;
+}
+
 export interface followInfo {
   following_user_id: number;
   follower_user_id: number;

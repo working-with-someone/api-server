@@ -1,7 +1,9 @@
 import joi from 'joi';
 import { RequestSchema } from '../middleware/validate';
+import { pageNationQuerySchema } from './pagenation.validation';
 
 export const getFollowings: RequestSchema = {
+  query: pageNationQuerySchema,
   params: joi.object().keys({
     userId: joi.number(),
   }),
@@ -22,6 +24,7 @@ export const deleteFollow: RequestSchema = {
 };
 
 export const getFollowers: RequestSchema = {
+  query: pageNationQuerySchema,
   params: joi.object().keys({
     userId: joi.number(),
   }),

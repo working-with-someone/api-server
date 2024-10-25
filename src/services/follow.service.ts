@@ -1,13 +1,20 @@
 import prismaClient from '../database/clients/prisma';
 import { wwsError } from '../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import type { createFollow, deleteFollow } from '../@types/follow';
+import type {
+  createFollow,
+  deleteFollow,
+  getFollowers,
+  getFollowings,
+} from '../@types/follow';
 
-export async function getFollowings(userId: number) {
+export async function getFollowings(data: getFollowings) {
   const follows = await prismaClient.follow.findMany({
     where: {
-      follower_user_id: userId,
+      follower_user_id: data.userId,
     },
+    skip: (data.page - 1) * data.per_page,
+    take: data.per_page,
   });
 
   return follows;
@@ -53,12 +60,14 @@ export async function deleteFollow(data: deleteFollow) {
   return;
 }
 
-export async function getFollowers(userId: number) {
+export async function getFollowers(data: getFollowers) {
   const followers = await prismaClient.follow.findMany({
     where: {
-      following_user_id: userId,
+      following_user_id: data.userId,
     },
     include: { follower: true },
+    skip: (data.page - 1) * data.per_page,
+    take: data.per_page,
   });
 
   return followers.map((follow) => follow.follower);

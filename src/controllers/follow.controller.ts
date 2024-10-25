@@ -3,12 +3,15 @@ import asyncCatch from '../utils/asyncCatch';
 import { followService } from '../services/';
 
 export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
-  const follows = await followService.getFollowings(
-    parseInt(req.params.userId)
-  );
+  const follows = await followService.getFollowings({
+    userId: parseInt(req.params.userId),
+    per_page: parseInt(req.query.per_page as string),
+    page: parseInt(req.query.page as string),
+  });
 
   return res.status(200).json(follows);
 });
+
 export const createFollowings = asyncCatch(
   async (req: Request, res: Response) => {
     const follow = await followService.createFollow({
@@ -32,9 +35,11 @@ export const deleteFollowings = asyncCatch(
 );
 
 export const getFollowers = asyncCatch(async (req: Request, res: Response) => {
-  const followers = await followService.getFollowers(
-    parseInt(req.params.userId)
-  );
+  const followers = await followService.getFollowers({
+    userId: parseInt(req.params.userId),
+    per_page: parseInt(req.query.per_page as string),
+    page: parseInt(req.query.page as string),
+  });
 
   return res.status(200).json(followers);
 });
