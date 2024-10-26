@@ -4,14 +4,14 @@ import { PrismaError } from 'prisma-error-enum';
 import httpStatusCode from 'http-status-codes';
 
 import type {
-  createFollow,
-  deleteFollow,
-  getFollowers,
-  getFollowings,
+  CreateFollow,
+  DeleteFollow,
+  GetFollowers,
+  GetFollowings,
 } from '../@types/follow';
 import { Prisma } from '@prisma/client';
 
-export async function getFollowings(data: getFollowings) {
+export async function getFollowings(data: GetFollowings) {
   const follows = await prismaClient.follow.findMany({
     where: {
       follower_user_id: data.userId,
@@ -22,7 +22,7 @@ export async function getFollowings(data: getFollowings) {
 
   return follows;
 }
-export async function createFollow(data: createFollow) {
+export async function createFollow(data: CreateFollow) {
   const targetUser = await prismaClient.user.findUnique({
     where: {
       id: data.following_user_id,
@@ -69,7 +69,7 @@ export async function createFollow(data: createFollow) {
   }
 }
 
-export async function deleteFollow(data: deleteFollow) {
+export async function deleteFollow(data: DeleteFollow) {
   await prismaClient.$transaction([
     prismaClient.follow.delete({
       where: {
@@ -98,7 +98,7 @@ export async function deleteFollow(data: deleteFollow) {
   return;
 }
 
-export async function getFollowers(data: getFollowers) {
+export async function getFollowers(data: GetFollowers) {
   const followers = await prismaClient.follow.findMany({
     where: {
       following_user_id: data.userId,
