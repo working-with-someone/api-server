@@ -9,7 +9,7 @@ export const getFollowings: RequestSchema = {
   }),
 };
 
-export const createFollow: RequestSchema = {
+export const createFollowing: RequestSchema = {
   params: joi.object().keys({
     userId: joi.number(),
     following_user_id: joi.number(),
@@ -23,7 +23,7 @@ export const checkFollowing: RequestSchema = {
   }),
 };
 
-export const deleteFollow: RequestSchema = {
+export const deleteFollowing: RequestSchema = {
   params: joi.object().keys({
     userId: joi.number(),
     following_user_id: joi.number(),

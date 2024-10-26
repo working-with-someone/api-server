@@ -30,15 +30,15 @@ followingRouter
   )
   // 사용자의 다른 사용자 following을 생성한다.
   .post(
-    validate(followValidationSchema.createFollow),
+    validate(followValidationSchema.createFollowing),
     userPermission(),
-    followController.createFollowings
+    followController.createFollowing
   )
   // 사용자의 다른 사용자 following을 제거한다.
   .delete(
-    validate(followValidationSchema.deleteFollow),
+    validate(followValidationSchema.deleteFollowing),
     userPermission(),
-    followController.deleteFollowings
+    followController.deleteFollowing
   );
 
 // /users/:userId/followers

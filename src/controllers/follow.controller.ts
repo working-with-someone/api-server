@@ -12,7 +12,7 @@ export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
   return res.status(200).json(follows);
 });
 
-export const createFollowings = asyncCatch(
+export const createFollowing = asyncCatch(
   async (req: Request, res: Response) => {
     const follow = await followService.createFollow({
       following_user_id: parseInt(req.params.following_user_id),
@@ -39,7 +39,7 @@ export const checkFollowing = asyncCatch(
   }
 );
 
-export const deleteFollowings = asyncCatch(
+export const deleteFollowing = asyncCatch(
   async (req: Request, res: Response) => {
     await followService.deleteFollow({
       following_user_id: parseInt(req.params.following_user_id),
