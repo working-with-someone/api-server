@@ -127,6 +127,55 @@ describe('Follow API', () => {
     });
   });
 
+  describe('GET /users/:user_id/followings/:following_user_id', () => {
+    beforeAll(async () => {
+      await prismaClient.follow.createMany({
+        data: [
+          {
+            follower_user_id: currUser.id,
+            following_user_id: testUserData.users[1].id,
+          },
+          {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[1].id,
+            following_user_id: testUserData.users[2].id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: currUser.id,
+          },
+          {
+            follower_user_id: testUserData.users[2].id,
+            following_user_id: testUserData.users[1].id,
+          },
+        ],
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.follow.deleteMany({});
+    });
+
+    test('Response_204', async () => {
+      const res = await request(mockApp).get(
+        `/users/${currUser.id}/followings/${testUserData.users[1].id}`
+      );
+
+      expect(res.statusCode).toEqual(204);
+    });
+
+    test('Response_404', async () => {
+      const res = await request(mockApp).get(
+        `/users/${currUser.id}/followings/${testUserData.users[2].id}`
+      );
+
+      expect(res.statusCode).toEqual(404);
+    });
+  });
+
   describe('POST /users/:user_id/followings/:following_user_id', () => {
     afterEach(async () => {
       await prismaClient.follow.deleteMany({});

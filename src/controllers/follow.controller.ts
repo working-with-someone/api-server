@@ -23,6 +23,22 @@ export const createFollowings = asyncCatch(
   }
 );
 
+// authenticated user가 following user를 follow하고 있다면 204를 return, follow하고 있지 않다면 404를 return
+export const checkFollowing = asyncCatch(
+  async (req: Request, res: Response) => {
+    const isFollowing = await followService.checkFollowing({
+      following_user_id: parseInt(req.params.following_user_id),
+      follower_user_id: req.session.userId as number,
+    });
+
+    if (isFollowing) {
+      return res.status(204).end();
+    }
+
+    return res.status(404).end();
+  }
+);
+
 export const deleteFollowings = asyncCatch(
   async (req: Request, res: Response) => {
     await followService.deleteFollow({

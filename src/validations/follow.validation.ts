@@ -16,6 +16,13 @@ export const createFollow: RequestSchema = {
   }),
 };
 
+export const checkFollowing: RequestSchema = {
+  params: joi.object().keys({
+    userId: joi.number(),
+    following_user_id: joi.number(),
+  }),
+};
+
 export const deleteFollow: RequestSchema = {
   params: joi.object().keys({
     userId: joi.number(),

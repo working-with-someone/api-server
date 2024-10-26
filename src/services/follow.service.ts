@@ -4,12 +4,30 @@ import { PrismaError } from 'prisma-error-enum';
 import httpStatusCode from 'http-status-codes';
 
 import type {
+  CheckFollowing,
   CreateFollow,
   DeleteFollow,
   GetFollowers,
+  GetFollowing,
   GetFollowings,
 } from '../@types/follow';
 import { Prisma } from '@prisma/client';
+
+export async function getFollowing(data: GetFollowing) {
+  const follows = await prismaClient.follow.findUnique({
+    where: {
+      follower_user_id_following_user_id: data,
+    },
+  });
+
+  return follows;
+}
+
+export async function checkFollowing(data: CheckFollowing) {
+  const follow = await getFollowing(data);
+
+  return follow ? true : false;
+}
 
 export async function getFollowings(data: GetFollowings) {
   const follows = await prismaClient.follow.findMany({
