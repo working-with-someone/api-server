@@ -100,7 +100,7 @@ export async function deleteFollow(data: DeleteFollow) {
         id: data.follower_user_id,
       },
       data: {
-        followings_count: { increment: 1 },
+        followings_count: { decrement: 1 },
       },
     }),
 
@@ -108,7 +108,7 @@ export async function deleteFollow(data: DeleteFollow) {
     prismaClient.user.update({
       where: { id: data.following_user_id },
       data: {
-        followers_count: { increment: 1 },
+        followers_count: { decrement: 1 },
       },
     }),
   ]);
