@@ -24,6 +24,7 @@ model user {
   followings_count   Int                 @default(0)
   followers          follow[]            @relation("following")
   following          follow[]            @relation("follower")
+  session            session[]
 }
 
 model pfp {
@@ -69,4 +70,26 @@ model follow {
   following_user_id Int
 
   @@id([follower_user_id, following_user_id])
+}
+
+model category {
+  id      Int       @id
+  label   String
+  session session[]
+}
+
+model session {
+  id          String   @id @db.VarChar(36)
+  title       String   @db.VarChar(100)
+  description String   @db.Text
+  thumbnail   String
+  video_uri   String  
+  created_at  DateTime @default(now())
+  duration    Int
+  is_private  Boolean  @default(false)
+
+  user_id     Int
+  user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  category_id Int
+  category    category @relation(fields: [category_id], references: [id], onDelete: Cascade)
 }
