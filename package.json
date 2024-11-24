@@ -1,12 +1,12 @@
 {
   "name": "wws-api-server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.ts",
   "repository": "https://github.com/seungho-hub/wws-api-server.git",
   "author": "seungho-hub <63999413+kangseungho-hub@users.noreply.github.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/server.ts",
+    "dev": "cross-env NODE_ENV=development nodemon",
     "db:migrate:prod": "dotenv -e ./.env -- prisma migrate deploy",
     "db:migrate:dev": "dotenv -e ./.env -- prisma migrate dev",
     "db:migrate:test": "dotenv -e ./.env.test -- prisma migrate dev",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.637.0",
     "@aws-sdk/lib-storage": "^3.645.0",
+    "@dotenvx/dotenvx": "^1.24.5",
     "@prisma/client": "^4.16.2",
     "@types/cookie": "^0.6.0",
     "connect-redis": "^7.1.1",
@@ -59,7 +60,6 @@
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "cross-env": "^7.0.3",
-    "dotenv-cli": "^7.4.2",
     "eslint": "^8.43.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-jest": "^27.2.3",
