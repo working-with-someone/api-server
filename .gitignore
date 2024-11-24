@@ -1,7 +1,8 @@
 dist
 node_modules
-.env
-.env.test
+
+.env*
+!.env.example
 
 yarn-error.log
 yarn.lock

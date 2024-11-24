@@ -1,5 +1,3 @@
-import 'dotenv/config';
-
 import http from 'http';
 import app from './app';
 import redisClient from './database/clients/redis';

@@ -5,7 +5,6 @@ module.exports = {
   clearMocks: true,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  setupFiles: ['<rootDir>/tests/jest/setup/setEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/tests/jest/setup/singleton.ts'],
   globalTeardown: '<rootDir>/tests/jest/tearDown.ts',
 };
