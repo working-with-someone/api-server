@@ -7,3 +7,5 @@ node_modules
 dockerfile
 .dockerignore
 README.md
+.eslintrc.json
+.env.example
