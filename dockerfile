@@ -5,6 +5,5 @@ WORKDIR /app
 COPY . /app
 
 RUN yarn install
-RUN yarn run compile
 
-CMD ["yarn", "run", "start"]
+CMD ["yarn", "run", "watch"]
