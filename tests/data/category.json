@@ -1,0 +1,22 @@
+{
+  "categories" : [
+    {
+      "label" : "study"
+    },
+    {
+      "label" : "code"
+    },
+    {
+      "label" : "get beauty"
+    },
+    {
+      "label" : "working"
+    },
+    {
+      "label" : "smoking"
+    },
+    {
+      "label" : "talk"
+    }
+  ]
+}

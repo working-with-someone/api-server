@@ -2,6 +2,7 @@ import express from 'express';
 
 import userRoute from './user/user.route';
 import mediaRoute from './media.route';
+import categoryRoute from './category.route';
 
 const router = express.Router();
 
@@ -13,6 +14,10 @@ const defaultRoutes = [
   {
     path: '/media',
     route: mediaRoute,
+  },
+  {
+    path: '/categories',
+    route: categoryRoute,
   },
 ];
 
