@@ -3,26 +3,10 @@ jest.unmock('../../src/database/clients/prisma.ts');
 
 import app from '../../src/app';
 import request from 'supertest';
-import session from 'express-session';
-import sessionConfig from '../../src/config/session.config';
 import testUserData from '../data/user.json';
-import express from 'express';
 import s3Client from '../../src/database/clients/s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import fs from 'fs';
-
-const currUser = { ...testUserData.users[0] };
-
-const mockApp = express();
-
-mockApp.use(session(sessionConfig));
-
-mockApp.all('*', (req, res, next) => {
-  req.session.userId = currUser.id;
-  next();
-});
-
-mockApp.use(app);
 
 describe('Media API', () => {
   beforeAll(async () => {
@@ -52,15 +36,13 @@ describe('Media API', () => {
       });
 
       test('Response_200_With_Image', async () => {
-        const res = await request(mockApp).get(
-          `/media/images/${uploadedImageKey}`
-        );
+        const res = await request(app).get(`/media/images/${uploadedImageKey}`);
 
         expect(res.statusCode).toEqual(200);
       });
 
       test('Response_404_key(does_not_exist)', async () => {
-        const res = await request(mockApp).get(`/media/images/deosNotExist'`);
+        const res = await request(app).get(`/media/images/deosNotExist'`);
 
         expect(res.statusCode).toEqual(404);
       });
@@ -70,7 +52,7 @@ describe('Media API', () => {
       const defaultPfpImageKey = 'pfp';
 
       test('Response_200_With_Image', async () => {
-        const res = await request(mockApp).get(
+        const res = await request(app).get(
           `/media/images/default/${defaultPfpImageKey}`
         );
 
@@ -78,7 +60,7 @@ describe('Media API', () => {
       });
 
       test('Response_400', async () => {
-        const res = await request(mockApp).get(
+        const res = await request(app).get(
           `/media/images/default/doesNotExistDefaultObjectKey`
         );
 
