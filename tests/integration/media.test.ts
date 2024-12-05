@@ -1,7 +1,7 @@
 import prismaClient from '../../src/database/clients/prisma';
 jest.unmock('../../src/database/clients/prisma.ts');
 
-import app from '../../src/app';
+import server from '../../src';
 import request from 'supertest';
 import testUserData from '../data/user.json';
 import s3Client from '../../src/database/clients/s3';
@@ -21,6 +21,10 @@ describe('Media API', () => {
     await prismaClient.user.deleteMany({});
   });
 
+  afterAll((done) => {
+    server.close(done);
+  });
+
   describe('Images', () => {
     describe('GET /media/images/:key', () => {
       const uploadedImageKey = 'media-test-key';
@@ -36,13 +40,15 @@ describe('Media API', () => {
       });
 
       test('Response_200_With_Image', async () => {
-        const res = await request(app).get(`/media/images/${uploadedImageKey}`);
+        const res = await request(server).get(
+          `/media/images/${uploadedImageKey}`
+        );
 
         expect(res.statusCode).toEqual(200);
       });
 
       test('Response_404_key(does_not_exist)', async () => {
-        const res = await request(app).get(`/media/images/deosNotExist'`);
+        const res = await request(server).get(`/media/images/deosNotExist'`);
 
         expect(res.statusCode).toEqual(404);
       });
@@ -52,7 +58,7 @@ describe('Media API', () => {
       const defaultPfpImageKey = 'pfp';
 
       test('Response_200_With_Image', async () => {
-        const res = await request(app).get(
+        const res = await request(server).get(
           `/media/images/default/${defaultPfpImageKey}`
         );
 
@@ -60,7 +66,7 @@ describe('Media API', () => {
       });
 
       test('Response_400', async () => {
-        const res = await request(app).get(
+        const res = await request(server).get(
           `/media/images/default/doesNotExistDefaultObjectKey`
         );
 
