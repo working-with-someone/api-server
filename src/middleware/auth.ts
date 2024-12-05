@@ -13,9 +13,12 @@ const authMiddleware = async (
       where: {
         id: req.session.userId,
       },
+      include: {
+        email_verification: true,
+      },
     });
 
-    if (user) {
+    if (user?.email_verification?.email_verified) {
       return next();
     }
   }
