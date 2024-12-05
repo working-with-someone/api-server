@@ -73,7 +73,7 @@ model follow {
 }
 
 model category {
-  id      Int       @id
+  id      Int       @id @default(autoincrement())
   label   String
   session session[]
 }
