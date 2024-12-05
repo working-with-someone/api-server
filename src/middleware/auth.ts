@@ -31,4 +31,4 @@ const authMiddleware = async (
   );
 };
 
-export { authMiddleware };
+export default authMiddleware;

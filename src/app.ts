@@ -4,7 +4,7 @@ import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import RequestLogger from './middleware/requestLogger';
 import router from './routes';
-import { authMiddleware } from './middleware/auth';
+import authMiddleware from './middleware/auth';
 import helmet from 'helmet';
 import cors from 'cors';
 import sessionConfig from './config/session.config';
