@@ -9,17 +9,13 @@ const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  //should log errors that occur in other packages.
-  if (err.originError) {
+  const isUnHandledException = err.originError ? true : false;
+
+  // unhandled exception
+  if (isUnHandledException) {
     const originError = err.originError;
 
-    errorLogger.error(originError.message, { stack: originError.stack });
-  }
-
-  if (err.status == httpStatusCode.NOT_FOUND) {
-    // do not need to log wws not found error
-  } else {
-    // is optional to log other custom wws errors.
+    errorLogger.log('error', originError.message, { stack: originError.stack });
   }
 
   return res.status(err.status).json({
