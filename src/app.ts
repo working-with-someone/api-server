@@ -3,6 +3,7 @@ import session from 'express-session';
 import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
 import requestLogger from './middleware/requestLogger';
+import responseLogger from './middleware/responseLogger';
 import router from './routes';
 import authMiddleware from './middleware/auth';
 import helmet from 'helmet';
@@ -33,6 +34,7 @@ app.use(express.json());
 
 // log request
 app.use(requestLogger);
+app.use(responseLogger);
 
 //jwt authentication
 app.use(authMiddleware);
