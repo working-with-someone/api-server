@@ -8,9 +8,11 @@ import authMiddleware from './middleware/auth';
 import helmet from 'helmet';
 import cors from 'cors';
 import sessionConfig from './config/session.config';
+import correlator from 'express-correlation-id';
 
 const app = express();
 
+app.use(correlator());
 //set security headers of response
 app.use(
   helmet({
@@ -29,7 +31,7 @@ app.use(session(sessionConfig));
 
 app.use(express.json());
 
-//log request
+// log request
 app.use(requestLogger);
 
 //jwt authentication
