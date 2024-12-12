@@ -1,6 +1,6 @@
 import { wwsError } from '../utils/wwsError';
 import { Request, Response, NextFunction } from 'express';
-import { sysErrorLogger } from '../logger/winston';
+import { errorLogger } from '../logger/winston';
 import httpStatusCode from 'http-status-codes';
 
 const errorHandler = (
@@ -13,7 +13,7 @@ const errorHandler = (
   if (err.originError) {
     const originError = err.originError;
 
-    sysErrorLogger.error(originError.message, { stack: originError.stack });
+    errorLogger.error(originError.message, { stack: originError.stack });
   }
 
   if (err.status == httpStatusCode.NOT_FOUND) {

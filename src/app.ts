@@ -2,7 +2,7 @@ import express from 'express';
 import session from 'express-session';
 import errorHandler from './middleware/errorHandler';
 import NotFound from './middleware/notFound';
-import RequestLogger from './middleware/requestLogger';
+import requestLogger from './middleware/requestLogger';
 import router from './routes';
 import authMiddleware from './middleware/auth';
 import helmet from 'helmet';
@@ -30,7 +30,7 @@ app.use(session(sessionConfig));
 app.use(express.json());
 
 //log request
-app.use(RequestLogger);
+app.use(requestLogger);
 
 //jwt authentication
 app.use(authMiddleware);

@@ -1,14 +1,14 @@
 import winston from 'winston';
 import {
-  webServerLoggerConfig,
-  sysErrorLoggerConfig,
+  httpLoggerConfig,
+  errorLoggerConfig,
   databaseLoggerConfig,
 } from '../config/winston.config';
 
-const webServerLogger = winston.createLogger(webServerLoggerConfig);
+const httpLogger = winston.createLogger(httpLoggerConfig);
 
-const sysErrorLogger = winston.createLogger(sysErrorLoggerConfig);
+const errorLogger = winston.createLogger(errorLoggerConfig);
 
 const databaseLogger = winston.createLogger(databaseLoggerConfig);
 
-export { webServerLogger, sysErrorLogger, databaseLogger };
+export { httpLogger, errorLogger, databaseLogger };

@@ -1,19 +1,23 @@
 import winston, { LoggerOptions } from 'winston';
 import path from 'path';
 
-const logFileRoot = path.join(
-  process.cwd(),
-  process.env.NODE_ENV == 'test' ? 'log/test' : 'log'
-);
-
-const httpFormat = winston.format.combine(
+const baseFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
   winston.format.printf(({ timestamp, level, message }) => {
     return `${timestamp} ${level.toUpperCase()} ${message}`;
   })
 );
 
+const httpLogFormat = winston.format.combine(baseFormat);
+const errorLogFormat = winston.format.combine(baseFormat);
+const databaseLogFormat = winston.format.combine(baseFormat);
+
 const generateTransports = (logFileName: string) => {
+  const logFileRoot = path.join(
+    process.cwd(),
+    process.env.NODE_ENV == 'test' ? 'log/test' : 'log'
+  );
+
   const transports: winston.transport[] = [
     new winston.transports.File({
       filename: `${logFileRoot}/${logFileName}`,
@@ -28,38 +32,19 @@ const generateTransports = (logFileName: string) => {
   return transports;
 };
 
-const webServerLoggerConfig: LoggerOptions = {
-  defaultMeta: { timestamp: true },
-  format: httpFormat,
-  transports: generateTransports('webserver.log'),
+const httpLoggerConfig: LoggerOptions = {
+  format: httpLogFormat,
+  transports: generateTransports('http.log'),
 };
 
-const sysErrorLoggerConfig: LoggerOptions = {
-  defaultMeta: { timestamp: true },
-  format: winston.format.combine(
-    httpFormat,
-    winston.format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
-    winston.format.printf(({ timestamp, level, message, metadata }) => {
-      let logMessage = `${timestamp} ${level.toUpperCase()} ${message}`;
-      if (metadata) {
-        logMessage += ` ${JSON.stringify(metadata)}`;
-      }
-      return logMessage;
-    })
-  ),
-  transports: generateTransports('sys-error.log'),
+const errorLoggerConfig: LoggerOptions = {
+  format: errorLogFormat,
+  transports: generateTransports('error.log'),
 };
 
 const databaseLoggerConfig: LoggerOptions = {
-  defaultMeta: { timestamp: true },
-  format: winston.format.combine(
-    httpFormat,
-    winston.format.metadata({ fillExcept: ['timestamp', 'level', 'message'] }),
-    winston.format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} ${level.toUpperCase()} ${message}`;
-    })
-  ),
+  format: databaseLogFormat,
   transports: generateTransports('database.log'),
 };
 
-export { webServerLoggerConfig, sysErrorLoggerConfig, databaseLoggerConfig };
+export { httpLoggerConfig, errorLoggerConfig, databaseLoggerConfig };

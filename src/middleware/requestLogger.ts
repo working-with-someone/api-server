@@ -1,12 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import { webServerLogger } from '../logger/winston';
+import { httpLogger } from '../logger/winston';
 
-const RequestLogger = (req: Request, res: Response, next: NextFunction) => {
-  const message = `${req.method} ${req.url} ${req.ip} ${req.headers['user-agent']}`;
+const requestLogger = (req: Request, res: Response, next: NextFunction) => {
+  const test = { name: 'seungho' };
+  const message = `${req.method} ${req.url} ${req.session.userId || 'anonymous'} ${test} ${req.ip} ${req.headers['user-agent']}`;
 
-  webServerLogger.info(message);
+  httpLogger.log('info', { message });
 
   next();
 };
 
-export default RequestLogger;
+export default requestLogger;
