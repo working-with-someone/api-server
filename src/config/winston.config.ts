@@ -3,9 +3,7 @@ import path from 'path';
 
 const baseFormat = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-  winston.format.printf(({ timestamp, level, message }) => {
-    return `${timestamp} ${level.toUpperCase()} ${message}`;
-  })
+  winston.format.json()
 );
 
 const httpLogFormat = winston.format.combine(baseFormat);
