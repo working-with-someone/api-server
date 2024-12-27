@@ -11,7 +11,7 @@ const errorLogFormat = winston.format.combine(baseFormat);
 const databaseLogFormat = winston.format.combine(baseFormat);
 
 const generateTransports = (logFileName: string) => {
-  const logFileRoot = path.join(
+  const logFileRoot = path.posix.join(
     process.cwd(),
     process.env.NODE_ENV == 'test' ? 'log/test' : 'log'
   );

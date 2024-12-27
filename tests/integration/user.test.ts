@@ -144,7 +144,7 @@ describe('User API', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body.username).toEqual(testUserData.updateUser.username);
         expect(res.body.pfp.curr).toEqual(
-          path.join(to.media.default.images, 'pfp')
+          path.posix.join(to.media.default.images, 'pfp')
         );
       });
 

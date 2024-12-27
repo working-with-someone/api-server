@@ -57,7 +57,7 @@ export async function updateSelf(userId: number, data: user.updateUserInput) {
   if (data.pfpToDefault) {
     // 이미 default가 아니라면
     if (!user!.pfp!.is_default) {
-      const pfpPath = path.join(to.media.default.images, 'pfp');
+      const pfpPath = path.posix.join(to.media.default.images, 'pfp');
 
       _data.pfp = {
         update: {
@@ -73,7 +73,7 @@ export async function updateSelf(userId: number, data: user.updateUserInput) {
     // user의 pfp가 default라면, pfp만 upload해주면된다.
     const key = await uploadImage('pfp', data.pfp);
 
-    const pfpPath = path.join(to.media.images, key);
+    const pfpPath = path.posix.join(to.media.images, key);
 
     _data.pfp = { update: { curr: pfpPath, is_default: false } };
   }

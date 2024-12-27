@@ -2,9 +2,9 @@ import path from 'path';
 
 export const to = {
   media: {
-    images: path.join('/media', 'images'),
+    images: path.posix.join('/media', 'images'),
     default: {
-      images: path.join('/media', 'images', 'default'),
+      images: path.posix.join('/media', 'images', 'default'),
     },
   },
 };

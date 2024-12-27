@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 dotenv.config({
-  path: path.join(process.cwd(), '.env.test'),
+  path: path.posix.join(process.cwd(), '.env.test'),
 });
 
 import s3Client from '../../src/database/clients/s3';
