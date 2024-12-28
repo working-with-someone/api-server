@@ -5,7 +5,7 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { Readable } from 'stream';
 import { wwsError } from '../../utils/wwsError';
 
-type keys = 'pfp';
+type keys = 'pfp' | 'thumbnail';
 
 interface s3APIOption {
   bucket_name?: string;

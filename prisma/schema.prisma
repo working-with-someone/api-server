@@ -73,17 +73,27 @@ model follow {
 }
 
 model session {
-  id          String  @id @db.VarChar(36)
-  title       String  @db.VarChar(100)
-  description String  @db.Text
-  thumbnail   String
-  video_uri   String
-  duration    Int
-  is_private  Boolean @default(false)
+  id            String  @id
+  title         String  @db.VarChar(100)
+  description   String? @db.Text
+  thumbnail_url String
+  is_live       Boolean
+  // 1 : public 2 : followersOnly 3 : private
+  access_level  Int @default(1)
 
   created_at DateTime @default(now())
+  updated_at DateTime @default(now())
 
-  user_id  Int
-  user     user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  category String
+  organizer_id      Int
+  organizer         user          @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
+  category     String
+  session_live session_live?
 }
+
+model session_live {
+  started_at    DateTime?
+  publish_url   String
+  session       session   @relation(fields: [session_id], references: [id])
+  session_id    String    @unique
+}
+
