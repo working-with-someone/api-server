@@ -3,3 +3,10 @@ export const enum accessLevel {
   followersOnly,
   private,
 }
+
+export const enum liveSessionStatus {
+  ready = 1,
+  opened,
+  paused,
+  closed,
+}

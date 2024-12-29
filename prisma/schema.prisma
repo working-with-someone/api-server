@@ -94,8 +94,9 @@ model session {
 
 model session_live {
   started_at    DateTime?
-  publish_url   String
-  session       session   @relation(fields: [session_id], references: [id])
+  // 1 : ready, 2 : opened 3 : paused 4 : closed
+  status        Int
+  session       session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
   session_id    String    @unique
 }
 
