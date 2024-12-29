@@ -6,6 +6,7 @@ import testUserData from '../../data/user.json';
 import testSessionData from '../../data/session.json';
 import fs from 'node:fs';
 import { v4 } from 'uuid';
+import { liveSessionStatus } from '../../../src/enums/session';
 
 describe('Live Session API', () => {
   const currUser = testUserData.currUser;
@@ -44,6 +45,11 @@ describe('Live Session API', () => {
             ...testSessionData.newPublicLiveSession,
             thumbnail_url: testSessionData.default.thumbnail_url,
             organizer_id: organizer.id,
+            session_live: {
+              create: {
+                status: liveSessionStatus.ready,
+              },
+            },
           },
         });
 
@@ -52,6 +58,9 @@ describe('Live Session API', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body).toMatchObject(testSessionData.newPublicLiveSession);
         expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.session_live).toMatchObject(
+          testSessionData.default.session_live
+        );
       });
     });
 
@@ -64,6 +73,11 @@ describe('Live Session API', () => {
             ...testSessionData.newFollowerOnlyLiveSession,
             thumbnail_url: testSessionData.default.thumbnail_url,
             organizer_id: organizer.id,
+            session_live: {
+              create: {
+                status: liveSessionStatus.ready,
+              },
+            },
           },
         });
 
@@ -81,6 +95,9 @@ describe('Live Session API', () => {
           testSessionData.newFollowerOnlyLiveSession
         );
         expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.session_live).toMatchObject(
+          testSessionData.default.session_live
+        );
       });
 
       test('Response_401', async () => {
@@ -90,6 +107,11 @@ describe('Live Session API', () => {
             ...testSessionData.newFollowerOnlyLiveSession,
             thumbnail_url: testSessionData.default.thumbnail_url,
             organizer_id: organizer.id,
+            session_live: {
+              create: {
+                status: liveSessionStatus.ready,
+              },
+            },
           },
         });
 
@@ -106,6 +128,11 @@ describe('Live Session API', () => {
             ...testSessionData.newPrivateLiveSession,
             thumbnail_url: testSessionData.default.thumbnail_url,
             organizer_id: organizer.id,
+            session_live: {
+              create: {
+                status: liveSessionStatus.ready,
+              },
+            },
           },
         });
 
@@ -121,6 +148,9 @@ describe('Live Session API', () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body).toMatchObject(testSessionData.newPrivateLiveSession);
         expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.session_live).toMatchObject(
+          testSessionData.default.session_live
+        );
       });
 
       test('Response_401', async () => {
@@ -130,6 +160,11 @@ describe('Live Session API', () => {
             ...testSessionData.newPrivateLiveSession,
             thumbnail_url: testSessionData.default.thumbnail_url,
             organizer_id: organizer.id,
+            session_live: {
+              create: {
+                status: liveSessionStatus.ready,
+              },
+            },
           },
         });
 

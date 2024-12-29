@@ -125,6 +125,10 @@
   },
 
   "default": {
-    "thumbnail_url": "/media/images/default/thumbnail"
+    "thumbnail_url": "/media/images/default/thumbnail",
+    "session_live" : {
+      "started_at" : null,
+      "status" : 1
+    }
   }
 }

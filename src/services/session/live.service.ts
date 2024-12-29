@@ -6,13 +6,17 @@ import path from 'node:path';
 import { to } from '../../config/path.config';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import { accessLevel } from '../../enums/session';
+import { accessLevel, liveSessionStatus } from '../../enums/session';
 import { checkFollowing } from '../follow.service';
 
 export async function getLiveSession(data: getSessionInput) {
   const session = await prismaClient.session.findFirst({
     where: {
       id: data.id,
+    },
+
+    include: {
+      session_live: true,
     },
   });
 
@@ -78,6 +82,11 @@ export async function createLiveSession(data: createSessionInput) {
       access_level: data.access_level,
       category: data.category,
       organizer_id: data.userId,
+      session_live: {
+        create: {
+          status: liveSessionStatus.ready,
+        },
+      },
     },
   });
 
