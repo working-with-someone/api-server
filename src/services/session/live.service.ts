@@ -6,7 +6,7 @@ import path from 'node:path';
 import { to } from '../../config/path.config';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import accessLevel from '../../config/accessLevel.config';
+import { accessLevel } from '../../enums/session';
 import { checkFollowing } from '../follow.service';
 
 export async function getLiveSession(data: getSessionInput) {
