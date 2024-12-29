@@ -15,4 +15,11 @@ router
     liveSessionController.createLiveSession
   );
 
+router
+  .route('/:live_session_id')
+  .get(
+    validate(liveSessionValidationSchema.getLiveSession),
+    liveSessionController.getLiveSession
+  );
+
 export default router;

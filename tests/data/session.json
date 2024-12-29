@@ -94,7 +94,7 @@
       "id": "klmn1234-opqr-5678-stuv-abcdefg87654",
       "title": "Late Night Gaming",
       "description": "Chill and play games with me late into the night.",
-      "thumbnail_url": "https://example.com/thumbnails/late-night-gaming.jpg",
+      "thumbnail_url": "https://example.com/thumbnails/late-nigsht-gaming.jpg",
       "access_level" : 3,
       "is_live" : true,
       "organizer_id": 3,
@@ -106,17 +106,24 @@
     "description": "study with seungho-hub",
     "access_level" : 1,
     "is_live" : true,
-    "organizer_id": 1,
     "category": "study"
   },
+  "newFollowerOnlyLiveSession" : {
+    "title": "study with me!",
+    "description": "study with seungho-hub",
+    "access_level" : 2,
+    "is_live" : true,
+    "category": "study"
+  },
+
   "newPrivateLiveSession": {
-    "title": "code with me!",
-    "description": "code with seungho-hub",
+    "title": "study with me!",
+    "description": "study with seungho-hub",
     "access_level" : 3,
     "is_live" : true,
-    "organizer_id": 1,
-    "category": "code"
+    "category": "study"
   },
+
   "default": {
     "thumbnail_url": "/media/images/default/thumbnail"
   }

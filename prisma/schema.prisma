@@ -25,6 +25,7 @@ model user {
   followers          follow[]            @relation("following")
   following          follow[]            @relation("follower")
   session            session[]
+  allow_list         session_allow[]
 }
 
 model pfp {
@@ -79,7 +80,7 @@ model session {
   thumbnail_url String
   is_live       Boolean
   // 1 : public 2 : followersOnly 3 : private
-  access_level  Int @default(1)
+  access_level  Int     @default(1)
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
@@ -88,6 +89,7 @@ model session {
   organizer         user          @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
   category     String
   session_live session_live?
+  allow_list   session_allow[]
 }
 
 model session_live {
@@ -97,3 +99,11 @@ model session_live {
   session_id    String    @unique
 }
 
+model session_allow {
+  user       user    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id    Int
+  session    session @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  session_id String
+
+  @@id([session_id, user_id])
+}

@@ -5,6 +5,7 @@ import server from '../../../src';
 import testUserData from '../../data/user.json';
 import testSessionData from '../../data/session.json';
 import fs from 'node:fs';
+import { v4 } from 'uuid';
 
 describe('Live Session API', () => {
   const currUser = testUserData.currUser;
@@ -23,6 +24,119 @@ describe('Live Session API', () => {
 
   afterAll((done) => {
     server.close(done);
+  });
+
+  describe('GET /sessions/live/:live_session_id', () => {
+    const organizer = testUserData.users[1];
+
+    afterEach(async () => {
+      await prismaClient.session.deleteMany({});
+      await prismaClient.follow.deleteMany({});
+      await prismaClient.session_allow.deleteMany({});
+    });
+
+    describe('Public Session', () => {
+      // user2가 생성한 public session은 누구나 가져올 수 있다.
+      test('Response_200_With_Public_Live_Session', async () => {
+        const session = await prismaClient.session.create({
+          data: {
+            id: v4(),
+            ...testSessionData.newPublicLiveSession,
+            thumbnail_url: testSessionData.default.thumbnail_url,
+            organizer_id: organizer.id,
+          },
+        });
+
+        const res = await request(server).get(`/sessions/live/${session.id}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toMatchObject(testSessionData.newPublicLiveSession);
+        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+      });
+    });
+
+    describe('Follower Only Session', () => {
+      // user2가 생성한 follower only session을 follower인 사람은 가져올 수 있다.'
+      test('Response_200_With_Follower_Only_Live_Session', async () => {
+        const session = await prismaClient.session.create({
+          data: {
+            id: v4(),
+            ...testSessionData.newFollowerOnlyLiveSession,
+            thumbnail_url: testSessionData.default.thumbnail_url,
+            organizer_id: organizer.id,
+          },
+        });
+
+        await prismaClient.follow.create({
+          data: {
+            follower_user_id: currUser.id,
+            following_user_id: organizer.id,
+          },
+        });
+
+        const res = await request(server).get(`/sessions/live/${session.id}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toMatchObject(
+          testSessionData.newFollowerOnlyLiveSession
+        );
+        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+      });
+
+      test('Response_401', async () => {
+        const session = await prismaClient.session.create({
+          data: {
+            id: v4(),
+            ...testSessionData.newFollowerOnlyLiveSession,
+            thumbnail_url: testSessionData.default.thumbnail_url,
+            organizer_id: organizer.id,
+          },
+        });
+
+        const res = await request(server).get(`/sessions/live/${session.id}`);
+        expect(res.statusCode).toEqual(401);
+      });
+    });
+
+    describe('Private Session', () => {
+      test('Response_200_With_Private_Session', async () => {
+        const session = await prismaClient.session.create({
+          data: {
+            id: v4(),
+            ...testSessionData.newPrivateLiveSession,
+            thumbnail_url: testSessionData.default.thumbnail_url,
+            organizer_id: organizer.id,
+          },
+        });
+
+        await prismaClient.session_allow.create({
+          data: {
+            session_id: session.id,
+            user_id: currUser.id,
+          },
+        });
+
+        const res = await request(server).get(`/sessions/live/${session.id}`);
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body).toMatchObject(testSessionData.newPrivateLiveSession);
+        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+      });
+
+      test('Response_401', async () => {
+        const session = await prismaClient.session.create({
+          data: {
+            id: v4(),
+            ...testSessionData.newPrivateLiveSession,
+            thumbnail_url: testSessionData.default.thumbnail_url,
+            organizer_id: organizer.id,
+          },
+        });
+
+        const res = await request(server).get(`/sessions/live/${session.id}`);
+        expect(res.statusCode).toEqual(401);
+      });
+    });
   });
 
   describe('POST /sessions/live', () => {
