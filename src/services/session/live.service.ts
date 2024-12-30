@@ -27,6 +27,11 @@ export async function getLiveSession(data: getSessionInput) {
   const organizer_id = session.organizer_id;
   const participant_id = data.userId;
 
+  // 자신의 session이라면, access level에 관계없이 접근 가능하다.
+  if (organizer_id === participant_id) {
+    return session;
+  }
+
   // access level follower only라면, follwing check
   if (session.access_level === accessLevel.followersOnly) {
     const isFollowing = await checkFollowing({
