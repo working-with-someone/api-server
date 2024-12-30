@@ -100,7 +100,7 @@ describe('Live Session API', () => {
         );
       });
 
-      test('Response_401', async () => {
+      test('Response_403', async () => {
         const session = await prismaClient.session.create({
           data: {
             id: v4(),
@@ -116,7 +116,7 @@ describe('Live Session API', () => {
         });
 
         const res = await request(server).get(`/sessions/live/${session.id}`);
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(403);
       });
     });
 
@@ -153,7 +153,7 @@ describe('Live Session API', () => {
         );
       });
 
-      test('Response_401', async () => {
+      test('Response_403', async () => {
         const session = await prismaClient.session.create({
           data: {
             id: v4(),
@@ -169,7 +169,7 @@ describe('Live Session API', () => {
         });
 
         const res = await request(server).get(`/sessions/live/${session.id}`);
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(403);
       });
     });
   });

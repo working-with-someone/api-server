@@ -42,7 +42,7 @@ export async function getLiveSession(data: getSessionInput) {
     // organizer의 follower가 아니라면, 401
     if (!isFollowing) {
       throw new wwsError(
-        httpStatusCode.UNAUTHORIZED,
+        httpStatusCode.FORBIDDEN,
         'Only followers are allowed to participate.'
       );
     }
@@ -58,7 +58,7 @@ export async function getLiveSession(data: getSessionInput) {
 
     if (!isAllowed) {
       throw new wwsError(
-        httpStatusCode.UNAUTHORIZED,
+        httpStatusCode.FORBIDDEN,
         'You are not authorized for this session.'
       );
     }
