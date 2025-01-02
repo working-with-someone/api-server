@@ -284,4 +284,93 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(400);
     });
   });
+
+  describe('PUT /sessions/live/:live_session_id/status', () => {
+    afterEach(async () => {
+      await prismaClient.session.deleteMany({});
+      await prismaClient.follow.deleteMany({});
+      await prismaClient.session_allow.deleteMany({});
+    });
+
+    test('Response_200_With_Status_Ready_To_Opened', async () => {
+      const session = await prismaClient.session.create({
+        data: {
+          id: v4(),
+          ...testSessionData.newPublicLiveSession,
+          thumbnail_url: testSessionData.default.thumbnail_url,
+          organizer_id: currUser.id,
+          session_live: {
+            create: {
+              status: liveSessionStatus.ready,
+            },
+          },
+        },
+      });
+
+      expect(session).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${session.id}/status`)
+        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .send({
+          status: liveSessionStatus.opened,
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toEqual(liveSessionStatus.opened);
+    });
+
+    test('Response_400', async () => {
+      const session = await prismaClient.session.create({
+        data: {
+          id: v4(),
+          ...testSessionData.newPublicLiveSession,
+          thumbnail_url: testSessionData.default.thumbnail_url,
+          organizer_id: currUser.id,
+          session_live: {
+            create: {
+              status: liveSessionStatus.ready,
+            },
+          },
+        },
+      });
+
+      expect(session).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${session.id}/status`)
+        .set('Content-Type', 'application/x-www-form-urlencoded');
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_403', async () => {
+      const organizer = testUserData.users[1];
+
+      const session = await prismaClient.session.create({
+        data: {
+          id: v4(),
+          ...testSessionData.newPublicLiveSession,
+          thumbnail_url: testSessionData.default.thumbnail_url,
+          organizer_id: organizer.id,
+          session_live: {
+            create: {
+              status: liveSessionStatus.ready,
+            },
+          },
+        },
+      });
+
+      expect(session).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${session.id}/status`)
+        .set('Content-Type', 'application/x-www-form-urlencoded')
+        .send({
+          status: liveSessionStatus.opened,
+        });
+
+      expect(res.statusCode).toEqual(403);
+    });
+  });
 });

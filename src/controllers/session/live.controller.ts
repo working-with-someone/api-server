@@ -24,3 +24,14 @@ export const createLiveSession = asyncCatch(
     return res.status(201).json(session);
   }
 );
+
+export const updateLiveSessionStatus = asyncCatch(
+  async (req: Request, res: Response) => {
+    const status = await liveSessionService.updateLiveSessionStatus({
+      sessionId: req.params.live_session_id,
+      status: req.body.status,
+    });
+
+    return res.status(200).json(status);
+  }
+);
