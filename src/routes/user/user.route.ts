@@ -23,7 +23,7 @@ router
   .put(
     multer().single('pfp'),
     validate(userValidationSchema.updateUser),
-    userPermission(),
+    userPermission,
     userController.updateSelf
   );
 

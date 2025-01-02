@@ -3,19 +3,17 @@ import httpStatusCode from 'http-status-codes';
 import { wwsError } from '../utils/wwsError';
 import prismaClient from '../database/clients/prisma';
 
-interface PermissionMiddlewareOption {
-  block: boolean;
-}
+export const userPermission = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (req.session.userId != parseInt(req.params.userId)) {
+    return next(new wwsError(httpStatusCode.UNAUTHORIZED));
+  }
 
-export const userPermission =
-  (option?: PermissionMiddlewareOption) =>
-  (req: Request, res: Response, next: NextFunction) => {
-    if (req.session.userId != parseInt(req.params.userId)) {
-      throw new wwsError(httpStatusCode.UNAUTHORIZED);
-    }
-
-    next();
-  };
+  next();
+};
 
 export const sessionPermission = async (
   req: Request,

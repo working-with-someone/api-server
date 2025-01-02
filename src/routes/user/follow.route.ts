@@ -31,13 +31,13 @@ followingRouter
   // 사용자의 다른 사용자 following을 생성한다.
   .post(
     validate(followValidationSchema.createFollowing),
-    userPermission(),
+    userPermission,
     followController.createFollowing
   )
   // 사용자의 다른 사용자 following을 제거한다.
   .delete(
     validate(followValidationSchema.deleteFollowing),
-    userPermission(),
+    userPermission,
     followController.deleteFollowing
   );
 
