@@ -1,5 +1,9 @@
 import prismaClient from '../../database/clients/prisma';
-import type { createSessionInput, getSessionInput } from '../../@types/session';
+import type {
+  createSessionInput,
+  getSessionInput,
+  updateLiveSessionStatus,
+} from '../../@types/session';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../lib/s3';
 import path from 'node:path';
@@ -96,4 +100,24 @@ export async function createLiveSession(data: createSessionInput) {
   });
 
   return session;
+}
+
+export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
+  const session = await prismaClient.session.update({
+    where: {
+      id: data.sessionId,
+    },
+    data: {
+      session_live: {
+        update: {
+          status: data.status,
+        },
+      },
+    },
+    include: {
+      session_live: true,
+    },
+  });
+
+  return session.session_live?.status;
 }

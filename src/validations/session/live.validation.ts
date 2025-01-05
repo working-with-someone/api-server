@@ -1,7 +1,7 @@
 import joi from 'joi';
 import type { RequestSchema } from '../../middleware/validate';
 import categories from '../../../static/data/category.json';
-import { accessLevel } from '../../enums/session';
+import { accessLevel, liveSessionStatus } from '../../enums/session';
 
 export const getLiveSession: RequestSchema = {
   params: joi.object().keys({
@@ -24,4 +24,17 @@ export const createLiveSession: RequestSchema = {
     thumbnail: joi.optional(),
   }),
   file: joi.object().optional(),
+};
+
+export const updateLiveSessionStatus: RequestSchema = {
+  body: joi.object().keys({
+    status: joi
+      .number()
+      .valid(
+        liveSessionStatus.opened,
+        liveSessionStatus.paused,
+        liveSessionStatus.closed
+      )
+      .required(),
+  }),
 };
