@@ -1,9 +1,6 @@
 {
-    "watch": [
-        "src"
-    ],
-    "ext": "ts,json",
-    "exec": "ts-node ./src/index.ts",
-    "delay": 10,
-    "ignore": []
+  "watch": ["src"],
+  "ext": "ts,json",
+  "delay": 10,
+  "ignore": []
 }
