@@ -12,6 +12,7 @@ import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import { accessLevel, liveSessionStatus } from '../../enums/session';
 import { checkFollowing } from '../follow.service';
+import { Prisma } from '@prisma/client';
 
 export async function getLiveSession(data: getSessionInput) {
   const session = await prismaClient.session.findFirst({
@@ -103,15 +104,38 @@ export async function createLiveSession(data: createSessionInput) {
 }
 
 export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
-  const session = await prismaClient.session.update({
+  let session = await prismaClient.session.findFirst({
+    where: {
+      id: data.sessionId,
+    },
+    include: {
+      session_live: true,
+    },
+  });
+
+  if (!session) {
+    throw new wwsError(httpStatusCode.NOT_FOUND);
+  }
+
+  const updateInput: Prisma.session_liveUpdateInput = {
+    status: data.status,
+  };
+
+  // live session이 ready 상태에서 open될 때, started_at을 기록한다.
+  if (
+    session.session_live?.status == liveSessionStatus.ready &&
+    data.status == liveSessionStatus.opened
+  ) {
+    updateInput.started_at = new Date();
+  }
+
+  session = await prismaClient.session.update({
     where: {
       id: data.sessionId,
     },
     data: {
       session_live: {
-        update: {
-          status: data.status,
-        },
+        update: updateInput,
       },
     },
     include: {

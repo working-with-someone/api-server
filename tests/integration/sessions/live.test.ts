@@ -293,7 +293,7 @@ describe('Live Session API', () => {
     });
 
     test('Response_200_With_Status_Ready_To_Opened', async () => {
-      const session = await prismaClient.session.create({
+      const newLiveSession = await prismaClient.session.create({
         data: {
           id: v4(),
           ...testSessionData.newPublicLiveSession,
@@ -307,17 +307,29 @@ describe('Live Session API', () => {
         },
       });
 
-      expect(session).toBeDefined();
+      expect(newLiveSession).toBeDefined();
 
       const res = await request(server)
-        .put(`/sessions/live/${session.id}/status`)
+        .put(`/sessions/live/${newLiveSession.id}/status`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send({
           status: liveSessionStatus.opened,
         });
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toEqual(liveSessionStatus.opened);
+      expect(res.status).toEqual(200);
+
+      const session = await prismaClient.session.findFirst({
+        where: {
+          id: newLiveSession.id,
+        },
+        include: {
+          session_live: true,
+        },
+      });
+
+      expect(session?.session_live?.status).toEqual(liveSessionStatus.opened);
+      // 첫 ready => open은 started_at을 지정한다.
+      expect(session?.session_live?.started_at).toBeDefined();
     });
 
     test('Response_400', async () => {
