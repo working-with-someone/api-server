@@ -4,12 +4,7 @@ import { liveSessionService } from '../../services';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
-    const session = await liveSessionService.getLiveSession({
-      session: res.locals.session,
-      userId: req.session.userId as number,
-    });
-
-    return res.status(200).json(session);
+    return res.status(200).json(res.locals.session);
   }
 );
 

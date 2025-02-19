@@ -3,7 +3,10 @@ import { liveSessionController } from '../../controllers';
 import { sessionValidationSchema } from '../../validations';
 import { liveSessionValidationSchema } from '../../validations';
 import validate from '../../middleware/validate';
-import { attachSessionOrNotfound } from '../../middleware/session';
+import {
+  attachSessionOrNotfound,
+  checkAllowedOrForbidden,
+} from '../../middleware/session';
 
 import multer from 'multer';
 import { checkOwnerOrForbidden } from '../../middleware/session';
@@ -23,6 +26,7 @@ router
   .get(
     validate(sessionValidationSchema.getSession),
     attachSessionOrNotfound,
+    checkAllowedOrForbidden,
     liveSessionController.getLiveSession
   );
 

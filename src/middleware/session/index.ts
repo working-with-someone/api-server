@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import prismaClient from '../../database/clients/prisma';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
+import { isAllowedToSession } from '../../services/session/live.service';
 
 export const attachSessionOrNotfound = async (
   req: Request,
@@ -41,4 +42,23 @@ export const checkOwnerOrForbidden = async (
   }
 
   return next();
+};
+
+export const checkAllowedOrForbidden = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const session = res.locals.session;
+
+  if (
+    !(await isAllowedToSession({
+      session,
+      userId: req.session.userId!,
+    }))
+  ) {
+    return next(new wwsError(httpStatusCode.FORBIDDEN));
+  }
+
+  next();
 };
