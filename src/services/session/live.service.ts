@@ -15,19 +15,7 @@ import { checkFollowing } from '../follow.service';
 import { Prisma } from '@prisma/client';
 
 export async function getLiveSession(data: getSessionInput) {
-  const session = await prismaClient.session.findFirst({
-    where: {
-      id: data.id,
-    },
-
-    include: {
-      session_live: true,
-    },
-  });
-
-  if (!session) {
-    throw new wwsError(httpStatusCode.NOT_FOUND);
-  }
+  const session = data.session;
 
   const organizer_id = session.organizer_id;
   const participant_id = data.userId;
@@ -56,7 +44,7 @@ export async function getLiveSession(data: getSessionInput) {
   else if (session.access_level === accessLevel.private) {
     const isAllowed = await prismaClient.session_allow.findFirst({
       where: {
-        session_id: data.id,
+        session_id: session.id,
         user_id: participant_id,
       },
     });
@@ -104,18 +92,7 @@ export async function createLiveSession(data: createSessionInput) {
 }
 
 export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
-  let session = await prismaClient.session.findFirst({
-    where: {
-      id: data.sessionId,
-    },
-    include: {
-      session_live: true,
-    },
-  });
-
-  if (!session) {
-    throw new wwsError(httpStatusCode.NOT_FOUND);
-  }
+  let session = data.session;
 
   const updateInput: Prisma.session_liveUpdateInput = {
     status: data.status,
@@ -131,7 +108,7 @@ export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
 
   session = await prismaClient.session.update({
     where: {
-      id: data.sessionId,
+      id: session.id,
     },
     data: {
       session_live: {

@@ -1,7 +1,10 @@
 import { Prisma } from '@prisma/client';
 import { liveSessionStatus } from '../enums/session';
 
-export interface getSessionInput extends Pick<Prisma.sessionWhereInput, 'id'> {
+export interface getSessionInput {
+  session: Prisma.sessionGetPayload<{
+    include: { session_live: true };
+  }>;
   userId: number;
 }
 
@@ -15,6 +18,8 @@ export interface createSessionInput
 }
 
 export interface updateLiveSessionStatus {
-  sessionId: string;
+  session: Prisma.sessionGetPayload<{
+    include: { session_live: true };
+  }>;
   status: liveSessionStatus;
 }
