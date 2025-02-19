@@ -1,6 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { liveSessionStatus } from '../enums/session';
 
+export interface isAllowedToSessionInput {
+  session: Prisma.sessionGetPayload<{
+    include: { session_live: true };
+  }>;
+  userId: number;
+}
+
 export interface getSessionInput {
   session: Prisma.sessionGetPayload<{
     include: { session_live: true };
