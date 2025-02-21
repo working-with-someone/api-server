@@ -108,13 +108,13 @@ describe('User API', () => {
         expect(res.body.username).toEqual(testUserData.updateUser.username);
       });
 
-      test('Response_401', async () => {
+      test('Response_403', async () => {
         const res = await request(server)
           .put(`/users/${testUserData.users[1].id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username);
 
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(403);
       });
 
       test('Response_200_With_Updated_Current_User_username(o)_pfp(o)', async () => {

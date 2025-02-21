@@ -27,7 +27,7 @@ export async function getUser(userId: number, isSelf: boolean) {
   return getPublicUserInfo(user);
 }
 
-export async function updateSelf(userId: number, data: user.updateUserInput) {
+export async function updateUser(userId: number, data: user.updateUserInput) {
   const _data: Prisma.userUpdateInput = {};
 
   const user = await prismaClient.user.findFirst({

@@ -208,12 +208,12 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(409);
     });
 
-    test('Response_401', async () => {
+    test('Response_403', async () => {
       const res = await request(server).post(
         `/users/${following.id}/followings/${currUser.id}`
       );
 
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
     });
   });
 
@@ -239,12 +239,12 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(204);
     });
 
-    test('Response_401', async () => {
+    test('Response_403', async () => {
       const res = await request(server).delete(
         `/users/${following.id}/followings/${currUser.id}`
       );
 
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
     });
   });
 

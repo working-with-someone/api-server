@@ -7,6 +7,8 @@ jest.mock('../../../src/middleware/auth.ts', () => {
   return (req: Request, res: Response, next: NextFunction) => {
     req.session.userId = currUser.id;
 
+    req.user = currUser;
+
     next();
   };
 });

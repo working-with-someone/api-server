@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { followValidationSchema } from '../../validations';
 import { followController } from '../../controllers';
 import validate from '../../middleware/validate';
-import { userPermission } from '../../middleware/permission';
+import userEndpointMiddleware from '../../middleware/user';
 
 const followingRouter = Router({
   mergeParams: true,
@@ -12,7 +12,7 @@ const followerRouter = Router({
   mergeParams: true,
 });
 
-// /users/:userId/followings
+// /users/:user_id/followings
 followingRouter
   .route('/')
   // 사용자가 following하는 사용자들을 가져온다.
@@ -21,7 +21,7 @@ followingRouter
     followController.getFollowings
   );
 
-// /users/:userId/followings/:following_user_id
+// /users/:user_id/followings/:following_user_id
 followingRouter
   .route('/:following_user_id')
   .get(
@@ -31,17 +31,19 @@ followingRouter
   // 사용자의 다른 사용자 following을 생성한다.
   .post(
     validate(followValidationSchema.createFollowing),
-    userPermission,
+    userEndpointMiddleware.attachUserOrNotfound,
+    userEndpointMiddleware.checkIsOwnerOrForbidden,
     followController.createFollowing
   )
   // 사용자의 다른 사용자 following을 제거한다.
   .delete(
     validate(followValidationSchema.deleteFollowing),
-    userPermission,
+    userEndpointMiddleware.attachUserOrNotfound,
+    userEndpointMiddleware.checkIsOwnerOrForbidden,
     followController.deleteFollowing
   );
 
-// /users/:userId/followers
+// /users/:user_id/followers
 followerRouter
   .route('/')
   // 사용자를 following하는 사용자들을 가져온다.
