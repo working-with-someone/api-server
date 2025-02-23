@@ -1,7 +1,6 @@
 import { wwsError } from '../utils/wwsError';
 import { Request, Response, NextFunction } from 'express';
 import { errorLogger } from '../logger/winston';
-import httpStatusCode from 'http-status-codes';
 
 const errorHandler = (
   err: wwsError,

@@ -60,5 +60,5 @@ export const checkAllowedOrForbidden = async (
     return next(new wwsError(httpStatusCode.FORBIDDEN));
   }
 
-  next();
+  return next();
 };

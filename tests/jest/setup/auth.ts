@@ -9,6 +9,6 @@ jest.mock('../../../src/middleware/auth.ts', () => {
 
     req.user = currUser;
 
-    next();
+    return next();
   };
 });
