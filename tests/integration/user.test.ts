@@ -9,9 +9,19 @@ import { to } from '../../src/config/path.config';
 import path from 'path';
 
 describe('User API', () => {
-  const currUser: Record<string, any> = { ...testUserData.users[0] };
+  const currUser = testUserData.currUser;
 
   beforeAll(async () => {
+    await prismaClient.user.create({
+      data: {
+        ...currUser,
+        pfp: {
+          create: currUser.pfp,
+        },
+        email_verification: currUser.email_verification,
+      },
+    });
+
     for (const user of testUserData.users) {
       await prismaClient.user.create({
         data: { ...user, pfp: { create: {} } },
@@ -37,7 +47,7 @@ describe('User API', () => {
     });
 
     test('Response_200_With_Public_User_Info', async () => {
-      const user = testUserData.users[1];
+      const user = testUserData.users[0];
 
       const res = await request(server).get(`/users/${user.id}`);
 
@@ -81,15 +91,12 @@ describe('User API', () => {
       afterEach(async () => {
         await prismaClient.user.update({
           where: {
-            id: testUserData.users[0].id,
+            id: currUser.id,
           },
           data: {
-            username: testUserData.users[0].username,
-            pfp: {
-              update: {
-                ...testUserData.defaultPfp,
-              },
-            },
+            ...currUser,
+            pfp: { update: currUser.pfp },
+            email_verification: { update: currUser.email_verification },
           },
         });
       });
@@ -110,7 +117,7 @@ describe('User API', () => {
 
       test('Response_403', async () => {
         const res = await request(server)
-          .put(`/users/${testUserData.users[1].id}`)
+          .put(`/users/${testUserData.users[0].id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username);
 
@@ -189,20 +196,17 @@ describe('User API', () => {
       afterAll(async () => {
         await prismaClient.user.update({
           where: {
-            id: testUserData.users[0].id,
+            id: currUser.id,
           },
           data: {
-            username: testUserData.users[0].username,
-            pfp: {
-              update: {
-                ...testUserData.defaultPfp,
-              },
-            },
+            ...currUser,
+            pfp: { update: currUser.pfp },
+            email_verification: { update: currUser.email_verification },
           },
         });
       });
 
-      let currUploadedPfpKey = '';
+      let uploadedPfpKey = '';
 
       // curr user의 username과 pfp를 새로운 image로 update한다.
       test('1. Response_200_With_Updated_Current_User_pfpToDefault(x)', async () => {
@@ -217,7 +221,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
         // request 1 으로 인해 upload된 pfp key
-        currUploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.pfp.curr;
       });
 
       // curr user의 pfp를 새로운 image로 update한다.
@@ -233,7 +237,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
-        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
+        expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
 
         // 두번째 req의 image가 upload되었어야함.
 
@@ -241,7 +245,7 @@ describe('User API', () => {
 
         expect(pfpRes.statusCode).toEqual(200);
 
-        currUploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.pfp.curr;
       });
 
       test('3. Response_200_With_Updated_Current_User_And_Updated_Default_Pfp_At_Req2_Must_Be_deleted', async () => {
@@ -255,7 +259,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).toEqual(testUserData.defaultPfp.curr);
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
-        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
+        expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
       });
     });
   });
