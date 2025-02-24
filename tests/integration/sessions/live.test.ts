@@ -7,10 +7,11 @@ import testSessionData from '../../data/session.json';
 import fs from 'node:fs';
 import { v4 } from 'uuid';
 import { liveSessionStatus } from '../../../src/enums/session';
+import currUser from '../../data/curr-user';
 
 describe('Live Session API', () => {
-  const currUser = testUserData.currUser;
   beforeAll(async () => {
+    await currUser.insert();
     // create test user
     for (const user of testUserData.users) {
       await prismaClient.user.create({
@@ -28,7 +29,7 @@ describe('Live Session API', () => {
   });
 
   describe('GET /sessions/live/:live_session_id', () => {
-    const organizer = testUserData.users[1];
+    const organizer = testUserData.users[0];
 
     afterEach(async () => {
       await prismaClient.session.deleteMany({});

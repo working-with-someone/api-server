@@ -9,7 +9,7 @@ const authMiddleware = async (
   next: NextFunction
 ) => {
   if (req.session.userId) {
-    const user = await prismaClient.user.findUnique({
+    const user = await prismaClient.user.findFirst({
       where: {
         id: req.session.userId,
       },
@@ -18,8 +18,14 @@ const authMiddleware = async (
       },
     });
 
-    if (user?.email_verification?.email_verified) {
-      return next();
+    if (user) {
+      const emailVerified = user.email_verification?.email_verified;
+
+      if (emailVerified) {
+        req.user = user;
+
+        return next();
+      }
     }
   }
 

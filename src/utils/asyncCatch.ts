@@ -10,11 +10,11 @@ const asyncCatch =
     Promise.resolve(controller(req, res, next)).catch((err) => {
       //expected된 error를 그대로 error handler에 보낸다.
       if (err instanceof wwsError) {
-        next(err);
+        return next(err);
       }
       //unexpected error에 대해선 internal error를 생성해 error handler에 보낸다.
       else {
-        next(
+        return next(
           new wwsError(
             httpStatusCode.INTERNAL_SERVER_ERROR,
             httpStatusCode.getStatusText(httpStatusCode.INTERNAL_SERVER_ERROR),

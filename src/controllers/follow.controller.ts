@@ -4,7 +4,7 @@ import { followService } from '../services/';
 
 export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
   const follows = await followService.getFollowings({
-    userId: parseInt(req.params.userId),
+    userId: parseInt(req.params.user_id),
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });
@@ -52,7 +52,7 @@ export const deleteFollowing = asyncCatch(
 
 export const getFollowers = asyncCatch(async (req: Request, res: Response) => {
   const followers = await followService.getFollowers({
-    userId: parseInt(req.params.userId),
+    userId: parseInt(req.params.user_id),
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });

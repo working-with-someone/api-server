@@ -4,12 +4,7 @@ import { liveSessionService } from '../../services';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
-    const session = await liveSessionService.getLiveSession({
-      id: req.params.live_session_id,
-      userId: req.session.userId as number,
-    });
-
-    return res.status(200).json(session);
+    return res.status(200).json(res.locals.session);
   }
 );
 
@@ -28,7 +23,7 @@ export const createLiveSession = asyncCatch(
 export const updateLiveSessionStatus = asyncCatch(
   async (req: Request, res: Response) => {
     const status = await liveSessionService.updateLiveSessionStatus({
-      sessionId: req.params.live_session_id,
+      session: res.locals.session,
       status: req.body.status,
     });
 

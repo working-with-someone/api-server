@@ -7,11 +7,12 @@ import fs from 'fs';
 import { loadImage } from '../../src/lib/s3';
 import { to } from '../../src/config/path.config';
 import path from 'path';
+import currUser from '../data/curr-user';
 
 describe('User API', () => {
-  const currUser: Record<string, any> = { ...testUserData.users[0] };
-
   beforeAll(async () => {
+    await currUser.insert();
+
     for (const user of testUserData.users) {
       await prismaClient.user.create({
         data: { ...user, pfp: { create: {} } },
@@ -37,7 +38,7 @@ describe('User API', () => {
     });
 
     test('Response_200_With_Public_User_Info', async () => {
-      const user = testUserData.users[1];
+      const user = testUserData.users[0];
 
       const res = await request(server).get(`/users/${user.id}`);
 
@@ -79,19 +80,7 @@ describe('User API', () => {
     describe('single request', () => {
       // update된 user의 정보를 복구한다.
       afterEach(async () => {
-        await prismaClient.user.update({
-          where: {
-            id: testUserData.users[0].id,
-          },
-          data: {
-            username: testUserData.users[0].username,
-            pfp: {
-              update: {
-                ...testUserData.defaultPfp,
-              },
-            },
-          },
-        });
+        await currUser.insert();
       });
 
       // current user의 username, pfp를 update하는 요청에
@@ -108,13 +97,13 @@ describe('User API', () => {
         expect(res.body.username).toEqual(testUserData.updateUser.username);
       });
 
-      test('Response_401', async () => {
+      test('Response_403', async () => {
         const res = await request(server)
-          .put(`/users/${testUserData.users[1].id}`)
+          .put(`/users/${testUserData.users[0].id}`)
           .set('Content-Type', 'multipart/form-data')
           .field('username', testUserData.updateUser.username);
 
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(403);
       });
 
       test('Response_200_With_Updated_Current_User_username(o)_pfp(o)', async () => {
@@ -187,22 +176,10 @@ describe('User API', () => {
 
     describe('continuous request', () => {
       afterAll(async () => {
-        await prismaClient.user.update({
-          where: {
-            id: testUserData.users[0].id,
-          },
-          data: {
-            username: testUserData.users[0].username,
-            pfp: {
-              update: {
-                ...testUserData.defaultPfp,
-              },
-            },
-          },
-        });
+        await currUser.insert();
       });
 
-      let currUploadedPfpKey = '';
+      let uploadedPfpKey = '';
 
       // curr user의 username과 pfp를 새로운 image로 update한다.
       test('1. Response_200_With_Updated_Current_User_pfpToDefault(x)', async () => {
@@ -217,7 +194,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
         // request 1 으로 인해 upload된 pfp key
-        currUploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.pfp.curr;
       });
 
       // curr user의 pfp를 새로운 image로 update한다.
@@ -233,7 +210,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
-        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
+        expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
 
         // 두번째 req의 image가 upload되었어야함.
 
@@ -241,7 +218,7 @@ describe('User API', () => {
 
         expect(pfpRes.statusCode).toEqual(200);
 
-        currUploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.pfp.curr;
       });
 
       test('3. Response_200_With_Updated_Current_User_And_Updated_Default_Pfp_At_Req2_Must_Be_deleted', async () => {
@@ -255,7 +232,7 @@ describe('User API', () => {
         expect(res.body.pfp.curr).toEqual(testUserData.defaultPfp.curr);
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
-        expect(loadImage({ key: currUploadedPfpKey })).rejects.toThrow();
+        expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
       });
     });
   });

@@ -16,7 +16,7 @@ const requestLogger = (req: Request, res: Response, next: NextFunction) => {
     },
   });
 
-  next();
+  return next();
 };
 
 export default requestLogger;

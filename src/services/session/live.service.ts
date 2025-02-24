@@ -2,6 +2,7 @@ import prismaClient from '../../database/clients/prisma';
 import type {
   createSessionInput,
   getSessionInput,
+  isAllowedToSessionInput,
   updateLiveSessionStatus,
 } from '../../@types/session';
 import { v4 } from 'uuid';
@@ -14,27 +15,15 @@ import { accessLevel, liveSessionStatus } from '../../enums/session';
 import { checkFollowing } from '../follow.service';
 import { Prisma } from '@prisma/client';
 
-export async function getLiveSession(data: getSessionInput) {
-  const session = await prismaClient.session.findFirst({
-    where: {
-      id: data.id,
-    },
-
-    include: {
-      session_live: true,
-    },
-  });
-
-  if (!session) {
-    throw new wwsError(httpStatusCode.NOT_FOUND);
-  }
+export async function isAllowedToSession(data: isAllowedToSessionInput) {
+  const session = data.session;
 
   const organizer_id = session.organizer_id;
   const participant_id = data.userId;
 
   // 자신의 session이라면, access level에 관계없이 접근 가능하다.
   if (organizer_id === participant_id) {
-    return session;
+    return true;
   }
 
   // access level follower only라면, follwing check
@@ -44,33 +33,36 @@ export async function getLiveSession(data: getSessionInput) {
       following_user_id: organizer_id,
     });
 
-    // organizer의 follower가 아니라면, 401
+    // organizer의 follower가 아니라면 false
     if (!isFollowing) {
-      throw new wwsError(
-        httpStatusCode.FORBIDDEN,
-        'Only followers are allowed to participate.'
-      );
+      return false;
     }
   }
   // access level이 private라면 allowList check
   else if (session.access_level === accessLevel.private) {
     const isAllowed = await prismaClient.session_allow.findFirst({
       where: {
-        session_id: data.id,
+        session_id: session.id,
         user_id: participant_id,
       },
     });
 
     if (!isAllowed) {
-      throw new wwsError(
-        httpStatusCode.FORBIDDEN,
-        'You are not authorized for this session.'
-      );
+      return false;
     }
   }
-  //public이라면
-  return session;
+
+  return true;
 }
+
+export async function getLiveSession(data: getSessionInput) {
+  if (!(await isAllowedToSession(data))) {
+    throw new wwsError(httpStatusCode.FORBIDDEN);
+  }
+  //public이라면
+  return data.session;
+}
+
 export async function createLiveSession(data: createSessionInput) {
   const uuid = v4();
 
@@ -104,18 +96,7 @@ export async function createLiveSession(data: createSessionInput) {
 }
 
 export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
-  let session = await prismaClient.session.findFirst({
-    where: {
-      id: data.sessionId,
-    },
-    include: {
-      session_live: true,
-    },
-  });
-
-  if (!session) {
-    throw new wwsError(httpStatusCode.NOT_FOUND);
-  }
+  let session = data.session;
 
   const updateInput: Prisma.session_liveUpdateInput = {
     status: data.status,
@@ -131,7 +112,7 @@ export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
 
   session = await prismaClient.session.update({
     where: {
-      id: data.sessionId,
+      id: session.id,
     },
     data: {
       session_live: {
