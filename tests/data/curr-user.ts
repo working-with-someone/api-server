@@ -1,6 +1,4 @@
 import { Prisma } from '@prisma/client';
-import testUserData from './user.json';
-import { GetResult } from '@prisma/client/runtime';
 import prismaClient from '../../src/database/clients/prisma';
 
 type CurrentUser = Prisma.userGetPayload<{
@@ -23,7 +21,7 @@ class CurrUser implements CurrentUser {
   followings_count: number;
 
   constructor() {
-    this.id = 0;
+    this.id = 1;
     this.username = 'currUser';
     this.encrypted_password =
       '$2b$10$6ZbxBKRk1qdhySGQeN5Iw.CTA4XFCVGL9KHkZnabitdjSRegvBif2';
@@ -31,14 +29,14 @@ class CurrUser implements CurrentUser {
     this.pfp = {
       curr: '/media/images/default/pfp',
       is_default: true,
-      user_id: 0,
+      user_id: 1,
     };
     this.email_verification = {
       email_verified: true,
       verify_token: 'testVerifyToken',
       created_at: new Date(),
       expired_at: new Date(),
-      user_id: 0,
+      user_id: 1,
     };
     this.created_at = new Date();
     this.updated_at = new Date();
@@ -47,11 +45,54 @@ class CurrUser implements CurrentUser {
     this.followings_count = 0;
   }
 
-  async store() {
+  async insert() {
+    if (await this.isInserted()) {
+      await this.delete();
+    }
+
     await prismaClient.user.create({
       data: {
-        ...this,
+        id: this.id,
+        username: this.username,
+        email: this.email,
+        encrypted_password: this.encrypted_password,
+        created_at: this.created_at,
+        updated_at: this.updated_at,
+      },
+    });
+
+    await prismaClient.pfp.create({
+      data: this.pfp,
+    });
+
+    await prismaClient.email_verification.create({
+      data: this.email_verification,
+    });
+  }
+
+  async delete() {
+    await prismaClient.user.delete({
+      where: {
+        id: this.id,
       },
     });
   }
+
+  async isInserted() {
+    if (
+      await prismaClient.user.findFirst({
+        where: {
+          id: this.id,
+        },
+      })
+    ) {
+      return true;
+    }
+
+    return false;
+  }
 }
+
+const currUser = new CurrUser();
+
+export default currUser;

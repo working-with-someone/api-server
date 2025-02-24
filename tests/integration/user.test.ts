@@ -7,20 +7,11 @@ import fs from 'fs';
 import { loadImage } from '../../src/lib/s3';
 import { to } from '../../src/config/path.config';
 import path from 'path';
+import currUser from '../data/curr-user';
 
 describe('User API', () => {
-  const currUser = testUserData.currUser;
-
   beforeAll(async () => {
-    await prismaClient.user.create({
-      data: {
-        ...currUser,
-        pfp: {
-          create: currUser.pfp,
-        },
-        email_verification: currUser.email_verification,
-      },
-    });
+    await currUser.insert();
 
     for (const user of testUserData.users) {
       await prismaClient.user.create({
@@ -89,16 +80,7 @@ describe('User API', () => {
     describe('single request', () => {
       // update된 user의 정보를 복구한다.
       afterEach(async () => {
-        await prismaClient.user.update({
-          where: {
-            id: currUser.id,
-          },
-          data: {
-            ...currUser,
-            pfp: { update: currUser.pfp },
-            email_verification: { update: currUser.email_verification },
-          },
-        });
+        await currUser.insert();
       });
 
       // current user의 username, pfp를 update하는 요청에
@@ -194,16 +176,7 @@ describe('User API', () => {
 
     describe('continuous request', () => {
       afterAll(async () => {
-        await prismaClient.user.update({
-          where: {
-            id: currUser.id,
-          },
-          data: {
-            ...currUser,
-            pfp: { update: currUser.pfp },
-            email_verification: { update: currUser.email_verification },
-          },
-        });
+        await currUser.insert();
       });
 
       let uploadedPfpKey = '';

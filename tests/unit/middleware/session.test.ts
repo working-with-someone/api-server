@@ -4,14 +4,16 @@ jest.unmock('../../../src/database/clients/prisma.ts');
 import testSessionData from '../../data/session.json';
 import testUserData from '../../data/user.json';
 import { checkOwnerOrForbidden } from '../../../src/middleware/session';
+import currUser from '../../data/curr-user';
 
 // must mocking next function which accpet err argument but do nothing
 const mockNext = jest.fn((err) => err);
-const currUser = testUserData.currUser;
 
 describe('session middleware', () => {
   describe('ownerOrForbidden ', () => {
     beforeAll(async () => {
+      await currUser.insert();
+
       for (const user of testUserData.users) {
         await prismaClient.user.create({
           data: { ...user, pfp: { create: {} } },
