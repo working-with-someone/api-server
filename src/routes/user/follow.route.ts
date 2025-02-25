@@ -18,6 +18,7 @@ followingRouter
   // 사용자가 following하는 사용자들을 가져온다.
   .get(
     validate(followValidationSchema.getFollowings),
+    userEndpointMiddleware.attachUserOrNotfound,
     followController.getFollowings
   );
 

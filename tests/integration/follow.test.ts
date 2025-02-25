@@ -107,6 +107,15 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveLength(2);
     });
+
+    test('Response_404', async () => {
+      const res = await request(server).get(`/users/-1/followings`).query({
+        per_page: 1,
+        page: 1,
+      });
+
+      expect(res.statusCode).toEqual(404);
+    });
   });
 
   describe('GET /users/:user_id/followings/:following_user_id', () => {
