@@ -27,6 +27,7 @@ followingRouter
   .route('/:following_user_id')
   .get(
     validate(followValidationSchema.checkFollowing),
+    userEndpointMiddleware.attachUserOrNotfound,
     followController.checkFollowing
   )
   // 사용자의 다른 사용자 following을 생성한다.

@@ -4,7 +4,7 @@ import { followService } from '../services/';
 
 export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
   const follows = await followService.getFollowings({
-    userId: parseInt(req.params.user_id),
+    userId: res.locals.user.id,
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });
@@ -16,7 +16,7 @@ export const createFollowing = asyncCatch(
   async (req: Request, res: Response) => {
     const follow = await followService.createFollowing({
       following_user_id: parseInt(req.params.following_user_id),
-      follower_user_id: req.session.userId as number,
+      follower_user_id: res.locals.user.id,
     });
 
     return res.status(201).json(follow);
@@ -28,7 +28,7 @@ export const checkFollowing = asyncCatch(
   async (req: Request, res: Response) => {
     const isFollowing = await followService.checkFollowing({
       following_user_id: parseInt(req.params.following_user_id),
-      follower_user_id: req.session.userId as number,
+      follower_user_id: res.locals.user.id,
     });
 
     if (isFollowing) {
@@ -43,7 +43,7 @@ export const deleteFollowing = asyncCatch(
   async (req: Request, res: Response) => {
     await followService.deleteFollow({
       following_user_id: parseInt(req.params.following_user_id),
-      follower_user_id: req.session.userId as number,
+      follower_user_id: res.locals.user.id,
     });
 
     return res.status(204).json({});
