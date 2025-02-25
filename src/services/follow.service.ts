@@ -4,16 +4,17 @@ import { PrismaError } from 'prisma-error-enum';
 import httpStatusCode from 'http-status-codes';
 
 import type {
-  CheckFollowing,
-  CreateFollow,
-  DeleteFollow,
-  GetFollowers,
-  GetFollowing,
-  GetFollowings,
+  CheckFollowingInput,
+  CreateFollowingInput,
+  DeleteFollowInput,
+  GetFollowersInput,
+  GetFollowingInput,
+  GetFollowingsInput,
 } from '../@types/follow';
+
 import { Prisma } from '@prisma/client';
 
-export async function getFollowing(data: GetFollowing) {
+export async function getFollowing(data: GetFollowingInput) {
   const follows = await prismaClient.follow.findUnique({
     where: {
       follower_user_id_following_user_id: data,
@@ -23,13 +24,13 @@ export async function getFollowing(data: GetFollowing) {
   return follows;
 }
 
-export async function checkFollowing(data: CheckFollowing) {
+export async function checkFollowing(data: CheckFollowingInput) {
   const follow = await getFollowing(data);
 
   return follow ? true : false;
 }
 
-export async function getFollowings(data: GetFollowings) {
+export async function getFollowings(data: GetFollowingsInput) {
   const follows = await prismaClient.follow.findMany({
     where: {
       follower_user_id: data.userId,
@@ -40,7 +41,8 @@ export async function getFollowings(data: GetFollowings) {
 
   return follows;
 }
-export async function createFollow(data: CreateFollow) {
+
+export async function createFollowing(data: CreateFollowingInput) {
   const targetUser = await prismaClient.user.findUnique({
     where: {
       id: data.following_user_id,
@@ -97,7 +99,7 @@ export async function createFollow(data: CreateFollow) {
   }
 }
 
-export async function deleteFollow(data: DeleteFollow) {
+export async function deleteFollow(data: DeleteFollowInput) {
   await prismaClient.$transaction([
     prismaClient.follow.delete({
       where: {
@@ -126,7 +128,8 @@ export async function deleteFollow(data: DeleteFollow) {
   return;
 }
 
-export async function getFollowers(data: GetFollowers) {
+// user의 follower 목록을 가져온다.
+export async function getFollowers(data: GetFollowersInput) {
   const followers = await prismaClient.follow.findMany({
     where: {
       following_user_id: data.userId,

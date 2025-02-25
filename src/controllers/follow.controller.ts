@@ -14,7 +14,7 @@ export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
 
 export const createFollowing = asyncCatch(
   async (req: Request, res: Response) => {
-    const follow = await followService.createFollow({
+    const follow = await followService.createFollowing({
       following_user_id: parseInt(req.params.following_user_id),
       follower_user_id: req.session.userId as number,
     });

@@ -1,10 +1,10 @@
 import type { PageNationData } from './pagenation';
 
-export interface GetFollowers extends PageNationData {
+export interface GetFollowersInput extends PageNationData {
   userId: number;
 }
 
-export interface GetFollowings extends PageNationData {
+export interface GetFollowingsInput extends PageNationData {
   userId: number;
 }
 
@@ -13,10 +13,10 @@ export interface FollowInfo {
   follower_user_id: number;
 }
 
-export type GetFollowing = FollowInfo;
+export type GetFollowingInput = FollowInfo;
 
-export type CreateFollow = FollowInfo;
+export type CreateFollowingInput = FollowInfo;
 
-export type CheckFollowing = FollowInfo;
+export type CheckFollowingInput = FollowInfo;
 
-export type DeleteFollow = FollowInfo;
+export type DeleteFollowInput = FollowInfo;
