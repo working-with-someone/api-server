@@ -249,6 +249,22 @@ describe('Follow API', () => {
       expect(res.statusCode).toEqual(204);
     });
 
+    test('Response_404_user_id(does_not_exist)', async () => {
+      const res = await request(server).delete(
+        `/users/${currUser.id}/followings/${currUser.id}`
+      );
+
+      expect(res.statusCode).toEqual(404);
+    });
+
+    test('Response_404_following_user_id(does_not_exist)', async () => {
+      const res = await request(server).delete(
+        `/users/${currUser.id}/followings/${currUser.id}`
+      );
+
+      expect(res.statusCode).toEqual(404);
+    });
+
     test('Response_403', async () => {
       const res = await request(server).delete(
         `/users/${following.id}/followings/${currUser.id}`
@@ -316,6 +332,15 @@ describe('Follow API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveLength(2);
+    });
+
+    test('Response_404', async () => {
+      const res = await request(server).get(`/users/-1/followers`).query({
+        per_page: 1,
+        page: 1,
+      });
+
+      expect(res.statusCode).toEqual(404);
     });
 
     test('Response_200_With_Other_Users_Single_Follower', async () => {

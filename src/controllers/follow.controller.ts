@@ -40,7 +40,7 @@ export const deleteFollowing = asyncCatch(
 
 export const getFollowers = asyncCatch(async (req: Request, res: Response) => {
   const followers = await followService.getFollowers({
-    userId: parseInt(req.params.user_id),
+    userId: res.locals.user.id,
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });

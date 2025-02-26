@@ -46,6 +46,7 @@ followingRouter
     validate(followValidationSchema.deleteFollowing),
     userEndpointMiddleware.attachUserOrNotfound,
     userEndpointMiddleware.checkIsOwnerOrForbidden,
+    followEndpointMiddleware.attachFollowingOrNotFound,
     followController.deleteFollowing
   );
 
@@ -55,6 +56,7 @@ followerRouter
   // 사용자를 following하는 사용자들을 가져온다.
   .get(
     validate(followValidationSchema.getFollowers),
+    userEndpointMiddleware.attachUserOrNotfound,
     followController.getFollowers
   );
 
