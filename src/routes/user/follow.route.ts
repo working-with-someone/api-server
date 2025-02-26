@@ -37,6 +37,8 @@ followingRouter
     validate(followValidationSchema.createFollowing),
     userEndpointMiddleware.attachUserOrNotfound,
     userEndpointMiddleware.checkIsOwnerOrForbidden,
+    followEndpointMiddleware.checkFollowingDoesNotExistOrConflict,
+    followEndpointMiddleware.checkTargetUserExistOrNotFound,
     followController.createFollowing
   )
   // 사용자의 다른 사용자 following을 제거한다.

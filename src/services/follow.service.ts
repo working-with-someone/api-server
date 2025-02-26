@@ -43,26 +43,6 @@ export async function getFollowings(data: GetFollowingsInput) {
 }
 
 export async function createFollowing(data: CreateFollowingInput) {
-  const targetUser = await prismaClient.user.findUnique({
-    where: {
-      id: data.following_user_id,
-    },
-  });
-
-  if (!targetUser) {
-    throw new wwsError(404, 'can not found target user');
-  }
-
-  const alreadyFollow = await prismaClient.follow.findUnique({
-    where: {
-      follower_user_id_following_user_id: data,
-    },
-  });
-
-  if (alreadyFollow) {
-    throw new wwsError(httpStatusCode.CONFLICT, 'already following that user');
-  }
-
   // follow record 생성과 user들의 following_count increment, follower count increment가 문제 없이 실행된다면
   // 생성된 follow record를 반환한다.
   try {
