@@ -3,6 +3,7 @@ import { followValidationSchema } from '../../validations';
 import { followController } from '../../controllers';
 import validate from '../../middleware/validate';
 import userEndpointMiddleware from '../../middleware/user';
+import followEndpointMiddleware from '../../middleware/following';
 
 const followingRouter = Router({
   mergeParams: true,
@@ -28,7 +29,8 @@ followingRouter
   .get(
     validate(followValidationSchema.checkFollowing),
     userEndpointMiddleware.attachUserOrNotfound,
-    followController.checkFollowing
+    followEndpointMiddleware.attachFollowingOrNotFound,
+    followController.getFollowing
   )
   // 사용자의 다른 사용자 following을 생성한다.
   .post(

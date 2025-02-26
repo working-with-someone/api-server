@@ -20,6 +20,7 @@ declare global {
       }>;
 
       user: Prisma.userGetPayload<false>;
+      following: Prisma.followGetPayload<false>;
     }
   }
 }

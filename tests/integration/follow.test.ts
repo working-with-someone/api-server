@@ -150,12 +150,12 @@ describe('Follow API', () => {
       await prismaClient.follow.deleteMany({});
     });
 
-    test('Response_204', async () => {
+    test('Response_200', async () => {
       const res = await request(server).get(
         `/users/${currUser.id}/followings/${testUserData.users[0].id}`
       );
 
-      expect(res.statusCode).toEqual(204);
+      expect(res.statusCode).toEqual(200);
     });
 
     test('Response_404', async () => {

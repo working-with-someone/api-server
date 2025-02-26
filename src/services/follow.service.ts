@@ -15,13 +15,13 @@ import type {
 import { Prisma } from '@prisma/client';
 
 export async function getFollowing(data: GetFollowingInput) {
-  const follows = await prismaClient.follow.findUnique({
+  const following = await prismaClient.follow.findUnique({
     where: {
       follower_user_id_following_user_id: data,
     },
   });
 
-  return follows;
+  return following;
 }
 
 export async function checkFollowing(data: CheckFollowingInput) {

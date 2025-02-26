@@ -3,13 +3,13 @@ import asyncCatch from '../utils/asyncCatch';
 import { followService } from '../services/';
 
 export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
-  const follows = await followService.getFollowings({
+  const followings = await followService.getFollowings({
     userId: res.locals.user.id,
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });
 
-  return res.status(200).json(follows);
+  return res.status(200).json(followings);
 });
 
 export const createFollowing = asyncCatch(
@@ -23,21 +23,9 @@ export const createFollowing = asyncCatch(
   }
 );
 
-// authenticated user가 following user를 follow하고 있다면 204를 return, follow하고 있지 않다면 404를 return
-export const checkFollowing = asyncCatch(
-  async (req: Request, res: Response) => {
-    const isFollowing = await followService.checkFollowing({
-      following_user_id: parseInt(req.params.following_user_id),
-      follower_user_id: res.locals.user.id,
-    });
-
-    if (isFollowing) {
-      return res.status(204).end();
-    }
-
-    return res.status(404).end();
-  }
-);
+export const getFollowing = asyncCatch(async (req: Request, res: Response) => {
+  return res.status(200).json(res.locals.following);
+});
 
 export const deleteFollowing = asyncCatch(
   async (req: Request, res: Response) => {
