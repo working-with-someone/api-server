@@ -7,6 +7,6 @@ export const enum accessLevel {
 export const enum liveSessionStatus {
   ready = 1,
   opened,
-  paused,
+  breaked,
   closed,
 }

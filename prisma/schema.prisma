@@ -85,19 +85,19 @@ model session {
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
 
-  organizer_id      Int
-  organizer         user          @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
+  organizer_id Int
+  organizer    user            @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
   category     String
   session_live session_live?
   allow_list   session_allow[]
 }
 
 model session_live {
-  started_at    DateTime?
-  // 1 : ready, 2 : opened 3 : paused 4 : closed
-  status        Int
-  session       session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
-  session_id    String    @unique
+  started_at DateTime?
+  // 1 : ready, 2 : opened 3 : breaked 4 : closed
+  status     Int
+  session    session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  session_id String    @unique
 }
 
 model session_allow {

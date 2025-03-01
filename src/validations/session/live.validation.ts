@@ -26,7 +26,7 @@ export const updateLiveSessionStatus: RequestSchema = {
       .number()
       .valid(
         liveSessionStatus.opened,
-        liveSessionStatus.paused,
+        liveSessionStatus.breaked,
         liveSessionStatus.closed
       )
       .required(),
