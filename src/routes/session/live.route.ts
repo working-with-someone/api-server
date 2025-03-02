@@ -1,15 +1,14 @@
 import { Router } from 'express';
 import { liveSessionController } from '../../controllers';
-import { sessionValidationSchema } from '../../validations';
 import { liveSessionValidationSchema } from '../../validations';
 import validate from '../../middleware/validate';
 import {
-  attachSessionOrNotfound,
+  attachLiveSessionOrNotfound,
   checkAllowedOrForbidden,
-} from '../../middleware/session';
+} from '../../middleware/session/live';
 
 import multer from 'multer';
-import { checkOwnerOrForbidden } from '../../middleware/session';
+import { checkOwnerOrForbidden } from '../../middleware/session/live';
 
 const router = Router();
 
@@ -22,19 +21,19 @@ router
   );
 
 router
-  .route('/:session_id')
+  .route('/:live_session_id')
   .get(
-    validate(sessionValidationSchema.getSession),
-    attachSessionOrNotfound,
+    validate(liveSessionValidationSchema.getLiveSession),
+    attachLiveSessionOrNotfound,
     checkAllowedOrForbidden,
     liveSessionController.getLiveSession
   );
 
 router
-  .route('/:session_id/status')
+  .route('/:live_session_id/status')
   .put(
     validate(liveSessionValidationSchema.updateLiveSessionStatus),
-    attachSessionOrNotfound,
+    attachLiveSessionOrNotfound,
     checkOwnerOrForbidden,
     liveSessionController.updateLiveSessionStatus
   );

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { AttachedLiveSession } from '../../session/live';
 
 export {};
 
@@ -15,9 +16,7 @@ declare global {
     }
 
     interface Locals {
-      session: Prisma.sessionGetPayload<{
-        include: { session_live: true };
-      }>;
+      liveSession: AttachedLiveSession;
 
       user: Prisma.userGetPayload<false>;
       following: Prisma.followGetPayload<false>;

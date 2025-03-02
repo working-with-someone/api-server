@@ -1,24 +1,23 @@
 import prismaClient from '../../database/clients/prisma';
 import type {
+  AttachedLiveSession,
   createSessionInput,
-  getSessionInput,
-  isAllowedToSessionInput,
-  updateLiveSessionStatus,
-} from '../../@types/session';
+} from '../../@types/session/live';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../lib/s3';
 import path from 'node:path';
 import { to } from '../../config/path.config';
-import { wwsError } from '../../utils/wwsError';
-import httpStatusCode from 'http-status-codes';
 import { accessLevel, liveSessionStatus } from '../../enums/session';
 import { checkFollowing } from '../follow.service';
 import { Prisma } from '@prisma/client';
 
-export async function isAllowedToSession(data: isAllowedToSessionInput) {
-  const session = data.session;
+export async function isAllowedToLiveSession(data: {
+  liveSession: AttachedLiveSession;
+  userId: number;
+}) {
+  const liveSession = data.liveSession;
 
-  const organizer_id = session.organizer_id;
+  const organizer_id = liveSession.organizer_id;
   const participant_id = data.userId;
 
   // 자신의 session이라면, access level에 관계없이 접근 가능하다.
@@ -27,7 +26,7 @@ export async function isAllowedToSession(data: isAllowedToSessionInput) {
   }
 
   // access level follower only라면, follwing check
-  if (session.access_level === accessLevel.followersOnly) {
+  if (liveSession.access_level === accessLevel.followersOnly) {
     const isFollowing = await checkFollowing({
       follower_user_id: participant_id,
       following_user_id: organizer_id,
@@ -39,10 +38,10 @@ export async function isAllowedToSession(data: isAllowedToSessionInput) {
     }
   }
   // access level이 private라면 allowList check
-  else if (session.access_level === accessLevel.private) {
-    const isAllowed = await prismaClient.session_allow.findFirst({
+  else if (liveSession.access_level === accessLevel.private) {
+    const isAllowed = await prismaClient.live_session_allow.findFirst({
       where: {
-        session_id: session.id,
+        live_session_id: liveSession.id,
         user_id: participant_id,
       },
     });
@@ -55,74 +54,66 @@ export async function isAllowedToSession(data: isAllowedToSessionInput) {
   return true;
 }
 
-export async function getLiveSession(data: getSessionInput) {
-  if (!(await isAllowedToSession(data))) {
-    throw new wwsError(httpStatusCode.FORBIDDEN);
-  }
-  //public이라면
-  return data.session;
+export async function getLiveSession(data: {
+  liveSession: AttachedLiveSession;
+  userId: number;
+}) {
+  return data.liveSession;
 }
 
 export async function createLiveSession(data: createSessionInput) {
   const uuid = v4();
+  const streamKey = v4();
 
-  let thumbnail_url = path.posix.join(to.media.default.images, 'thumbnail');
+  let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
 
   if (data.thumbnail) {
     const key = await uploadImage('thumbnail', data.thumbnail);
 
-    thumbnail_url = path.posix.join(to.media.images, key);
+    thumbnail_uri = path.posix.join(to.media.images, key);
   }
 
-  const session = await prismaClient.session.create({
+  const liveSession = await prismaClient.live_session.create({
     data: {
       id: uuid,
       title: data.title,
       description: data.description,
-      thumbnail_url,
-      is_live: true,
+      thumbnail_uri,
       access_level: data.access_level,
       category: data.category,
       organizer_id: data.userId,
-      session_live: {
-        create: {
-          status: liveSessionStatus.ready,
-        },
-      },
+      status: liveSessionStatus.ready,
+      stream_key: streamKey,
     },
   });
 
-  return session;
+  return liveSession;
 }
 
-export async function updateLiveSessionStatus(data: updateLiveSessionStatus) {
-  let session = data.session;
+export async function updateLiveSessionStatus(data: {
+  liveSession: AttachedLiveSession;
+  status: liveSessionStatus;
+}) {
+  const liveSession = data.liveSession;
 
-  const updateInput: Prisma.session_liveUpdateInput = {
+  const updateInput: Prisma.live_sessionUpdateInput = {
     status: data.status,
   };
 
   // live session이 ready 상태에서 open될 때, started_at을 기록한다.
   if (
-    session.session_live?.status == liveSessionStatus.ready &&
+    liveSession.status == liveSessionStatus.ready &&
     data.status == liveSessionStatus.opened
   ) {
     updateInput.started_at = new Date();
   }
 
-  session = await prismaClient.session.update({
+  const updatedLiveSession = await prismaClient.live_session.update({
     where: {
-      id: session.id,
+      id: liveSession.id,
     },
-    data: {
-      session_live: {
-        update: updateInput,
-      },
-    },
-    include: {
-      session_live: true,
-    },
+    data: updateInput,
   });
 
-  return session.session_live?.status;
+  return updatedLiveSession.status;
 }

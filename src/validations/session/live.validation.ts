@@ -3,6 +3,12 @@ import type { RequestSchema } from '../../middleware/validate';
 import categories from '../../../static/data/category.json';
 import { accessLevel, liveSessionStatus } from '../../enums/session';
 
+export const getLiveSession: RequestSchema = {
+  params: joi.object().keys({
+    live_session_id: joi.string().required(),
+  }),
+};
+
 export const createLiveSession: RequestSchema = {
   body: joi.object().keys({
     title: joi.string().required(),

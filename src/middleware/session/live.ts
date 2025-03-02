@@ -1,31 +1,27 @@
 import { Request, Response, NextFunction } from 'express';
-
 import prismaClient from '../../database/clients/prisma';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import { isAllowedToSession } from '../../services/session/live.service';
+import { isAllowedToLiveSession } from '../../services/session/live.service';
 
-export const attachSessionOrNotfound = async (
+export const attachLiveSessionOrNotfound = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { session_id } = req.params;
+  const { live_session_id } = req.params;
 
-  const session = await prismaClient.session.findFirst({
+  const liveSession = await prismaClient.live_session.findFirst({
     where: {
-      id: session_id,
-    },
-    include: {
-      session_live: true,
+      id: live_session_id,
     },
   });
 
-  if (!session) {
+  if (!liveSession) {
     return next(new wwsError(httpStatusCode.NOT_FOUND));
   }
 
-  res.locals.session = session;
+  res.locals.liveSession = liveSession;
 
   return next();
 };
@@ -35,9 +31,9 @@ export const checkOwnerOrForbidden = async (
   res: Response,
   next: NextFunction
 ) => {
-  const session = res.locals.session;
+  const liveSession = res.locals.liveSession;
 
-  if (req.session.userId !== session?.organizer_id) {
+  if (req.session.userId !== liveSession?.organizer_id) {
     return next(new wwsError(httpStatusCode.FORBIDDEN));
   }
 
@@ -49,11 +45,11 @@ export const checkAllowedOrForbidden = async (
   res: Response,
   next: NextFunction
 ) => {
-  const session = res.locals.session;
+  const liveSession = res.locals.liveSession;
 
   if (
-    !(await isAllowedToSession({
-      session,
+    !(await isAllowedToLiveSession({
+      liveSession: liveSession,
       userId: req.session.userId!,
     }))
   ) {
