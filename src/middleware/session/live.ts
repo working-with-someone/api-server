@@ -3,6 +3,7 @@ import prismaClient from '../../database/clients/prisma';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import { isAllowedToLiveSession } from '../../services/session/live.service';
+import { liveSessionStatus } from '../../enums/session';
 
 export const attachLiveSessionOrNotfound = async (
   req: Request,
@@ -54,6 +55,39 @@ export const checkAllowedOrForbidden = async (
     }))
   ) {
     return next(new wwsError(httpStatusCode.FORBIDDEN));
+  }
+
+  return next();
+};
+
+export const validateStatusTransitionOrBadRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const liveSession = res.locals.liveSession;
+
+  const transitionValidationSchema: Record<
+    liveSessionStatus,
+    Array<liveSessionStatus>
+  > = {
+    [liveSessionStatus.ready]: [liveSessionStatus.opened],
+    [liveSessionStatus.opened]: [
+      liveSessionStatus.breaked,
+      liveSessionStatus.closed,
+    ],
+    [liveSessionStatus.breaked]: [
+      liveSessionStatus.opened,
+      liveSessionStatus.closed,
+    ],
+    [liveSessionStatus.closed]: [],
+  };
+
+  const statusFrom = liveSession.status as liveSessionStatus;
+  const statusTo = req.body.status;
+
+  if (!transitionValidationSchema[statusFrom].includes(statusTo)) {
+    return next(new wwsError(httpStatusCode.BAD_REQUEST));
   }
 
   return next();

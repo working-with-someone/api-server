@@ -5,6 +5,7 @@ import validate from '../../middleware/validate';
 import {
   attachLiveSessionOrNotfound,
   checkAllowedOrForbidden,
+  validateStatusTransitionOrBadRequest,
 } from '../../middleware/session/live';
 
 import multer from 'multer';
@@ -35,6 +36,7 @@ router
     validate(liveSessionValidationSchema.updateLiveSessionStatus),
     attachLiveSessionOrNotfound,
     checkOwnerOrForbidden,
+    validateStatusTransitionOrBadRequest,
     liveSessionController.updateLiveSessionStatus
   );
 

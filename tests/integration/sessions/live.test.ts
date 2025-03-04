@@ -217,36 +217,371 @@ describe('Live Session API', () => {
     afterEach(async () => {
       await prismaClient.live_session.deleteMany({});
       await prismaClient.follow.deleteMany({});
-      await prismaClient.live_session_allow.deleteMany({});
     });
 
-    test('Response_200_With_Status_Ready_To_Opened', async () => {
-      const newLiveSession = await createTestLiveSession({
-        access_level: accessLevel.public,
-        organizer_id: currUser.id,
-        status: liveSessionStatus.ready,
-      });
+    describe('Ready To ', () => {
+      const statusFrom = liveSessionStatus.ready;
 
-      expect(newLiveSession).toBeDefined();
+      test('Response_200_With_Status_Ready_To_Opened', async () => {
+        const statusTo = liveSessionStatus.opened;
 
-      const res = await request(server)
-        .put(`/sessions/live/${newLiveSession.id}/status`)
-        .set('Content-Type', 'application/x-www-form-urlencoded')
-        .send({
-          status: liveSessionStatus.opened,
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
         });
 
-      expect(res.status).toEqual(200);
+        expect(newLiveSession).toBeDefined();
 
-      const liveSession = await prismaClient.live_session.findFirst({
-        where: {
-          id: newLiveSession.id,
-        },
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(200);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusTo);
+        // 첫 ready => open은 started_at을 지정한다.
+        expect(liveSession?.started_at).toBeDefined();
       });
 
-      expect(liveSession?.status).toEqual(liveSessionStatus.opened);
-      // 첫 ready => open은 started_at을 지정한다.
-      expect(liveSession?.started_at).toBeDefined();
+      test('Response_400_With_Status_Ready_To_Breaked', async () => {
+        const statusTo = liveSessionStatus.breaked;
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+
+      test('Response_400_With_Status_Ready_To_Closed', async () => {
+        const statusTo = liveSessionStatus.closed;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+    });
+
+    describe('Opened To', () => {
+      const statusFrom = liveSessionStatus.opened;
+
+      test('Response_200_With_Status_Opened_To_Breaked', async () => {
+        const statusTo = liveSessionStatus.breaked;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(200);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusTo);
+      });
+
+      test('Response_200_With_Status_Opened_To_Closed', async () => {
+        const statusTo = liveSessionStatus.closed;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(200);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusTo);
+      });
+
+      test('Response_400_With_Status_Opened_To_Ready', async () => {
+        const statusTo = liveSessionStatus.ready;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+    });
+
+    describe('Closed To', () => {
+      const statusFrom = liveSessionStatus.closed;
+
+      test('Response_400_With_Status_Closed_To_Ready', async () => {
+        const statusTo = liveSessionStatus.ready;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+
+      test('Response_400_With_Status_Closed_To_Opened', async () => {
+        const statusTo = liveSessionStatus.opened;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+
+      test('Response_400_With_Status_Closed_To_Breaked', async () => {
+        const statusTo = liveSessionStatus.breaked;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
+    });
+
+    describe('Breaked To', () => {
+      const statusFrom = liveSessionStatus.breaked;
+
+      test('Response_200_With_Status_Breaked_To_Closed', async () => {
+        const statusTo = liveSessionStatus.closed;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(200);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusTo);
+      });
+
+      test('Response_200_With_Status_Breaked_To_Opened', async () => {
+        const statusTo = liveSessionStatus.opened;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(200);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusTo);
+      });
+
+      test('Response_400_With_Status_Breaked_To_Ready', async () => {
+        const statusTo = liveSessionStatus.ready;
+
+        const newLiveSession = await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: statusFrom,
+        });
+
+        expect(newLiveSession).toBeDefined();
+
+        const res = await request(server)
+          .put(`/sessions/live/${newLiveSession.id}/status`)
+          .set('Content-Type', 'application/x-www-form-urlencoded')
+          .send({
+            status: statusTo,
+          });
+
+        expect(res.status).toEqual(400);
+
+        const liveSession = await prismaClient.live_session.findFirst({
+          where: {
+            id: newLiveSession.id,
+          },
+        });
+
+        expect(liveSession?.status).toEqual(statusFrom);
+      });
     });
 
     // live session status 변경 요청에 status가 지정되지 않으면 400을 응답받아야한다.
