@@ -3,7 +3,7 @@ import express from 'express';
 import userRoute from './user/user.route';
 import mediaRoute from './media.route';
 import categoryRoute from './category/category.route';
-import sessionRouter from './session/session.route';
+import sessionRouter from './session';
 
 const router = express.Router();
 

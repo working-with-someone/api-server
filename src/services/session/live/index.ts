@@ -1,14 +1,14 @@
-import prismaClient from '../../database/clients/prisma';
+import prismaClient from '../../../database/clients/prisma';
 import type {
   AttachedLiveSession,
   createSessionInput,
-} from '../../@types/session/live';
+} from '../../../@types/session/live';
 import { v4 } from 'uuid';
-import { uploadImage } from '../../lib/s3';
+import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
-import { to } from '../../config/path.config';
-import { accessLevel, liveSessionStatus } from '../../enums/session';
-import { checkFollowing } from '../follow.service';
+import { to } from '../../../config/path.config';
+import { accessLevel, liveSessionStatus } from '../../../enums/session';
+import { checkFollowing } from '../../follow.service';
 import { Prisma } from '@prisma/client';
 
 export async function isAllowedToLiveSession(data: {

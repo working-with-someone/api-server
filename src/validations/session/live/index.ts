@@ -1,7 +1,7 @@
 import joi from 'joi';
-import type { RequestSchema } from '../../middleware/validate';
-import categories from '../../../static/data/category.json';
-import { accessLevel, liveSessionStatus } from '../../enums/session';
+import type { RequestSchema } from '../../../middleware/validate';
+import categories from '../../../../static/data/category.json';
+import { accessLevel, liveSessionStatus } from '../../../enums/session';
 
 export const getLiveSession: RequestSchema = {
   params: joi.object().keys({

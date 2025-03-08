@@ -1,12 +1,12 @@
-import prismaClient from '../../../src/database/clients/prisma';
-jest.unmock('../../../src/database/clients/prisma.ts');
+import prismaClient from '../../../../src/database/clients/prisma';
+jest.unmock('../../../../src/database/clients/prisma.ts');
 import request from 'supertest';
-import server from '../../../src';
-import testUserData from '../../data/user.json';
-import { sampleLiveSessionFields } from '../../data/live-session';
-import { accessLevel, liveSessionStatus } from '../../../src/enums/session';
-import currUser from '../../data/curr-user';
-import { createTestLiveSession } from '../../data/live-session';
+import server from '../../../../src';
+import testUserData from '../../../data/user.json';
+import { sampleLiveSessionFields } from '../../../data/live-session';
+import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
+import currUser from '../../../data/curr-user';
+import { createTestLiveSession } from '../../../data/live-session';
 
 describe('Live Session API', () => {
   beforeAll(async () => {

@@ -1,15 +1,9 @@
 import { Router } from 'express';
-import { liveSessionController } from '../../controllers';
-import { liveSessionValidationSchema } from '../../validations';
-import validate from '../../middleware/validate';
-import {
-  attachLiveSessionOrNotfound,
-  checkAllowedOrForbidden,
-  validateStatusTransitionOrBadRequest,
-} from '../../middleware/session/live';
-
+import { liveSessionController } from '../../../controllers';
+import { liveSessionValidationSchema } from '../../../validations';
+import validate from '../../../middleware/validate';
+import liveSessionMiddleware from '../../../middleware/session/live';
 import multer from 'multer';
-import { checkOwnerOrForbidden } from '../../middleware/session/live';
 
 const router = Router();
 
@@ -25,8 +19,8 @@ router
   .route('/:live_session_id')
   .get(
     validate(liveSessionValidationSchema.getLiveSession),
-    attachLiveSessionOrNotfound,
-    checkAllowedOrForbidden,
+    liveSessionMiddleware.attachLiveSessionOrNotfound,
+    liveSessionMiddleware.checkAllowedOrForbidden,
     liveSessionController.getLiveSession
   );
 
@@ -34,9 +28,9 @@ router
   .route('/:live_session_id/status')
   .put(
     validate(liveSessionValidationSchema.updateLiveSessionStatus),
-    attachLiveSessionOrNotfound,
-    checkOwnerOrForbidden,
-    validateStatusTransitionOrBadRequest,
+    liveSessionMiddleware.attachLiveSessionOrNotfound,
+    liveSessionMiddleware.checkOwnerOrForbidden,
+    liveSessionMiddleware.validateStatusTransitionOrBadRequest,
     liveSessionController.updateLiveSessionStatus
   );
 

@@ -2,7 +2,7 @@ import { createRequest, createResponse } from 'node-mocks-http';
 import prismaClient from '../../../../src/database/clients/prisma';
 jest.unmock('../../../../src/database/clients/prisma.ts');
 import testUserData from '../../../data/user.json';
-import { checkOwnerOrForbidden } from '../../../../src/middleware/session/live';
+import liveSessionMiddleware from '../../../../src/middleware/session/live';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
 import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
@@ -49,7 +49,7 @@ describe('session middleware', () => {
         },
       });
 
-      await checkOwnerOrForbidden(req, res, mockNext);
+      await liveSessionMiddleware.checkOwnerOrForbidden(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledTimes(1);
       // must be called without error
@@ -86,7 +86,7 @@ describe('session middleware', () => {
         },
       });
 
-      await checkOwnerOrForbidden(req, res, mockNext);
+      await liveSessionMiddleware.checkOwnerOrForbidden(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalledTimes(1);
 

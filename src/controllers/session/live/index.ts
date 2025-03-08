@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import asyncCatch from '../../utils/asyncCatch';
-import { liveSessionService } from '../../services';
+import asyncCatch from '../../../utils/asyncCatch';
+import { liveSessionService } from '../../../services';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
