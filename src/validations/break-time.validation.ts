@@ -1,6 +1,12 @@
 import joi from 'joi';
 import type { RequestSchema } from '../middleware/validate';
 
+export const getBreakTime: RequestSchema = {
+  params: joi.object().keys({
+    live_session_id: joi.string().required(),
+  }),
+};
+
 export const createBreakTime: RequestSchema = {
   params: joi.object().keys({
     live_session_id: joi.string().required(),

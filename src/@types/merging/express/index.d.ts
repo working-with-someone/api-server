@@ -1,7 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { AttachedLiveSession } from '../../session/live';
+import { AttachedBreakTime } from '../../session/live/break-time';
 
-export {};
+export { };
 
 declare global {
   namespace Express {
@@ -17,7 +18,7 @@ declare global {
 
     interface Locals {
       liveSession: AttachedLiveSession;
-
+      breakTime: AttachedBreakTime;
       user: Prisma.userGetPayload<false>;
       following: Prisma.followGetPayload<false>;
     }

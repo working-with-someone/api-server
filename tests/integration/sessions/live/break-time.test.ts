@@ -5,7 +5,10 @@ import server from '../../../../src';
 import testUserData from '../../../data/user.json';
 import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
 import currUser from '../../../data/curr-user';
-import { createTestLiveSession } from '../../../data/live-session';
+import {
+  createTestLiveSession,
+  sampleBreakTimeFields,
+} from '../../../data/live-session';
 
 describe('Live Session API', () => {
   beforeAll(async () => {
@@ -128,6 +131,81 @@ describe('Live Session API', () => {
         .send({});
 
       expect(res.statusCode).toEqual(400);
+    });
+  });
+
+  describe('GET /sessions/live/:live_session_id/break_time', () => {
+    let hardLiveSession;
+    let softLiveSession;
+    let otherUserHardLiveSession;
+    let otherUserSoftLiveSession;
+
+    beforeAll(async () => {
+      hardLiveSession = await createTestLiveSession({
+        access_level: accessLevel.public,
+        organizer_id: currUser.id,
+        status: liveSessionStatus.opened,
+      });
+
+      softLiveSession = await createTestLiveSession({
+        access_level: accessLevel.public,
+        organizer_id: currUser.id,
+        status: liveSessionStatus.opened,
+        break_time: sampleBreakTimeFields,
+      });
+
+      otherUserHardLiveSession = await createTestLiveSession({
+        access_level: accessLevel.public,
+        organizer_id: testUserData.users[1].id,
+        status: liveSessionStatus.opened,
+      });
+
+      otherUserSoftLiveSession = await createTestLiveSession({
+        access_level: accessLevel.public,
+        organizer_id: testUserData.users[1].id,
+        status: liveSessionStatus.opened,
+        break_time: sampleBreakTimeFields,
+      });
+    });
+
+    afterAll(async () => {
+      await prismaClient.live_session.deleteMany({});
+    });
+
+    test('Response_200_With_Break_Time', async () => {
+      const res = await request(server).get(
+        `/sessions/live/${softLiveSession!.id}/break_time`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toMatchObject(sampleBreakTimeFields);
+    });
+
+    test('Response_200_With_Other_User_LiveSession_Break_Time', async () => {
+      const res = await request(server).get(
+        `/sessions/live/${otherUserSoftLiveSession!.id}/break_time`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toMatchObject(sampleBreakTimeFields);
+    });
+
+    test('Response_204_With_Break_Time', async () => {
+      const res = await request(server).get(
+        `/sessions/live/${hardLiveSession!.id}/break_time`
+      );
+
+      expect(res.statusCode).toEqual(204);
+      expect(JSON.stringify(res.body)).toBe('{}');
+    });
+
+    test('Response_204_With_Other_User_LiveSession_Break_Time', async () => {
+      const res = await request(server).get(
+        `/sessions/live/${otherUserHardLiveSession!.id}/break_time`
+      );
+
+      expect(res.statusCode).toEqual(204);
+      expect(JSON.stringify(res.body)).toBe('{}');
     });
   });
 });
