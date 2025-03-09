@@ -13,7 +13,7 @@ import correlator from 'express-correlation-id';
 
 const app = express();
 
-app.use(correlator());
+// app.use(correlator());
 //set security headers of response
 app.use(
   helmet({

@@ -92,9 +92,19 @@ model live_session {
   updated_at DateTime  @default(now())
   started_at DateTime?
 
-  organizer_id Int
-  organizer    user                 @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
-  allow        live_session_allow[]
+  organizer_id        Int
+  organizer           user                  @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
+  allow               live_session_allow[]
+  live_session_break  break_time?
+  video_session_break video_session_break[]
+}
+
+model break_time {
+  session_id String @id
+  interval   Int
+  duration   Int
+
+  live_session live_session? @relation(fields: [session_id], references: [id], onDelete: Cascade)
 }
 
 model live_session_allow {
@@ -122,6 +132,14 @@ model video_session {
   organizer_id Int
   organizer    user                  @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
   allow        video_session_allow[]
+}
+
+model video_session_break {
+  session_id String @id
+  interval   Int
+  duration   Int
+
+  live_session live_session? @relation(fields: [session_id], references: [id], onDelete: Cascade)
 }
 
 model video_session_allow {

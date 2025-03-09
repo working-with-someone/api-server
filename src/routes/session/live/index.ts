@@ -4,6 +4,7 @@ import { liveSessionValidationSchema } from '../../../validations';
 import validate from '../../../middleware/validate';
 import liveSessionMiddleware from '../../../middleware/session/live';
 import multer from 'multer';
+import breakTimeRouter from './break-time';
 
 const router = Router();
 
@@ -33,5 +34,7 @@ router
     liveSessionMiddleware.validateStatusTransitionOrBadRequest,
     liveSessionController.updateLiveSessionStatus
   );
+
+router.use('/:live_session_id/break_time', breakTimeRouter);
 
 export default router;
