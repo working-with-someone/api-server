@@ -26,7 +26,7 @@ describe('Live Session API', () => {
     server.close(done);
   });
 
-  describe('POST /sessions/live/:live_session_id', () => {
+  describe('POST /sessions/live/:live_session_id/break_time', () => {
     afterEach(async () => {
       await prismaClient.break_time.deleteMany({});
       await prismaClient.live_session.deleteMany({});
