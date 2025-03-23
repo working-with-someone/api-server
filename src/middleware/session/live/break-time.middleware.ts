@@ -8,7 +8,7 @@ const breakTimeMiddleware = {
     res: Response,
     next: NextFunction
   ) {
-    const breakTime = await prismaClient.break_time.findFirst({
+    const breakTime = await prismaClient.live_session_break_time.findFirst({
       where: {
         session_id: res.locals.liveSession.id,
       },

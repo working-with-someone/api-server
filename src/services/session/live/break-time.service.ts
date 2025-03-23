@@ -4,7 +4,7 @@ import prismaClient from '../../../database/clients/prisma';
 export async function createBreakTime(data: CreateBreakTimeInput) {
   const liveSession = data.liveSession;
 
-  const breakTime = await prismaClient.break_time.create({
+  const breakTime = await prismaClient.live_session_break_time.create({
     data: {
       interval: data.interval,
       duration: data.duration,

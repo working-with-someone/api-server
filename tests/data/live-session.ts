@@ -8,7 +8,10 @@ interface CreateTestLiveSessionCreationInput
     Prisma.live_sessionGetPayload<true>,
     'access_level' | 'organizer_id' | 'status'
   > {
-  break_time?: Pick<Prisma.break_timeCreateInput, 'interval' | 'duration'>;
+  break_time?: Pick<
+    Prisma.live_session_break_timeCreateInput,
+    'interval' | 'duration'
+  >;
 }
 
 export async function createTestLiveSession(
@@ -44,7 +47,7 @@ export const sampleLiveSessionFields = {
 };
 
 export const sampleBreakTimeFields: Pick<
-  Prisma.break_timeCreateInput,
+  Prisma.live_session_break_timeCreateInput,
   'interval' | 'duration'
 > = {
   interval: 50,
