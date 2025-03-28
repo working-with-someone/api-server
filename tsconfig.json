@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "typeRoots": [
-      "./src/@types/merging",
+      "src/types/merging",
       "./node_modules/@types",
     ]
   },

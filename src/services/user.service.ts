@@ -2,7 +2,7 @@ import prismaClient from '../database/clients/prisma';
 import { wwsError } from '../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import pick from '../utils/pick';
-import type { user } from '../@types/user';
+import type { user } from '../types/user';
 import { deleteImage, uploadImage } from '../lib/s3';
 import { Prisma } from '@prisma/client';
 import { to } from '../config/path.config';
