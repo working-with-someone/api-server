@@ -7,9 +7,9 @@ import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
 import { to } from '../../../config/path.config';
-import { accessLevel, liveSessionStatus } from '../../../enums/session';
+import { accessLevel } from '../../../enums/session';
 import { checkFollowing } from '../../follow.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, live_session_status } from '@prisma/client';
 
 export async function isAllowedToLiveSession(data: {
   liveSession: AttachedLiveSession;
@@ -82,7 +82,7 @@ export async function createLiveSession(data: createSessionInput) {
       access_level: data.access_level,
       category: data.category,
       organizer_id: data.userId,
-      status: liveSessionStatus.ready,
+      status: live_session_status.READY,
       stream_key: streamKey,
     },
   });
@@ -92,7 +92,7 @@ export async function createLiveSession(data: createSessionInput) {
 
 export async function updateLiveSessionStatus(data: {
   liveSession: AttachedLiveSession;
-  status: liveSessionStatus;
+  status: live_session_status;
 }) {
   const liveSession = data.liveSession;
 
@@ -102,8 +102,8 @@ export async function updateLiveSessionStatus(data: {
 
   // live session이 ready 상태에서 open될 때, started_at을 기록한다.
   if (
-    liveSession.status == liveSessionStatus.ready &&
-    data.status == liveSessionStatus.opened
+    liveSession.status == live_session_status.READY &&
+    data.status == live_session_status.OPENED
   ) {
     updateInput.started_at = new Date();
   }

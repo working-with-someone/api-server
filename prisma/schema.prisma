@@ -78,15 +78,15 @@ model follow {
 }
 
 model live_session {
-  id            String  @id
-  title         String  @db.VarChar(100)
-  description   String? @db.Text
+  id            String              @id
+  title         String              @db.VarChar(100)
+  description   String?             @db.Text
   thumbnail_uri String
   category      String
-  status        Int
+  status        live_session_status
   stream_key    String
   // 1 : public 2 : followersOnly 3 : private
-  access_level  Int     @default(1)
+  access_level  Int                 @default(1)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
@@ -96,6 +96,13 @@ model live_session {
   organizer    user                     @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
   allow        live_session_allow[]
   break_time   live_session_break_time?
+}
+
+enum live_session_status {
+  READY
+  OPENED
+  BREAKED
+  CLOSED
 }
 
 model live_session_break_time {

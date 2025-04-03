@@ -3,7 +3,8 @@ jest.unmock('../../../../src/database/clients/prisma.ts');
 import request from 'supertest';
 import server from '../../../../src';
 import testUserData from '../../../data/user.json';
-import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
+import { accessLevel } from '../../../../src/enums/session';
+import { live_session_status } from '@prisma/client';
 import currUser from '../../../data/curr-user';
 import {
   createTestLiveSession,
@@ -39,7 +40,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       const res = await request(server)
@@ -70,7 +71,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: testUserData.users[1].id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       const res = await request(server)
@@ -88,7 +89,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       const res = await request(server)
@@ -105,7 +106,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       const res = await request(server)
@@ -122,7 +123,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       const res = await request(server)
@@ -144,26 +145,26 @@ describe('Live Session API', () => {
       hardLiveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       softLiveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
         break_time: sampleBreakTimeFields,
       });
 
       otherUserHardLiveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: testUserData.users[1].id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
       });
 
       otherUserSoftLiveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: testUserData.users[1].id,
-        status: liveSessionStatus.opened,
+        status: live_session_status.OPENED,
         break_time: sampleBreakTimeFields,
       });
     });

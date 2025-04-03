@@ -5,7 +5,8 @@ import testUserData from '../../../data/user.json';
 import liveSessionMiddleware from '../../../../src/middleware/session/live';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
-import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
+import { accessLevel } from '../../../../src/enums/session';
+import { live_session_status } from '@prisma/client';
 
 // must mocking next function which accpet err argument but do nothing
 const mockNext = jest.fn((err) => err);
@@ -31,7 +32,7 @@ describe('session middleware', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.ready,
+        status: live_session_status.READY,
       });
 
       expect(liveSession).toBeDefined();
@@ -60,7 +61,7 @@ describe('session middleware', () => {
       const liveSession_1 = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.ready,
+        status: live_session_status.READY,
       });
 
       const participant = testUserData.users[1];

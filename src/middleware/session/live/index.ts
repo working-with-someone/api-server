@@ -3,7 +3,7 @@ import prismaClient from '../../../database/clients/prisma';
 import { wwsError } from '../../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import { isAllowedToLiveSession } from '../../../services/session/live';
-import { liveSessionStatus } from '../../../enums/session';
+import { live_session_status } from '@prisma/client';
 
 const liveSessionMiddleware = {
   attachLiveSessionOrNotfound: async function (
@@ -69,22 +69,22 @@ const liveSessionMiddleware = {
     const liveSession = res.locals.liveSession;
 
     const transitionValidationSchema: Record<
-      liveSessionStatus,
-      Array<liveSessionStatus>
+      live_session_status,
+      Array<live_session_status>
     > = {
-      [liveSessionStatus.ready]: [liveSessionStatus.opened],
-      [liveSessionStatus.opened]: [
-        liveSessionStatus.breaked,
-        liveSessionStatus.closed,
+      [live_session_status.READY]: [live_session_status.OPENED],
+      [live_session_status.OPENED]: [
+        live_session_status.BREAKED,
+        live_session_status.CLOSED,
       ],
-      [liveSessionStatus.breaked]: [
-        liveSessionStatus.opened,
-        liveSessionStatus.closed,
+      [live_session_status.BREAKED]: [
+        live_session_status.OPENED,
+        live_session_status.CLOSED,
       ],
-      [liveSessionStatus.closed]: [],
+      [live_session_status.CLOSED]: [],
     };
 
-    const statusFrom = liveSession.status as liveSessionStatus;
+    const statusFrom = liveSession.status as live_session_status;
     const statusTo = req.body.status;
 
     if (!transitionValidationSchema[statusFrom].includes(statusTo)) {

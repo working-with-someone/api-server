@@ -1,7 +1,8 @@
 import joi from 'joi';
 import type { RequestSchema } from '../../../middleware/validate';
 import categories from '../../../../static/data/category.json';
-import { accessLevel, liveSessionStatus } from '../../../enums/session';
+import { accessLevel } from '../../../enums/session';
+import { live_session_status } from '@prisma/client';
 
 export const getLiveSession: RequestSchema = {
   params: joi.object().keys({
@@ -31,9 +32,9 @@ export const updateLiveSessionStatus: RequestSchema = {
     status: joi
       .number()
       .valid(
-        liveSessionStatus.opened,
-        liveSessionStatus.breaked,
-        liveSessionStatus.closed
+        live_session_status.OPENED,
+        live_session_status.BREAKED,
+        live_session_status.CLOSED
       )
       .required(),
   }),

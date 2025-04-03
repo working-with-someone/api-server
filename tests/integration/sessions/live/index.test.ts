@@ -4,9 +4,10 @@ import request from 'supertest';
 import server from '../../../../src';
 import testUserData from '../../../data/user.json';
 import { sampleLiveSessionFields } from '../../../data/live-session';
-import { accessLevel, liveSessionStatus } from '../../../../src/enums/session';
+import { accessLevel } from '../../../../src/enums/session';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
+import { live_session_status } from '@prisma/client';
 
 describe('Live Session API', () => {
   beforeAll(async () => {
@@ -42,7 +43,7 @@ describe('Live Session API', () => {
         const liveSession = await createTestLiveSession({
           access_level: accessLevel.public,
           organizer_id: organizer.id,
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
         const res = await request(server).get(
@@ -60,7 +61,7 @@ describe('Live Session API', () => {
         const liveSession = await createTestLiveSession({
           access_level: accessLevel.public,
           organizer_id: organizer.id,
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
         await prismaClient.follow.create({
@@ -82,7 +83,7 @@ describe('Live Session API', () => {
         const liveSession = await createTestLiveSession({
           access_level: accessLevel.followersOnly,
           organizer_id: organizer.id,
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
         const res = await request(server).get(
@@ -97,7 +98,7 @@ describe('Live Session API', () => {
         const liveSession = await createTestLiveSession({
           access_level: accessLevel.private,
           organizer_id: organizer.id,
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
         await prismaClient.live_session_allow.create({
@@ -119,7 +120,7 @@ describe('Live Session API', () => {
         const liveSession = await createTestLiveSession({
           access_level: accessLevel.private,
           organizer_id: organizer.id,
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
         const res = await request(server).get(
@@ -220,10 +221,10 @@ describe('Live Session API', () => {
     });
 
     describe('Ready To ', () => {
-      const statusFrom = liveSessionStatus.ready;
+      const statusFrom = live_session_status.READY;
 
       test('Response_200_With_Status_Ready_To_Opened', async () => {
-        const statusTo = liveSessionStatus.opened;
+        const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -254,7 +255,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Ready_To_Breaked', async () => {
-        const statusTo = liveSessionStatus.breaked;
+        const statusTo = live_session_status.BREAKED;
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
           organizer_id: currUser.id,
@@ -282,7 +283,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Ready_To_Closed', async () => {
-        const statusTo = liveSessionStatus.closed;
+        const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -312,10 +313,10 @@ describe('Live Session API', () => {
     });
 
     describe('Opened To', () => {
-      const statusFrom = liveSessionStatus.opened;
+      const statusFrom = live_session_status.OPENED;
 
       test('Response_200_With_Status_Opened_To_Breaked', async () => {
-        const statusTo = liveSessionStatus.breaked;
+        const statusTo = live_session_status.BREAKED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -344,7 +345,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_200_With_Status_Opened_To_Closed', async () => {
-        const statusTo = liveSessionStatus.closed;
+        const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -373,7 +374,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Opened_To_Ready', async () => {
-        const statusTo = liveSessionStatus.ready;
+        const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -403,10 +404,10 @@ describe('Live Session API', () => {
     });
 
     describe('Closed To', () => {
-      const statusFrom = liveSessionStatus.closed;
+      const statusFrom = live_session_status.CLOSED;
 
       test('Response_400_With_Status_Closed_To_Ready', async () => {
-        const statusTo = liveSessionStatus.ready;
+        const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -435,7 +436,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Closed_To_Opened', async () => {
-        const statusTo = liveSessionStatus.opened;
+        const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -464,7 +465,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Closed_To_Breaked', async () => {
-        const statusTo = liveSessionStatus.breaked;
+        const statusTo = live_session_status.BREAKED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -494,10 +495,10 @@ describe('Live Session API', () => {
     });
 
     describe('Breaked To', () => {
-      const statusFrom = liveSessionStatus.breaked;
+      const statusFrom = live_session_status.BREAKED;
 
       test('Response_200_With_Status_Breaked_To_Closed', async () => {
-        const statusTo = liveSessionStatus.closed;
+        const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -526,7 +527,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_200_With_Status_Breaked_To_Opened', async () => {
-        const statusTo = liveSessionStatus.opened;
+        const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -555,7 +556,7 @@ describe('Live Session API', () => {
       });
 
       test('Response_400_With_Status_Breaked_To_Ready', async () => {
-        const statusTo = liveSessionStatus.ready;
+        const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
           access_level: accessLevel.public,
@@ -589,7 +590,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: currUser.id,
-        status: liveSessionStatus.ready,
+        status: live_session_status.READY,
       });
 
       expect(liveSession).toBeDefined();
@@ -608,7 +609,7 @@ describe('Live Session API', () => {
       const liveSession = await createTestLiveSession({
         access_level: accessLevel.public,
         organizer_id: organizer.id,
-        status: liveSessionStatus.ready,
+        status: live_session_status.READY,
       });
 
       expect(liveSession).toBeDefined();
@@ -617,7 +618,7 @@ describe('Live Session API', () => {
         .put(`/sessions/live/${liveSession.id}/status`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send({
-          status: liveSessionStatus.opened,
+          status: live_session_status.OPENED,
         });
 
       expect(res.statusCode).toEqual(403);
