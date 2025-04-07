@@ -108,12 +108,22 @@ export async function updateLiveSessionStatus(data: {
     updateInput.started_at = new Date();
   }
 
-  const updatedLiveSession = await prismaClient.live_session.update({
-    where: {
-      id: liveSession.id,
-    },
-    data: updateInput,
-  });
+  const [_, updatedLiveSession] = await prismaClient.$transaction([
+    prismaClient.live_session_transition_log.create({
+      data: {
+        from_state: liveSession.status,
+        to_state: data.status,
+        live_session_id: liveSession.id,
+      },
+    }),
+
+    prismaClient.live_session.update({
+      where: {
+        id: liveSession.id,
+      },
+      data: updateInput,
+    }),
+  ]);
 
   return updatedLiveSession.status;
 }

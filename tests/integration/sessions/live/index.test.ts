@@ -217,6 +217,8 @@ describe('Live Session API', () => {
   describe('PUT /sessions/live/:live_session_id/status', () => {
     afterEach(async () => {
       await prismaClient.live_session.deleteMany({});
+      // status update로 생성된 transition log를 제거한다.
+      await prismaClient.live_session_transition_log.deleteMany({});
       await prismaClient.follow.deleteMany({});
     });
 
@@ -252,6 +254,16 @@ describe('Live Session API', () => {
         expect(liveSession?.status).toEqual(statusTo);
         // 첫 ready => open은 started_at을 지정한다.
         expect(liveSession?.started_at).toBeDefined();
+
+        const transitionLog =
+          await prismaClient.live_session_transition_log.findFirst({
+            where: {
+              live_session_id: newLiveSession.id,
+            },
+          });
+
+        expect(transitionLog?.from_state).toEqual(live_session_status.READY);
+        expect(transitionLog?.to_state).toEqual(live_session_status.OPENED);
       });
 
       test('Response_400_With_Status_Ready_To_Breaked', async () => {
@@ -342,6 +354,16 @@ describe('Live Session API', () => {
         });
 
         expect(liveSession?.status).toEqual(statusTo);
+
+        const transitionLog =
+          await prismaClient.live_session_transition_log.findFirst({
+            where: {
+              live_session_id: newLiveSession.id,
+            },
+          });
+
+        expect(transitionLog?.from_state).toEqual(live_session_status.OPENED);
+        expect(transitionLog?.to_state).toEqual(live_session_status.BREAKED);
       });
 
       test('Response_200_With_Status_Opened_To_Closed', async () => {
@@ -371,6 +393,16 @@ describe('Live Session API', () => {
         });
 
         expect(liveSession?.status).toEqual(statusTo);
+
+        const transitionLog =
+          await prismaClient.live_session_transition_log.findFirst({
+            where: {
+              live_session_id: newLiveSession.id,
+            },
+          });
+
+        expect(transitionLog?.from_state).toEqual(live_session_status.OPENED);
+        expect(transitionLog?.to_state).toEqual(live_session_status.CLOSED);
       });
 
       test('Response_400_With_Status_Opened_To_Ready', async () => {
@@ -524,6 +556,16 @@ describe('Live Session API', () => {
         });
 
         expect(liveSession?.status).toEqual(statusTo);
+
+        const transitionLog =
+          await prismaClient.live_session_transition_log.findFirst({
+            where: {
+              live_session_id: newLiveSession.id,
+            },
+          });
+
+        expect(transitionLog?.from_state).toEqual(live_session_status.BREAKED);
+        expect(transitionLog?.to_state).toEqual(live_session_status.CLOSED);
       });
 
       test('Response_200_With_Status_Breaked_To_Opened', async () => {
@@ -553,6 +595,16 @@ describe('Live Session API', () => {
         });
 
         expect(liveSession?.status).toEqual(statusTo);
+
+        const transitionLog =
+          await prismaClient.live_session_transition_log.findFirst({
+            where: {
+              live_session_id: newLiveSession.id,
+            },
+          });
+
+        expect(transitionLog?.from_state).toEqual(live_session_status.BREAKED);
+        expect(transitionLog?.to_state).toEqual(live_session_status.OPENED);
       });
 
       test('Response_400_With_Status_Breaked_To_Ready', async () => {
