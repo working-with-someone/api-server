@@ -4,7 +4,12 @@ import { liveSessionService } from '../../../services';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
-    return res.status(200).json(res.locals.liveSession);
+    const sanitizedLiveSession = await liveSessionService.getLiveSession({
+      liveSession: res.locals.liveSession,
+      userId: req.user.id,
+    });
+
+    return res.status(200).json(sanitizedLiveSession);
   }
 );
 

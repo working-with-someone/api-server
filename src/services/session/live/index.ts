@@ -11,6 +11,7 @@ import { accessLevel } from '../../../enums/session';
 import { checkFollowing } from '../../follow.service';
 import { Prisma, live_session_status } from '@prisma/client';
 import { generateStreamKey } from '../../../utils/generator';
+import { sanitize } from '../../../utils/sanitize';
 
 export async function isAllowedToLiveSession(data: {
   liveSession: AttachedLiveSession;
@@ -59,7 +60,11 @@ export async function getLiveSession(data: {
   liveSession: AttachedLiveSession;
   userId: number;
 }) {
-  return data.liveSession;
+  const sanitizedLiveSession = sanitize(data.liveSession, {
+    exclude: ['stream_key'],
+  });
+
+  return sanitizedLiveSession;
 }
 
 export async function createLiveSession(data: createSessionInput) {
@@ -88,7 +93,11 @@ export async function createLiveSession(data: createSessionInput) {
     },
   });
 
-  return liveSession;
+  const sanitizedLiveSession = sanitize(liveSession, {
+    exclude: ['stream_key'],
+  });
+
+  return sanitizedLiveSession;
 }
 
 export async function updateLiveSessionStatus(data: {
