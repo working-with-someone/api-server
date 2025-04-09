@@ -136,6 +136,143 @@ describe('Live Session API', () => {
     });
   });
 
+  describe('GET /sessions/live', () => {
+    const organizer = testUserData.users[1];
+
+    beforeAll(async () => {
+      // other user's public live session
+      for (let i = 0; i < 2; i++) {
+        await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: organizer.id,
+          status: live_session_status.OPENED,
+        });
+      }
+
+      // other user's private live session
+      for (let i = 0; i < 2; i++) {
+        await createTestLiveSession({
+          access_level: accessLevel.followersOnly,
+          organizer_id: organizer.id,
+          status: live_session_status.OPENED,
+        });
+      }
+
+      // curr user's public live session
+      for (let i = 0; i < 2; i++) {
+        await createTestLiveSession({
+          access_level: accessLevel.public,
+          organizer_id: currUser.id,
+          status: live_session_status.OPENED,
+        });
+      }
+
+      // curr user's follower only live session
+      for (let i = 0; i < 2; i++) {
+        await createTestLiveSession({
+          access_level: accessLevel.followersOnly,
+          organizer_id: currUser.id,
+          status: live_session_status.OPENED,
+        });
+      }
+
+      // curr user's private live session
+      for (let i = 0; i < 2; i++) {
+        await createTestLiveSession({
+          access_level: accessLevel.private,
+          organizer_id: currUser.id,
+          status: live_session_status.OPENED,
+        });
+      }
+    });
+
+    afterAll(async () => {
+      await prismaClient.live_session.deleteMany({});
+    });
+
+    describe('Other_Live_Session(Public)_And_All_Curr_User_Live_Session(All)', () => {
+      test('Response_200_With_8_Live_Session', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          per_page: 10,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+
+        expect(res.body).toHaveLength(8);
+      });
+    });
+
+    describe('Other_Live_Session(Public, Followers Only)_And_Curr_User_Live_Session(All)', () => {
+      beforeAll(async () => {
+        await prismaClient.follow.create({
+          data: {
+            follower_user_id: currUser.id,
+            following_user_id: organizer.id,
+          },
+        });
+      });
+
+      afterAll(async () => {
+        await prismaClient.follow.deleteMany({});
+      });
+
+      test('Response_200_With_10_Live_Session', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          per_page: 12,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+
+        expect(res.body).toHaveLength(10);
+      });
+    });
+
+    describe('Other_Live_Session(Public, Private)_And_Curr_User_Live_Session', () => {
+      beforeAll(async () => {
+        await prismaClient.follow.create({
+          data: {
+            follower_user_id: currUser.id,
+            following_user_id: organizer.id,
+          },
+        });
+
+        // other user's follower only live session
+        for (let i = 0; i < 2; i++) {
+          const liveSession = await createTestLiveSession({
+            access_level: accessLevel.private,
+            organizer_id: organizer.id,
+            status: live_session_status.OPENED,
+          });
+
+          await prismaClient.live_session_allow.create({
+            data: {
+              live_session_id: liveSession.id,
+              user_id: currUser.id,
+            },
+          });
+        }
+      });
+
+      afterAll(async () => {
+        await prismaClient.follow.deleteMany({});
+        await prismaClient.live_session_allow.deleteMany({});
+      });
+
+      test('Response_200_With_10_Live_Session', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          per_page: 12,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+
+        expect(res.body).toHaveLength(12);
+      });
+    });
+  });
+
   describe('POST /sessions/live', () => {
     // 생성된 session을 모두 제거
     afterAll(async () => {

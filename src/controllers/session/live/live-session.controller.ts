@@ -13,6 +13,18 @@ export const getLiveSession = asyncCatch(
   }
 );
 
+export const getLiveSessions = asyncCatch(
+  async (req: Request, res: Response) => {
+    const liveSessions = await liveSessionService.getLiveSessions({
+      per_page: parseInt(req.query.per_page as string),
+      page: parseInt(req.query.page as string),
+      userId: req.user.id,
+    });
+
+    return res.status(200).json(liveSessions);
+  }
+);
+
 export const createLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
     const session = await liveSessionService.createLiveSession({

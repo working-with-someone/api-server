@@ -2,6 +2,7 @@ import prismaClient from '../../../database/clients/prisma';
 import type {
   AttachedLiveSession,
   createSessionInput,
+  GetLiveSessionsInput,
 } from '../../../types/session/live';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
@@ -61,6 +62,51 @@ export async function getLiveSession(data: {
   userId: number;
 }) {
   return data.liveSession;
+}
+
+export async function getLiveSessions(data: GetLiveSessionsInput) {
+  const liveSessions = await prismaClient.live_session.findMany({
+    where: {
+      OR: [
+        // curr user의 live session은 모두
+        {
+          organizer_id: data.userId,
+        },
+        // public live session이라면 모두
+        {
+          access_level: accessLevel.public,
+        },
+        // allow된 private live session이라면 모두
+        {
+          access_level: accessLevel.private,
+          allow: {
+            some: {
+              user_id: data.userId,
+            },
+          },
+        },
+        // following한 user의 followers only live session이라면 모두
+        {
+          access_level: accessLevel.followersOnly,
+          organizer: {
+            followers: {
+              some: {
+                follower_user_id: data.userId,
+              },
+            },
+          },
+        },
+      ],
+    },
+
+    skip: (data.page - 1) * data.per_page,
+    take: data.per_page,
+    omit: {
+      stream_key: true,
+    },
+  });
+
+  return liveSessions;
 }
 
 export async function createLiveSession(data: createSessionInput) {

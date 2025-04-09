@@ -3,11 +3,16 @@ import type { RequestSchema } from '../../../middleware/validate.middleware';
 import categories from '../../../../static/data/category.json';
 import { accessLevel } from '../../../enums/session';
 import { live_session_status } from '@prisma/client';
+import { pageNationQuerySchema } from '../../pagenation.validation';
 
 export const getLiveSession: RequestSchema = {
   params: joi.object().keys({
     live_session_id: joi.string().required(),
   }),
+};
+
+export const getLiveSessions: RequestSchema = {
+  query: pageNationQuerySchema,
 };
 
 export const createLiveSession: RequestSchema = {

@@ -1,4 +1,9 @@
 import { Prisma } from '@prisma/client';
+import { PageNationData } from '../../pagenation';
+
+export interface GetLiveSessionsInput extends PageNationData {
+  userId: number;
+}
 
 export type AttachedLiveSession = Prisma.live_sessionGetPayload<{
   omit: {

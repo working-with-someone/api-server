@@ -10,6 +10,10 @@ const router = Router();
 
 router
   .route('/')
+  .get(
+    validate(liveSessionValidationSchema.getLiveSessions),
+    liveSessionController.getLiveSessions
+  )
   .post(
     multer().single('thumbnail'),
     validate(liveSessionValidationSchema.createLiveSession),
