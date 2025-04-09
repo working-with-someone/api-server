@@ -17,6 +17,9 @@ const liveSessionMiddleware = {
       where: {
         id: live_session_id,
       },
+      omit: {
+        stream_key: true,
+      },
     });
 
     if (!liveSession) {

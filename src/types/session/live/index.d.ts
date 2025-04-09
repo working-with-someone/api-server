@@ -1,6 +1,10 @@
 import { Prisma } from '@prisma/client';
 
-export type AttachedLiveSession = Prisma.live_sessionGetPayload<true>;
+export type AttachedLiveSession = Prisma.live_sessionGetPayload<{
+  omit: {
+    stream_key: true;
+  };
+}>;
 
 export interface createSessionInput
   extends Pick<

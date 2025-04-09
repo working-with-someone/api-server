@@ -60,11 +60,7 @@ export async function getLiveSession(data: {
   liveSession: AttachedLiveSession;
   userId: number;
 }) {
-  const sanitizedLiveSession = sanitize(data.liveSession, {
-    exclude: ['stream_key'],
-  });
-
-  return sanitizedLiveSession;
+  return data.liveSession;
 }
 
 export async function createLiveSession(data: createSessionInput) {
