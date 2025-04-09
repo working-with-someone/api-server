@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { liveSessionController } from '../../../controllers';
 import { liveSessionValidationSchema } from '../../../validations';
-import validate from '../../../middleware/validate';
-import liveSessionMiddleware from '../../../middleware/session/live';
+import validate from '../../../middleware/validate.middleware';
+import liveSessionMiddleware from '../../../middleware/session/live/live-session.middleware';
 import multer from 'multer';
-import breakTimeRouter from './break-time';
+import breakTimeRouter from './break-time.route';
 
 const router = Router();
 

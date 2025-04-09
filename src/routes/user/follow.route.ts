@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { followValidationSchema } from '../../validations';
 import { followController } from '../../controllers';
-import validate from '../../middleware/validate';
-import userEndpointMiddleware from '../../middleware/user';
-import followEndpointMiddleware from '../../middleware/following';
+import validate from '../../middleware/validate.middleware';
+import userEndpointMiddleware from '../../middleware/user/user.middleware';
+import followEndpointMiddleware from '../../middleware/following/following.middleware';
 
 const followingRouter = Router({
   mergeParams: true,

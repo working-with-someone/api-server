@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import validate from '../../../middleware/validate';
+import validate from '../../../middleware/validate.middleware';
 import { breakTimeValidationSchema } from '../../../validations';
 
-import liveSessionMiddleware from '../../../middleware/session/live';
+import liveSessionMiddleware from '../../../middleware/session/live/live-session.middleware';
 import breakTimeController from '../../../controllers/session/live/break-time.controller';
 import breakTimeMiddleware from '../../../middleware/session/live/break-time.middleware';
 

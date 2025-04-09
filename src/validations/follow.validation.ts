@@ -1,5 +1,5 @@
 import joi from 'joi';
-import { RequestSchema } from '../middleware/validate';
+import { RequestSchema } from '../middleware/validate.middleware';
 import { pageNationQuerySchema } from './pagenation.validation';
 
 export const getFollowings: RequestSchema = {

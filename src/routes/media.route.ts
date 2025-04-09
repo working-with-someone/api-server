@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { mediaController } from '../controllers';
 import { mediaValidationSchema } from '../validations';
-import validate from '../middleware/validate';
+import validate from '../middleware/validate.middleware';
 
 const router = Router();
 

@@ -1,11 +1,11 @@
 import { createRequest, createResponse } from 'node-mocks-http';
-import prismaClient from '../../../../src/database/clients/prisma';
-jest.unmock('../../../../src/database/clients/prisma.ts');
-import testUserData from '../../../data/user.json';
-import liveSessionMiddleware from '../../../../src/middleware/session/live';
-import currUser from '../../../data/curr-user';
-import { createTestLiveSession } from '../../../data/live-session';
-import { accessLevel } from '../../../../src/enums/session';
+import prismaClient from '../../../../../src/database/clients/prisma';
+jest.unmock('../../../../../src/database/clients/prisma');
+import testUserData from '../../../../data/user.json';
+import liveSessionMiddleware from '../../../../../src/middleware/session/live/live-session.middleware';
+import currUser from '../../../../data/curr-user';
+import { createTestLiveSession } from '../../../../data/live-session';
+import { accessLevel } from '../../../../../src/enums/session';
 import { live_session_status } from '@prisma/client';
 
 // must mocking next function which accpet err argument but do nothing

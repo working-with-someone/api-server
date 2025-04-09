@@ -1,5 +1,5 @@
 import joi from 'joi';
-import type { RequestSchema } from '../middleware/validate';
+import type { RequestSchema } from '../middleware/validate.middleware';
 
 export const getBreakTime: RequestSchema = {
   params: joi.object().keys({

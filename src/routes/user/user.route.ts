@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { userController } from '../../controllers';
 import { userValidationSchema } from '../../validations';
-import validate from '../../middleware/validate';
+import validate from '../../middleware/validate.middleware';
 import multer from 'multer';
 import { followingRouter, followerRouter } from './follow.route';
-import userEndpointMiddleware from '../../middleware/user';
+import userEndpointMiddleware from '../../middleware/user/user.middleware';
 
 const router = Router();
 

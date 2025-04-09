@@ -3,7 +3,7 @@ import testUserData from '../../data/user.json';
 
 const currUser = testUserData.currUser;
 
-jest.mock('../../../src/middleware/auth.ts', () => {
+jest.mock('../../../src/middleware/auth.middleware.ts', () => {
   return (req: Request, res: Response, next: NextFunction) => {
     req.session.userId = currUser.id;
 

@@ -1,4 +1,6 @@
-import validate, { RequestSchema } from '../../../src/middleware/validate';
+import validate, {
+  RequestSchema,
+} from '../../../src/middleware/validate.middleware';
 import joi from 'joi';
 import { createRequest, createResponse } from 'node-mocks-http';
 

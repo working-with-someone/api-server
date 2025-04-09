@@ -1,5 +1,5 @@
 import joi from 'joi';
-import type { RequestSchema } from '../../../middleware/validate';
+import type { RequestSchema } from '../../../middleware/validate.middleware';
 import categories from '../../../../static/data/category.json';
 import { accessLevel } from '../../../enums/session';
 import { live_session_status } from '@prisma/client';
