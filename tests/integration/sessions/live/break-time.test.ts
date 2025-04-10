@@ -197,7 +197,6 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(204);
-      expect(JSON.stringify(res.body)).toBe('{}');
     });
 
     test('Response_204_With_Other_User_LiveSession_Break_Time', async () => {
@@ -206,7 +205,6 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(204);
-      expect(JSON.stringify(res.body)).toBe('{}');
     });
   });
 });

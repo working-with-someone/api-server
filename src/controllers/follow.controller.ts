@@ -34,7 +34,7 @@ export const deleteFollowing = asyncCatch(
       follower_user_id: res.locals.user.id,
     });
 
-    return res.status(204).json({});
+    return res.status(204).end();
   }
 );
 
