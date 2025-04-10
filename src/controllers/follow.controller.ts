@@ -9,7 +9,9 @@ export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
     page: parseInt(req.query.page as string),
   });
 
-  return res.status(200).json(followings);
+  return res.status(200).json({
+    data: followings,
+  });
 });
 
 export const createFollowing = asyncCatch(
@@ -19,12 +21,16 @@ export const createFollowing = asyncCatch(
       follower_user_id: res.locals.user.id,
     });
 
-    return res.status(201).json(follow);
+    return res.status(201).json({
+      data: follow,
+    });
   }
 );
 
 export const getFollowing = asyncCatch(async (req: Request, res: Response) => {
-  return res.status(200).json(res.locals.following);
+  return res.status(200).json({
+    data: res.locals.following,
+  });
 });
 
 export const deleteFollowing = asyncCatch(
@@ -45,5 +51,5 @@ export const getFollowers = asyncCatch(async (req: Request, res: Response) => {
     page: parseInt(req.query.page as string),
   });
 
-  return res.status(200).json(followers);
+  return res.status(200).json({ data: followers });
 });

@@ -51,9 +51,9 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
         // stream key는 숨겨져 있어야한다.
-        expect(res.body.stream_key).toBeUndefined();
+        expect(res.body.data.stream_key).toBeUndefined();
       });
     });
 
@@ -78,9 +78,9 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
         // stream key는 숨겨져 있어야한다.
-        expect(res.body.stream_key).toBeUndefined();
+        expect(res.body.data.stream_key).toBeUndefined();
       });
 
       test('Response_403', async () => {
@@ -117,7 +117,7 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
       });
 
       test('Response_403', async () => {
@@ -199,7 +199,7 @@ describe('Live Session API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        expect(res.body).toHaveLength(8);
+        expect(res.body.data).toHaveLength(8);
       });
     });
 
@@ -225,7 +225,7 @@ describe('Live Session API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        expect(res.body).toHaveLength(10);
+        expect(res.body.data).toHaveLength(10);
       });
     });
 
@@ -268,7 +268,7 @@ describe('Live Session API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        expect(res.body).toHaveLength(12);
+        expect(res.body.data).toHaveLength(12);
       });
     });
   });
@@ -290,11 +290,13 @@ describe('Live Session API', () => {
         .attach('thumbnail', sampleLiveSessionFields.getThumbnailReadable());
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body).toHaveProperty('organizer_id', currUser.id);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
       // stream key는 숨겨져 있어야한다.
-      expect(res.body.stream_key).toBeUndefined();
+      expect(res.body.data.stream_key).toBeUndefined();
 
-      const thumbnailRes = await request(server).get(res.body.thumbnail_uri);
+      const thumbnailRes = await request(server).get(
+        res.body.data.thumbnail_uri
+      );
 
       expect(thumbnailRes.statusCode).toEqual(200);
     });
@@ -309,9 +311,9 @@ describe('Live Session API', () => {
         .field('access_level', accessLevel.public);
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body).toHaveProperty('organizer_id', currUser.id);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
       // stream key는 숨겨져 있어야한다.
-      expect(res.body.stream_key).toBeUndefined();
+      expect(res.body.data.stream_key).toBeUndefined();
     });
 
     test('Response_201_With_Public_Live_Session', async () => {
@@ -325,11 +327,13 @@ describe('Live Session API', () => {
         .attach('thumbnail', sampleLiveSessionFields.getThumbnailReadable());
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body).toHaveProperty('organizer_id', currUser.id);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
       // stream key는 숨겨져 있어야한다.
-      expect(res.body.stream_key).toBeUndefined();
+      expect(res.body.data.stream_key).toBeUndefined();
 
-      const thumbnailRes = await request(server).get(res.body.thumbnail_uri);
+      const thumbnailRes = await request(server).get(
+        res.body.data.thumbnail_uri
+      );
 
       expect(thumbnailRes.statusCode).toEqual(200);
     });
@@ -344,9 +348,9 @@ describe('Live Session API', () => {
         .field('access_level', accessLevel.private);
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body).toHaveProperty('organizer_id', currUser.id);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
       // stream key는 숨겨져 있어야한다.
-      expect(res.body.stream_key).toBeUndefined();
+      expect(res.body.data.stream_key).toBeUndefined();
     });
 
     test('Response_400_With_access_level(?)', async () => {

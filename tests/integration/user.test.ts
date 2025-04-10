@@ -33,8 +33,8 @@ describe('User API', () => {
       const res = await request(server).get(`/users/${currUser.id}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.id).toEqual(currUser.id);
-      expect(res.body.encrypted_password).toBeDefined();
+      expect(res.body.data.id).toEqual(currUser.id);
+      expect(res.body.data.encrypted_password).toBeDefined();
     });
 
     test('Response_200_With_Public_User_Info', async () => {
@@ -43,8 +43,8 @@ describe('User API', () => {
       const res = await request(server).get(`/users/${user.id}`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.username).toEqual(user.username);
-      expect(res.body.encrypted_password).toBeUndefined();
+      expect(res.body.data.username).toEqual(user.username);
+      expect(res.body.data.encrypted_password).toBeUndefined();
     });
 
     test('Response_404', async () => {
@@ -72,7 +72,9 @@ describe('User API', () => {
       const res = await request(server).get(`/users/self`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.encrypted_password).toEqual(user?.encrypted_password);
+      expect(res.body.data.encrypted_password).toEqual(
+        user?.encrypted_password
+      );
     });
   });
 
@@ -94,7 +96,9 @@ describe('User API', () => {
           .field('username', testUserData.updateUser.username);
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(testUserData.updateUser.username);
+        expect(res.body.data.username).toEqual(
+          testUserData.updateUser.username
+        );
       });
 
       test('Response_403', async () => {
@@ -114,10 +118,14 @@ describe('User API', () => {
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(testUserData.updateUser.username);
-        expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.body.data.username).toEqual(
+          testUserData.updateUser.username
+        );
+        expect(res.body.data.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
 
-        const pfpRes = await request(server).get(res.body.pfp.curr);
+        const pfpRes = await request(server).get(res.body.data.pfp.curr);
 
         expect(pfpRes.statusCode).toEqual(200);
       });
@@ -131,8 +139,10 @@ describe('User API', () => {
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(testUserData.updateUser.username);
-        expect(res.body.pfp.curr).toEqual(
+        expect(res.body.data.username).toEqual(
+          testUserData.updateUser.username
+        );
+        expect(res.body.data.pfp.curr).toEqual(
           path.posix.join(to.media.default.images, 'pfp')
         );
       });
@@ -146,9 +156,11 @@ describe('User API', () => {
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(testUserData.updateUser.username);
+        expect(res.body.data.username).toEqual(
+          testUserData.updateUser.username
+        );
 
-        const pfpRes = await request(server).get(res.body.pfp.curr);
+        const pfpRes = await request(server).get(res.body.data.pfp.curr);
 
         expect(pfpRes.statusCode).toEqual(200);
       });
@@ -160,7 +172,9 @@ describe('User API', () => {
           .field('username', testUserData.updateUser.username);
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.username).toEqual(testUserData.updateUser.username);
+        expect(res.body.data.username).toEqual(
+          testUserData.updateUser.username
+        );
       });
 
       test('Response_200_With_Updated_Current_User_pfp(o)', async () => {
@@ -170,7 +184,9 @@ describe('User API', () => {
           .attach('pfp', fs.createReadStream('./tests/data/images/image.png'));
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.body.data.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
       });
     });
 
@@ -191,10 +207,12 @@ describe('User API', () => {
         expect(res.statusCode).toEqual(200);
 
         // pfp가 default여선 안된다.
-        expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.body.data.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
 
         // request 1 으로 인해 upload된 pfp key
-        uploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.data.pfp.curr;
       });
 
       // curr user의 pfp를 새로운 image로 update한다.
@@ -207,18 +225,20 @@ describe('User API', () => {
         expect(res.statusCode).toEqual(200);
 
         // pfp가 default여선 안된다.
-        expect(res.body.pfp.curr).not.toEqual(testUserData.defaultPfp.curr);
+        expect(res.body.data.pfp.curr).not.toEqual(
+          testUserData.defaultPfp.curr
+        );
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
         expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
 
         // 두번째 req의 image가 upload되었어야함.
 
-        const pfpRes = await request(server).get(res.body.pfp.curr);
+        const pfpRes = await request(server).get(res.body.data.pfp.curr);
 
         expect(pfpRes.statusCode).toEqual(200);
 
-        uploadedPfpKey = res.body.pfp.curr;
+        uploadedPfpKey = res.body.data.pfp.curr;
       });
 
       test('3. Response_200_With_Updated_Current_User_And_Updated_Default_Pfp_At_Req2_Must_Be_deleted', async () => {
@@ -229,7 +249,7 @@ describe('User API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        expect(res.body.pfp.curr).toEqual(testUserData.defaultPfp.curr);
+        expect(res.body.data.pfp.curr).toEqual(testUserData.defaultPfp.curr);
 
         // req1에서 upload되었던 pfp는 delete되었어야한다.
         expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();

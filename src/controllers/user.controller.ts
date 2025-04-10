@@ -9,14 +9,18 @@ export const getUser = asyncCatch(async (req: Request, res: Response) => {
     req.session.userId == parseInt(req.params.user_id)
   );
 
-  return res.status(200).json(user);
+  return res.status(200).json({
+    data: user,
+  });
 });
 
 export const getSelf = asyncCatch(async (req: Request, res: Response) => {
   // controller로 넘어왔다면, auth middleware에서 req.session.userId가 number인 것이 검증된다.
   const user = await userService.getUser(req.session.userId as number, true);
 
-  return res.status(200).json(user);
+  return res.status(200).json({
+    data: user,
+  });
 });
 
 export const updateUser = asyncCatch(async (req: Request, res: Response) => {
@@ -28,5 +32,7 @@ export const updateUser = asyncCatch(async (req: Request, res: Response) => {
     }
   );
 
-  return res.status(200).json(updatedUesr);
+  return res.status(200).json({
+    data: updatedUesr,
+  });
 });

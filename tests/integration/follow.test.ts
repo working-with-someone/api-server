@@ -69,7 +69,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.data).toHaveLength(1);
     });
 
     test('Response_200_With_Multiple_Followings', async () => {
@@ -81,7 +81,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
     });
 
     test('Response_200_With_Other_Users_Single_Following', async () => {
@@ -93,7 +93,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.data).toHaveLength(1);
     });
 
     test('Response_200_With_Other_Users_Multiple_Followings', async () => {
@@ -105,7 +105,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
     });
 
     test('Response_404', async () => {
@@ -180,14 +180,14 @@ describe('Follow API', () => {
       );
 
       expect(res.statusCode).toEqual(201);
-      expect(res.body.follower_user_id).toEqual(currUser.id);
-      expect(res.body.following_user_id).toEqual(following.id);
+      expect(res.body.data.follower_user_id).toEqual(currUser.id);
+      expect(res.body.data.following_user_id).toEqual(following.id);
 
       const followerUser = (await request(server).get(`/users/${currUser.id}`))
-        .body;
+        .body.data;
       const followingUser = (
         await request(server).get(`/users/${following.id}`)
-      ).body;
+      ).body.data;
 
       expect(followerUser.followings_count).toEqual(1);
       expect(followerUser.followers_count).toEqual(0);
@@ -319,7 +319,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.data).toHaveLength(1);
     });
 
     test('Response_200_With_Multiple_Followers', async () => {
@@ -331,7 +331,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
     });
 
     test('Response_404', async () => {
@@ -352,7 +352,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(1);
+      expect(res.body.data).toHaveLength(1);
     });
 
     test('Response_200_With_Other_Users_Multiple_Followers', async () => {
@@ -364,7 +364,7 @@ describe('Follow API', () => {
         });
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveLength(2);
+      expect(res.body.data).toHaveLength(2);
     });
   });
 });

@@ -7,7 +7,9 @@ export const getBreakTime = asyncCatch(async (req: Request, res: Response) => {
     return res.status(204).end();
   }
 
-  return res.status(200).json(res.locals.breakTime);
+  return res.status(200).json({
+    data: res.locals.breakTime,
+  });
 });
 
 export const createBreakTime = asyncCatch(
@@ -17,7 +19,9 @@ export const createBreakTime = asyncCatch(
       ...req.body,
     });
 
-    return res.status(201).json(breakTime);
+    return res.status(201).json({
+      data: breakTime,
+    });
   }
 );
 

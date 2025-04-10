@@ -9,7 +9,9 @@ export const getLiveSession = asyncCatch(
       userId: req.user.id,
     });
 
-    return res.status(200).json(sanitizedLiveSession);
+    return res.status(200).json({
+      data: sanitizedLiveSession,
+    });
   }
 );
 
@@ -21,7 +23,9 @@ export const getLiveSessions = asyncCatch(
       userId: req.user.id,
     });
 
-    return res.status(200).json(liveSessions);
+    return res.status(200).json({
+      data: liveSessions,
+    });
   }
 );
 
@@ -33,7 +37,9 @@ export const createLiveSession = asyncCatch(
       thumbnail: req.file,
     });
 
-    return res.status(201).json(session);
+    return res.status(201).json({
+      data: session,
+    });
   }
 );
 
@@ -44,6 +50,8 @@ export const updateLiveSessionStatus = asyncCatch(
       status: req.body.status,
     });
 
-    return res.status(200).json(status);
+    return res.status(200).json({
+      data: status,
+    });
   }
 );

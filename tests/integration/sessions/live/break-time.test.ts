@@ -179,7 +179,7 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toMatchObject(sampleBreakTimeFields);
+      expect(res.body.data).toMatchObject(sampleBreakTimeFields);
     });
 
     test('Response_200_With_Other_User_LiveSession_Break_Time', async () => {
@@ -188,7 +188,7 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toMatchObject(sampleBreakTimeFields);
+      expect(res.body.data).toMatchObject(sampleBreakTimeFields);
     });
 
     test('Response_204_With_Break_Time', async () => {
