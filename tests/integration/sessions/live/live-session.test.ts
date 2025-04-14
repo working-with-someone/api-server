@@ -4,10 +4,9 @@ import request from 'supertest';
 import server from '../../../../src';
 import testUserData from '../../../data/user.json';
 import { sampleLiveSessionFields } from '../../../data/live-session';
-import { accessLevel } from '../../../../src/enums/session';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
-import { live_session_status } from '@prisma/client';
+import { live_session_status, access_level } from '@prisma/client';
 
 describe('Live Session API', () => {
   beforeAll(async () => {
@@ -41,7 +40,7 @@ describe('Live Session API', () => {
       // public session은 authenticated user 모두가 가져올 수 있다.
       test('Response_200_With_Public_Live_Session', async () => {
         const liveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -61,7 +60,7 @@ describe('Live Session API', () => {
       // user2가 생성한 follower only session을 follower인 사람은 가져올 수 있다.'
       test('Response_200_With_Follower_Only_Live_Session', async () => {
         const liveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -85,7 +84,7 @@ describe('Live Session API', () => {
 
       test('Response_403', async () => {
         const liveSession = await createTestLiveSession({
-          access_level: accessLevel.followersOnly,
+          access_level: access_level.FOLLOWER_ONLY,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -100,7 +99,7 @@ describe('Live Session API', () => {
     describe('Private Session', () => {
       test('Response_200_With_Private_Session', async () => {
         const liveSession = await createTestLiveSession({
-          access_level: accessLevel.private,
+          access_level: access_level.PRIVATE,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -122,7 +121,7 @@ describe('Live Session API', () => {
 
       test('Response_403', async () => {
         const liveSession = await createTestLiveSession({
-          access_level: accessLevel.private,
+          access_level: access_level.PRIVATE,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -143,7 +142,7 @@ describe('Live Session API', () => {
       // other user's public live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -152,7 +151,7 @@ describe('Live Session API', () => {
       // other user's private live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
-          access_level: accessLevel.followersOnly,
+          access_level: access_level.FOLLOWER_ONLY,
           organizer_id: organizer.id,
           status: live_session_status.OPENED,
         });
@@ -161,7 +160,7 @@ describe('Live Session API', () => {
       // curr user's public live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: live_session_status.OPENED,
         });
@@ -170,7 +169,7 @@ describe('Live Session API', () => {
       // curr user's follower only live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
-          access_level: accessLevel.followersOnly,
+          access_level: access_level.FOLLOWER_ONLY,
           organizer_id: currUser.id,
           status: live_session_status.OPENED,
         });
@@ -179,7 +178,7 @@ describe('Live Session API', () => {
       // curr user's private live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
-          access_level: accessLevel.private,
+          access_level: access_level.PRIVATE,
           organizer_id: currUser.id,
           status: live_session_status.OPENED,
         });
@@ -241,7 +240,7 @@ describe('Live Session API', () => {
         // other user's follower only live session
         for (let i = 0; i < 2; i++) {
           const liveSession = await createTestLiveSession({
-            access_level: accessLevel.private,
+            access_level: access_level.PRIVATE,
             organizer_id: organizer.id,
             status: live_session_status.OPENED,
           });
@@ -286,7 +285,7 @@ describe('Live Session API', () => {
         .field('title', sampleLiveSessionFields.title)
         .field('description', sampleLiveSessionFields.description)
         .field('category', sampleLiveSessionFields.category)
-        .field('access_level', accessLevel.public)
+        .field('access_level', access_level.PUBLIC)
         .attach('thumbnail', sampleLiveSessionFields.getThumbnailReadable());
 
       expect(res.statusCode).toEqual(201);
@@ -308,7 +307,7 @@ describe('Live Session API', () => {
         .field('title', sampleLiveSessionFields.title)
         .field('description', sampleLiveSessionFields.description)
         .field('category', sampleLiveSessionFields.category)
-        .field('access_level', accessLevel.public);
+        .field('access_level', access_level.PUBLIC);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
@@ -323,7 +322,7 @@ describe('Live Session API', () => {
         .field('title', sampleLiveSessionFields.title)
         .field('description', sampleLiveSessionFields.description)
         .field('category', sampleLiveSessionFields.category)
-        .field('access_level', accessLevel.public)
+        .field('access_level', access_level.PUBLIC)
         .attach('thumbnail', sampleLiveSessionFields.getThumbnailReadable());
 
       expect(res.statusCode).toEqual(201);
@@ -345,7 +344,7 @@ describe('Live Session API', () => {
         .field('title', sampleLiveSessionFields.title)
         .field('description', sampleLiveSessionFields.description)
         .field('category', sampleLiveSessionFields.category)
-        .field('access_level', accessLevel.private);
+        .field('access_level', access_level.PRIVATE);
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
@@ -381,7 +380,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -421,7 +420,7 @@ describe('Live Session API', () => {
       test('Response_400_With_Status_Ready_To_Breaked', async () => {
         const statusTo = live_session_status.BREAKED;
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -450,7 +449,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -483,7 +482,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.BREAKED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -522,7 +521,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -561,7 +560,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -594,7 +593,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -623,7 +622,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -652,7 +651,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.BREAKED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -685,7 +684,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -724,7 +723,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.OPENED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -763,7 +762,7 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.READY;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
           organizer_id: currUser.id,
           status: statusFrom,
         });
@@ -792,7 +791,7 @@ describe('Live Session API', () => {
     // live session status 변경 요청에 status가 지정되지 않으면 400을 응답받아야한다.
     test('Response_400_status(x)', async () => {
       const liveSession = await createTestLiveSession({
-        access_level: accessLevel.public,
+        access_level: access_level.PUBLIC,
         organizer_id: currUser.id,
         status: live_session_status.READY,
       });
@@ -811,7 +810,7 @@ describe('Live Session API', () => {
       const organizer = testUserData.users[1];
 
       const liveSession = await createTestLiveSession({
-        access_level: accessLevel.public,
+        access_level: access_level.PUBLIC,
         organizer_id: organizer.id,
         status: live_session_status.READY,
       });

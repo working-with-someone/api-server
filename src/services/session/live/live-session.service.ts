@@ -8,9 +8,9 @@ import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
 import { to } from '../../../config/path.config';
-import { accessLevel } from '../../../enums/session';
+
 import { checkFollowing } from '../../follow.service';
-import { Prisma, live_session_status } from '@prisma/client';
+import { Prisma, live_session_status, access_level } from '@prisma/client';
 import { generateStreamKey } from '../../../utils/generator';
 import { sanitize } from '../../../utils/sanitize';
 
@@ -29,7 +29,7 @@ export async function isAllowedToLiveSession(data: {
   }
 
   // access level follower only라면, follwing check
-  if (liveSession.access_level === accessLevel.followersOnly) {
+  if (liveSession.access_level === access_level.FOLLOWER_ONLY) {
     const isFollowing = await checkFollowing({
       follower_user_id: participant_id,
       following_user_id: organizer_id,
@@ -41,7 +41,7 @@ export async function isAllowedToLiveSession(data: {
     }
   }
   // access level이 private라면 allowList check
-  else if (liveSession.access_level === accessLevel.private) {
+  else if (liveSession.access_level === access_level.PRIVATE) {
     const isAllowed = await prismaClient.live_session_allow.findFirst({
       where: {
         live_session_id: liveSession.id,
@@ -74,11 +74,11 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
         },
         // public live session이라면 모두
         {
-          access_level: accessLevel.public,
+          access_level: access_level.PUBLIC,
         },
         // allow된 private live session이라면 모두
         {
-          access_level: accessLevel.private,
+          access_level: access_level.PRIVATE,
           allow: {
             some: {
               user_id: data.userId,
@@ -87,7 +87,7 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
         },
         // following한 user의 followers only live session이라면 모두
         {
-          access_level: accessLevel.followersOnly,
+          access_level: access_level.FOLLOWER_ONLY,
           organizer: {
             followers: {
               some: {

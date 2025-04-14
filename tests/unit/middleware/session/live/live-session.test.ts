@@ -5,8 +5,7 @@ import testUserData from '../../../../data/user.json';
 import liveSessionMiddleware from '../../../../../src/middleware/session/live/live-session.middleware';
 import currUser from '../../../../data/curr-user';
 import { createTestLiveSession } from '../../../../data/live-session';
-import { accessLevel } from '../../../../../src/enums/session';
-import { live_session_status } from '@prisma/client';
+import { live_session_status, access_level } from '@prisma/client';
 
 // must mocking next function which accpet err argument but do nothing
 const mockNext = jest.fn((err) => err);
@@ -30,7 +29,7 @@ describe('session middleware', () => {
 
     test('Next_Function_Should_Called_Without_Error_If_Onwer', async () => {
       const liveSession = await createTestLiveSession({
-        access_level: accessLevel.public,
+        access_level: access_level.PUBLIC,
         organizer_id: currUser.id,
         status: live_session_status.READY,
       });
@@ -59,7 +58,7 @@ describe('session middleware', () => {
 
     test('Next_Function_Should_Called_With_Error_If_Not_Owner', async () => {
       const liveSession_1 = await createTestLiveSession({
-        access_level: accessLevel.public,
+        access_level: access_level.PUBLIC,
         organizer_id: currUser.id,
         status: live_session_status.READY,
       });

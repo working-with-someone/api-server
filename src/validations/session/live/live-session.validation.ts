@@ -1,8 +1,7 @@
 import joi from 'joi';
 import type { RequestSchema } from '../../../middleware/validate.middleware';
 import categories from '../../../../static/data/category.json';
-import { accessLevel } from '../../../enums/session';
-import { live_session_status } from '@prisma/client';
+import { live_session_status, access_level } from '@prisma/client';
 import { pageNationQuerySchema } from '../../pagenation.validation';
 
 export const getLiveSession: RequestSchema = {
@@ -21,7 +20,11 @@ export const createLiveSession: RequestSchema = {
     description: joi.string().required(),
     access_level: joi
       .number()
-      .valid(accessLevel.public, accessLevel.followersOnly, accessLevel.private)
+      .valid(
+        access_level.PUBLIC,
+        access_level.FOLLOWER_ONLY,
+        access_level.PRIVATE
+      )
       .required(),
     category: joi
       .string()

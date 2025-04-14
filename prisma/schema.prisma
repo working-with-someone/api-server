@@ -77,6 +77,12 @@ model follow {
   @@id([follower_user_id, following_user_id])
 }
 
+enum access_level {
+  PUBLIC
+  FOLLOWER_ONLY
+  PRIVATE
+}
+
 model live_session {
   id            String              @id
   title         String              @db.VarChar(100)
@@ -86,7 +92,7 @@ model live_session {
   status        live_session_status
   stream_key    String
   // 1 : public 2 : followersOnly 3 : private
-  access_level  Int                 @default(1)
+  access_level  access_level        @default(PUBLIC)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
