@@ -66,6 +66,7 @@ export async function getLiveSession(data: {
 
 export async function getLiveSessions(data: GetLiveSessionsInput) {
   const whereCondition = {
+    category: data.category,
     OR: [
       // curr user의 live session은 모두
       {

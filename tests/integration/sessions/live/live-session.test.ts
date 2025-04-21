@@ -7,6 +7,8 @@ import { sampleLiveSessionFields } from '../../../data/live-session';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
 import { live_session_status, access_level } from '@prisma/client';
+import categories from '../../../../static/data/category.json';
+import httpStatusCode from 'http-status-codes';
 
 describe('Live Session API', () => {
   beforeAll(async () => {
@@ -270,6 +272,43 @@ describe('Live Session API', () => {
         expect(res.body.data).toHaveLength(12);
       });
     });
+
+    describe('Categorized_Live_Session', () => {
+      beforeAll(async () => {
+        for (const category of categories) {
+          for (let i = 0; i < 2; i++) {
+            await createTestLiveSession({
+              category: category.label,
+            });
+          }
+        }
+      });
+
+      for (const category of categories) {
+        test(`Response_200_With_${category.label.toUpperCase()}_Categorized_Live_Session`, async () => {
+          const res = await request(server)
+            .get(`/sessions/live`)
+            .query({ category: category.label });
+
+          expect(res.status).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toBeDefined();
+
+          for (let i = 0; i < res.body.data.length; i++) {
+            expect(res.body.data[i].category).toEqual(category.label);
+          }
+        });
+      }
+
+      test('Response_Empty_Live_Session_Category(?)', async () => {
+        const res = await request(server).get(
+          `/sessions/live?category=doesNotExistLiveSession`
+        );
+
+        expect(res.status).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toBeDefined();
+        expect(res.body.data).toHaveLength(0);
+      });
+    });
   });
 
   describe('POST /sessions/live', () => {
@@ -521,8 +560,6 @@ describe('Live Session API', () => {
         const statusTo = live_session_status.CLOSED;
 
         const newLiveSession = await createTestLiveSession({
-          access_level: access_level.PUBLIC,
-          organizer_id: currUser.id,
           status: statusFrom,
         });
 

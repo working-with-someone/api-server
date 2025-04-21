@@ -8,7 +8,7 @@ interface CreateTestLiveSessionCreationInput
   extends Partial<
     Pick<
       Prisma.live_sessionGetPayload<true>,
-      'access_level' | 'organizer_id' | 'status'
+      'access_level' | 'organizer_id' | 'status' | 'category'
     >
   > {
   break_time?: Pick<
@@ -27,7 +27,7 @@ export async function createTestLiveSession(
       description: "it's just test",
       thumbnail_uri: 'https://example.com/thumbnails/morning-study.jpg',
       stream_key: v4(),
-      category: 'test',
+      category: data.category || 'test',
       access_level: data.access_level,
       organizer_id: data.organizer_id || currUser.id,
       status: data.status || live_session_status.OPENED,

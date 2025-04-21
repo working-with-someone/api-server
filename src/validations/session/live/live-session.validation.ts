@@ -11,7 +11,13 @@ export const getLiveSession: RequestSchema = {
 };
 
 export const getLiveSessions: RequestSchema = {
-  query: pagiNationQuerySchema,
+  // pagination query schema를 extend
+  query: pagiNationQuerySchema.keys({
+    category: joi
+      .string()
+      .allow(...categories.map((category) => category.label))
+      .optional(),
+  }),
 };
 
 export const createLiveSession: RequestSchema = {

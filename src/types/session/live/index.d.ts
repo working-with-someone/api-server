@@ -3,6 +3,7 @@ import { PagiNationData } from '../../pagination';
 
 export interface GetLiveSessionsInput extends PagiNationData {
   userId: number;
+  category: string;
 }
 
 export type AttachedLiveSession = Prisma.live_sessionGetPayload<{
