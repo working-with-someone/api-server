@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
-import { PageNationData } from '../../pagenation';
+import { PagiNationData } from '../../pagination';
 
-export interface GetLiveSessionsInput extends PageNationData {
+export interface GetLiveSessionsInput extends PagiNationData {
   userId: number;
 }
 

@@ -2,7 +2,7 @@ import joi from 'joi';
 import type { RequestSchema } from '../../../middleware/validate.middleware';
 import categories from '../../../../static/data/category.json';
 import { live_session_status, access_level } from '@prisma/client';
-import { pageNationQuerySchema } from '../../pagenation.validation';
+import { pagiNationQuerySchema } from '../../pagination.validation';
 
 export const getLiveSession: RequestSchema = {
   params: joi.object().keys({
@@ -11,7 +11,7 @@ export const getLiveSession: RequestSchema = {
 };
 
 export const getLiveSessions: RequestSchema = {
-  query: pageNationQuerySchema,
+  query: pagiNationQuerySchema,
 };
 
 export const createLiveSession: RequestSchema = {

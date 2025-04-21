@@ -1,10 +1,10 @@
-import type { PageNationData } from './pagenation';
+import type { PagiNationData } from './pagination';
 
-export interface GetFollowersInput extends PageNationData {
+export interface GetFollowersInput extends PagiNationData {
   userId: number;
 }
 
-export interface GetFollowingsInput extends PageNationData {
+export interface GetFollowingsInput extends PagiNationData {
   userId: number;
 }
 

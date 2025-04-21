@@ -65,39 +65,45 @@ export async function getLiveSession(data: {
 }
 
 export async function getLiveSessions(data: GetLiveSessionsInput) {
-  const liveSessions = await prismaClient.live_session.findMany({
-    where: {
-      OR: [
-        // curr user의 live session은 모두
-        {
-          organizer_id: data.userId,
+  const whereCondition = {
+    OR: [
+      // curr user의 live session은 모두
+      {
+        organizer_id: data.userId,
+      },
+      // public live session이라면 모두
+      {
+        access_level: access_level.PUBLIC,
+      },
+      // allow된 private live session이라면 모두
+      {
+        access_level: access_level.PRIVATE,
+        allow: {
+          some: {
+            user_id: data.userId,
+          },
         },
-        // public live session이라면 모두
-        {
-          access_level: access_level.PUBLIC,
-        },
-        // allow된 private live session이라면 모두
-        {
-          access_level: access_level.PRIVATE,
-          allow: {
+      },
+      // following한 user의 followers only live session이라면 모두
+      {
+        access_level: access_level.FOLLOWER_ONLY,
+        organizer: {
+          followers: {
             some: {
-              user_id: data.userId,
+              follower_user_id: data.userId,
             },
           },
         },
-        // following한 user의 followers only live session이라면 모두
-        {
-          access_level: access_level.FOLLOWER_ONLY,
-          organizer: {
-            followers: {
-              some: {
-                follower_user_id: data.userId,
-              },
-            },
-          },
-        },
-      ],
-    },
+      },
+    ],
+  };
+
+  const totalItems = await prismaClient.live_session.count({
+    where: whereCondition,
+  });
+
+  const liveSessions = await prismaClient.live_session.findMany({
+    where: whereCondition,
 
     skip: (data.page - 1) * data.per_page,
     take: data.per_page,
@@ -106,7 +112,23 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
     },
   });
 
-  return liveSessions;
+  const totalPages = Math.ceil(totalItems / data.per_page);
+  const hasMore = data.page < totalPages;
+  const previousPage = data.page > 1 ? data.page - 1 : null;
+  const nextPage = hasMore ? data.page + 1 : null;
+
+  return {
+    liveSessions,
+    pagination: {
+      currentPage: data.page,
+      totalPages,
+      totalItems,
+      per_page: data.per_page,
+      hasMore,
+      previousPage,
+      nextPage,
+    },
+  };
 }
 
 export async function createLiveSession(data: createSessionInput) {
