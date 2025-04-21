@@ -1,12 +1,15 @@
-import { Prisma } from '@prisma/client';
+import { live_session_status, Prisma } from '@prisma/client';
 import prismaClient from '../../src/database/clients/prisma';
 import { v4 } from 'uuid';
 import fs from 'node:fs';
+import currUser from './curr-user';
 
 interface CreateTestLiveSessionCreationInput
-  extends Pick<
-    Prisma.live_sessionGetPayload<true>,
-    'access_level' | 'organizer_id' | 'status'
+  extends Partial<
+    Pick<
+      Prisma.live_sessionGetPayload<true>,
+      'access_level' | 'organizer_id' | 'status'
+    >
   > {
   break_time?: Pick<
     Prisma.live_session_break_timeCreateInput,
@@ -24,10 +27,10 @@ export async function createTestLiveSession(
       description: "it's just test",
       thumbnail_uri: 'https://example.com/thumbnails/morning-study.jpg',
       stream_key: v4(),
-      category: 'study',
+      category: 'test',
       access_level: data.access_level,
-      organizer_id: data.organizer_id,
-      status: data.status,
+      organizer_id: data.organizer_id || currUser.id,
+      status: data.status || live_session_status.OPENED,
 
       break_time: {
         create: data.break_time,
