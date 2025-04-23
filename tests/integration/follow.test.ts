@@ -1,25 +1,18 @@
 import prismaClient from '../../src/database/clients/prisma';
-jest.unmock('../../src/database/clients/prisma.ts');
 import request from 'supertest';
-import testUserData from '../data/user.json';
 import server from '../../src';
 import currUser from '../data/curr-user';
+import { userFactory } from '../factories';
+import { user } from '@prisma/client';
 
 describe('Follow API', () => {
+  let user1: user;
+  let user2: user;
+  let user3: user;
+
   beforeAll(async () => {
-    await currUser.insert();
-
-    for (const user of testUserData.users) {
-      await prismaClient.user.create({
-        data: { ...user, pfp: { create: {} } },
-      });
-    }
+    [user1, user2, user3] = await userFactory.createManyAndSave({ count: 3 });
   });
-
-  afterAll(async () => {
-    await prismaClient.user.deleteMany({});
-  });
-
   afterAll((done) => {
     server.close(done);
   });
@@ -30,27 +23,27 @@ describe('Follow API', () => {
         data: [
           {
             follower_user_id: currUser.id,
-            following_user_id: testUserData.users[0].id,
+            following_user_id: user1.id,
           },
           {
             follower_user_id: currUser.id,
-            following_user_id: testUserData.users[1].id,
+            following_user_id: user2.id,
           },
           {
-            follower_user_id: testUserData.users[0].id,
+            follower_user_id: user1.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[0].id,
-            following_user_id: testUserData.users[1].id,
+            follower_user_id: user1.id,
+            following_user_id: user2.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
+            follower_user_id: user2.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
-            following_user_id: testUserData.users[0].id,
+            follower_user_id: user2.id,
+            following_user_id: user1.id,
           },
         ],
       });
@@ -86,7 +79,7 @@ describe('Follow API', () => {
 
     test('Response_200_With_Other_Users_Single_Following', async () => {
       const res = await request(server)
-        .get(`/users/${testUserData.users[0].id}/followings`)
+        .get(`/users/${user1.id}/followings`)
         .query({
           per_page: 1,
           page: 2,
@@ -98,7 +91,7 @@ describe('Follow API', () => {
 
     test('Response_200_With_Other_Users_Multiple_Followings', async () => {
       const res = await request(server)
-        .get(`/users/${testUserData.users[0].id}/followings`)
+        .get(`/users/${user1.id}/followings`)
         .query({
           per_page: 2,
           page: 1,
@@ -124,23 +117,23 @@ describe('Follow API', () => {
         data: [
           {
             follower_user_id: currUser.id,
-            following_user_id: testUserData.users[0].id,
+            following_user_id: user1.id,
           },
           {
-            follower_user_id: testUserData.users[0].id,
+            follower_user_id: user1.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[0].id,
-            following_user_id: testUserData.users[1].id,
+            follower_user_id: user1.id,
+            following_user_id: user2.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
+            follower_user_id: user2.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
-            following_user_id: testUserData.users[0].id,
+            follower_user_id: user2.id,
+            following_user_id: user1.id,
           },
         ],
       });
@@ -152,7 +145,7 @@ describe('Follow API', () => {
 
     test('Response_200', async () => {
       const res = await request(server).get(
-        `/users/${currUser.id}/followings/${testUserData.users[0].id}`
+        `/users/${currUser.id}/followings/${user1.id}`
       );
 
       expect(res.statusCode).toEqual(200);
@@ -160,7 +153,7 @@ describe('Follow API', () => {
 
     test('Response_404', async () => {
       const res = await request(server).get(
-        `/users/${currUser.id}/followings/${testUserData.users[1].id}`
+        `/users/${currUser.id}/followings/${user2.id}`
       );
 
       expect(res.statusCode).toEqual(404);
@@ -172,22 +165,19 @@ describe('Follow API', () => {
       await prismaClient.follow.deleteMany({});
     });
 
-    const following = testUserData.users[0];
-
     test('Response_200_With_Following', async () => {
       const res = await request(server).post(
-        `/users/${currUser.id}/followings/${following.id}`
+        `/users/${currUser.id}/followings/${user1.id}`
       );
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data.follower_user_id).toEqual(currUser.id);
-      expect(res.body.data.following_user_id).toEqual(following.id);
+      expect(res.body.data.following_user_id).toEqual(user1.id);
 
       const followerUser = (await request(server).get(`/users/${currUser.id}`))
         .body.data;
-      const followingUser = (
-        await request(server).get(`/users/${following.id}`)
-      ).body.data;
+      const followingUser = (await request(server).get(`/users/${user1.id}`))
+        .body.data;
 
       expect(followerUser.followings_count).toEqual(1);
       expect(followerUser.followers_count).toEqual(0);
@@ -207,12 +197,12 @@ describe('Follow API', () => {
       await prismaClient.follow.create({
         data: {
           follower_user_id: currUser.id,
-          following_user_id: following.id,
+          following_user_id: user1.id,
         },
       });
 
       const res = await request(server).post(
-        `/users/${currUser.id}/followings/${following.id}`
+        `/users/${currUser.id}/followings/${user1.id}`
       );
 
       expect(res.statusCode).toEqual(409);
@@ -220,7 +210,7 @@ describe('Follow API', () => {
 
     test('Response_403', async () => {
       const res = await request(server).post(
-        `/users/${following.id}/followings/${currUser.id}`
+        `/users/${user1.id}/followings/${currUser.id}`
       );
 
       expect(res.statusCode).toEqual(403);
@@ -228,12 +218,10 @@ describe('Follow API', () => {
   });
 
   describe('DELETE /users/:user_id/followings/:following_user_id', () => {
-    const following = testUserData.users[1];
-
     beforeEach(async () => {
       await prismaClient.follow.create({
         data: {
-          following_user_id: following.id,
+          following_user_id: user2.id,
           follower_user_id: currUser.id,
         },
       });
@@ -243,7 +231,7 @@ describe('Follow API', () => {
 
     test('Response_204', async () => {
       const res = await request(server).delete(
-        `/users/${currUser.id}/followings/${following.id}`
+        `/users/${currUser.id}/followings/${user2.id}`
       );
 
       expect(res.statusCode).toEqual(204);
@@ -267,7 +255,7 @@ describe('Follow API', () => {
 
     test('Response_403', async () => {
       const res = await request(server).delete(
-        `/users/${following.id}/followings/${currUser.id}`
+        `/users/${user2.id}/followings/${currUser.id}`
       );
 
       expect(res.statusCode).toEqual(403);
@@ -280,27 +268,27 @@ describe('Follow API', () => {
         data: [
           {
             follower_user_id: currUser.id,
-            following_user_id: testUserData.users[1].id,
+            following_user_id: user2.id,
           },
           {
             follower_user_id: currUser.id,
-            following_user_id: testUserData.users[2].id,
+            following_user_id: user3.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
+            follower_user_id: user2.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[1].id,
-            following_user_id: testUserData.users[2].id,
+            follower_user_id: user2.id,
+            following_user_id: user3.id,
           },
           {
-            follower_user_id: testUserData.users[2].id,
+            follower_user_id: user3.id,
             following_user_id: currUser.id,
           },
           {
-            follower_user_id: testUserData.users[2].id,
-            following_user_id: testUserData.users[1].id,
+            follower_user_id: user3.id,
+            following_user_id: user2.id,
           },
         ],
       });
@@ -345,7 +333,7 @@ describe('Follow API', () => {
 
     test('Response_200_With_Other_Users_Single_Follower', async () => {
       const res = await request(server)
-        .get(`/users/${testUserData.users[1].id}/followers`)
+        .get(`/users/${user2.id}/followers`)
         .query({
           per_page: 1,
           page: 2,
@@ -357,7 +345,7 @@ describe('Follow API', () => {
 
     test('Response_200_With_Other_Users_Multiple_Followers', async () => {
       const res = await request(server)
-        .get(`/users/${testUserData.users[1].id}/followers`)
+        .get(`/users/${user2.id}/followers`)
         .query({
           per_page: 2,
           page: 1,

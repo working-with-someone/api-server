@@ -1,28 +1,19 @@
 import prismaClient from '../../../../src/database/clients/prisma';
-jest.unmock('../../../../src/database/clients/prisma.ts');
 import request from 'supertest';
 import server from '../../../../src';
-import testUserData from '../../../data/user.json';
-import { live_session_status, access_level } from '@prisma/client';
+import { live_session_status, access_level, user } from '@prisma/client';
 import currUser from '../../../data/curr-user';
 import {
   createTestLiveSession,
   sampleBreakTimeFields,
 } from '../../../data/live-session';
+import { userFactory } from '../../../factories';
 
 describe('Live Session API', () => {
-  beforeAll(async () => {
-    await currUser.insert();
-    // create test user
-    for (const user of testUserData.users) {
-      await prismaClient.user.create({
-        data: { ...user, pfp: { create: {} } },
-      });
-    }
-  });
+  let user1: user;
 
-  afterAll(async () => {
-    await prismaClient.user.deleteMany({});
+  beforeAll(async () => {
+    user1 = await userFactory.createAndSave();
   });
 
   afterAll((done) => {
@@ -66,10 +57,11 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(404);
     });
 
+    // 다른 사용자의 live session에 break time을 생성하려는 요청은 401을 응답받아야한다.
     test('Response_401', async () => {
       const liveSession = await createTestLiveSession({
         access_level: access_level.PUBLIC,
-        organizer_id: testUserData.users[1].id,
+        organizer_id: user1.id,
         status: live_session_status.OPENED,
       });
 
@@ -156,13 +148,13 @@ describe('Live Session API', () => {
 
       otherUserHardLiveSession = await createTestLiveSession({
         access_level: access_level.PUBLIC,
-        organizer_id: testUserData.users[1].id,
+        organizer_id: user1.id,
         status: live_session_status.OPENED,
       });
 
       otherUserSoftLiveSession = await createTestLiveSession({
         access_level: access_level.PUBLIC,
-        organizer_id: testUserData.users[1].id,
+        organizer_id: user1.id,
         status: live_session_status.OPENED,
         break_time: sampleBreakTimeFields,
       });

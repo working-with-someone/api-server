@@ -1,26 +1,10 @@
-import prismaClient from '../../src/database/clients/prisma';
-jest.unmock('../../src/database/clients/prisma.ts');
-
 import server from '../../src';
 import request from 'supertest';
-import testUserData from '../data/user.json';
 import s3Client from '../../src/database/clients/s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import fs from 'fs';
 
 describe('Media API', () => {
-  beforeAll(async () => {
-    for (const user of testUserData.users) {
-      await prismaClient.user.create({
-        data: { ...user, pfp: { create: {} } },
-      });
-    }
-  });
-
-  afterAll(async () => {
-    await prismaClient.user.deleteMany({});
-  });
-
   afterAll((done) => {
     server.close(done);
   });

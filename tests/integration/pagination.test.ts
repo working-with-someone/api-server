@@ -1,5 +1,4 @@
 import { access_level, live_session_status } from '@prisma/client';
-jest.unmock('../../src/database/clients/prisma.ts');
 import currUser from '../data/curr-user';
 import request from 'supertest';
 import server from '../../src';
@@ -9,12 +8,9 @@ import {
   createTestLiveSession,
   sampleBreakTimeFields,
 } from '../data/live-session';
+import prismaClient from '../../src/database/clients/prisma';
 
 describe('Pagination', () => {
-  beforeAll(async () => {
-    await currUser.insert();
-  });
-
   afterAll((done) => {
     server.close(done);
   });
@@ -29,6 +25,10 @@ describe('Pagination', () => {
           break_time: sampleBreakTimeFields,
         });
       }
+    });
+
+    afterAll(async () => {
+      await prismaClient.live_session.deleteMany();
     });
 
     test('Response_400_With_When_Page_Is_Zero', async () => {

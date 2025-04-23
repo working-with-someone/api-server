@@ -47,7 +47,7 @@ class CurrUser implements CurrentUser {
 
   async insert() {
     if (await this.isInserted()) {
-      await this.delete();
+      throw new Error('curr user already inserted');
     }
 
     await prismaClient.user.create({
@@ -70,22 +70,58 @@ class CurrUser implements CurrentUser {
     });
   }
 
+  async restore() {
+    if (!(await this.isInserted())) {
+      throw new Error('curr user does not inserted');
+    }
+
+    await prismaClient.user.update({
+      where: {
+        id: this.id,
+      },
+      data: {
+        username: this.username,
+        email: this.email,
+        encrypted_password: this.encrypted_password,
+        created_at: this.created_at,
+        updated_at: this.updated_at,
+      },
+    });
+
+    await prismaClient.pfp.update({
+      where: {
+        user_id: this.id,
+      },
+      data: this.pfp,
+    });
+
+    await prismaClient.email_verification.update({
+      where: {
+        user_id: this.id,
+      },
+      data: this.email_verification,
+    });
+  }
+
   async delete() {
     await prismaClient.user.delete({
       where: {
         id: this.id,
       },
+      include: {
+        email_verification: true,
+      },
     });
   }
 
   async isInserted() {
-    if (
-      await prismaClient.user.findFirst({
-        where: {
-          id: this.id,
-        },
-      })
-    ) {
+    const currUser = await prismaClient.user.findFirst({
+      where: {
+        id: this.id,
+      },
+    });
+
+    if (currUser) {
       return true;
     }
 

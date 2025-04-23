@@ -1,28 +1,20 @@
 import prismaClient from '../../../../src/database/clients/prisma';
-jest.unmock('../../../../src/database/clients/prisma.ts');
 import request from 'supertest';
 import server from '../../../../src';
-import testUserData from '../../../data/user.json';
 import { sampleLiveSessionFields } from '../../../data/live-session';
 import currUser from '../../../data/curr-user';
 import { createTestLiveSession } from '../../../data/live-session';
 import { live_session_status, access_level } from '@prisma/client';
 import categories from '../../../../static/data/category.json';
 import httpStatusCode from 'http-status-codes';
+import { userFactory } from '../../../factories';
+import { user } from '@prisma/client';
 
 describe('Live Session API', () => {
-  beforeAll(async () => {
-    await currUser.insert();
-    // create test user
-    for (const user of testUserData.users) {
-      await prismaClient.user.create({
-        data: { ...user, pfp: { create: {} } },
-      });
-    }
-  });
+  let user1: user;
 
-  afterAll(async () => {
-    await prismaClient.user.deleteMany({});
+  beforeAll(async () => {
+    user1 = await userFactory.createAndSave();
   });
 
   afterAll((done) => {
@@ -30,8 +22,6 @@ describe('Live Session API', () => {
   });
 
   describe('GET /sessions/live/:live_session_id', () => {
-    const organizer = testUserData.users[0];
-
     afterEach(async () => {
       await prismaClient.live_session.deleteMany({});
       await prismaClient.follow.deleteMany({});
@@ -43,7 +33,7 @@ describe('Live Session API', () => {
       test('Response_200_With_Public_Live_Session', async () => {
         const liveSession = await createTestLiveSession({
           access_level: access_level.PUBLIC,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
 
@@ -52,7 +42,7 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', user1.id);
         // stream key는 숨겨져 있어야한다.
         expect(res.body.data.stream_key).toBeUndefined();
       });
@@ -63,14 +53,14 @@ describe('Live Session API', () => {
       test('Response_200_With_Follower_Only_Live_Session', async () => {
         const liveSession = await createTestLiveSession({
           access_level: access_level.PUBLIC,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
 
         await prismaClient.follow.create({
           data: {
             follower_user_id: currUser.id,
-            following_user_id: organizer.id,
+            following_user_id: user1.id,
           },
         });
 
@@ -79,7 +69,7 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', user1.id);
         // stream key는 숨겨져 있어야한다.
         expect(res.body.data.stream_key).toBeUndefined();
       });
@@ -87,7 +77,7 @@ describe('Live Session API', () => {
       test('Response_403', async () => {
         const liveSession = await createTestLiveSession({
           access_level: access_level.FOLLOWER_ONLY,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
 
@@ -102,7 +92,7 @@ describe('Live Session API', () => {
       test('Response_200_With_Private_Session', async () => {
         const liveSession = await createTestLiveSession({
           access_level: access_level.PRIVATE,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
 
@@ -118,13 +108,13 @@ describe('Live Session API', () => {
         );
 
         expect(res.statusCode).toEqual(200);
-        expect(res.body.data).toHaveProperty('organizer_id', organizer.id);
+        expect(res.body.data).toHaveProperty('organizer_id', user1.id);
       });
 
       test('Response_403', async () => {
         const liveSession = await createTestLiveSession({
           access_level: access_level.PRIVATE,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
 
@@ -138,14 +128,12 @@ describe('Live Session API', () => {
   });
 
   describe('GET /sessions/live', () => {
-    const organizer = testUserData.users[1];
-
     beforeAll(async () => {
       // other user's public live session
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
           access_level: access_level.PUBLIC,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
       }
@@ -154,7 +142,7 @@ describe('Live Session API', () => {
       for (let i = 0; i < 2; i++) {
         await createTestLiveSession({
           access_level: access_level.FOLLOWER_ONLY,
-          organizer_id: organizer.id,
+          organizer_id: user1.id,
           status: live_session_status.OPENED,
         });
       }
@@ -209,7 +197,7 @@ describe('Live Session API', () => {
         await prismaClient.follow.create({
           data: {
             follower_user_id: currUser.id,
-            following_user_id: organizer.id,
+            following_user_id: user1.id,
           },
         });
       });
@@ -235,7 +223,7 @@ describe('Live Session API', () => {
         await prismaClient.follow.create({
           data: {
             follower_user_id: currUser.id,
-            following_user_id: organizer.id,
+            following_user_id: user1.id,
           },
         });
 
@@ -243,7 +231,7 @@ describe('Live Session API', () => {
         for (let i = 0; i < 2; i++) {
           const liveSession = await createTestLiveSession({
             access_level: access_level.PRIVATE,
-            organizer_id: organizer.id,
+            organizer_id: user1.id,
             status: live_session_status.OPENED,
           });
 
@@ -844,7 +832,7 @@ describe('Live Session API', () => {
 
     // 다른 사용자의 live session status 변경을 요청하면 403을 응답받아야한다.
     test('Response_403', async () => {
-      const organizer = testUserData.users[1];
+      const organizer = user1;
 
       const liveSession = await createTestLiveSession({
         access_level: access_level.PUBLIC,

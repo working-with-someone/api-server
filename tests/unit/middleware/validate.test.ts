@@ -3,6 +3,13 @@ import validate, {
 } from '../../../src/middleware/validate.middleware';
 import joi from 'joi';
 import { createRequest, createResponse } from 'node-mocks-http';
+import { mockDeep } from 'jest-mock-extended';
+import { PrismaClient } from '@prisma/client';
+
+jest.mock('../../../src/database/clients/prisma', () => ({
+  __esModule: true,
+  default: mockDeep<PrismaClient>(),
+}));
 
 // must mocking next function which accpet err argument but do nothing
 const mockNext = jest.fn((err) => err);
