@@ -1,11 +1,10 @@
 import { createRequest, createResponse } from 'node-mocks-http';
 import prismaClient from '../../../../../src/database/clients/prisma';
-jest.unmock('../../../../../src/database/clients/prisma');
 import liveSessionMiddleware from '../../../../../src/middleware/session/live/live-session.middleware';
 import currUser from '../../../../data/curr-user';
-import { createTestLiveSession } from '../../../../data/live-session';
-import { live_session_status, access_level, user } from '@prisma/client';
+import { user } from '@prisma/client';
 import UserFactory from '../../../../factories/user-factory';
+import { liveSessionFactory } from '../../../../factories';
 
 // must mocking next function which accpet err argument but do nothing
 const mockNext = jest.fn((err) => err);
@@ -23,16 +22,14 @@ describe('session middleware', () => {
     });
 
     test('Next_Function_Should_Called_Without_Error_If_Onwer', async () => {
-      const liveSession = await createTestLiveSession({
-        access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
-        status: live_session_status.READY,
+      const liveSession = await liveSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
       });
 
       expect(liveSession).toBeDefined();
 
       const req = createRequest({
-        params: { live_session_id: liveSession!.id },
+        params: { live_session_id: liveSession.id },
         session: {
           userId: currUser.id,
         },

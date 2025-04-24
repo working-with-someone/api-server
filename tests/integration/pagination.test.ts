@@ -1,14 +1,10 @@
-import { access_level, live_session_status } from '@prisma/client';
-import currUser from '../data/curr-user';
 import request from 'supertest';
 import server from '../../src';
 import httpStatusCode from 'http-status-codes';
 
-import {
-  createTestLiveSession,
-  sampleBreakTimeFields,
-} from '../data/live-session';
 import prismaClient from '../../src/database/clients/prisma';
+import { liveSessionFactory } from '../factories';
+import currUser from '../data/curr-user';
 
 describe('Pagination', () => {
   afterAll((done) => {
@@ -17,14 +13,12 @@ describe('Pagination', () => {
 
   describe('Live Session', () => {
     beforeAll(async () => {
-      for (let i = 0; i < 100; i++) {
-        await createTestLiveSession({
-          access_level: access_level.PUBLIC,
-          organizer_id: currUser.id,
-          status: live_session_status.OPENED,
-          break_time: sampleBreakTimeFields,
-        });
-      }
+      await liveSessionFactory.createManyAndSave({
+        count: 100,
+        overrides: {
+          organizer: { connect: { id: currUser.id } },
+        },
+      });
     });
 
     afterAll(async () => {

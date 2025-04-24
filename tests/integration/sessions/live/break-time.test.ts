@@ -1,13 +1,15 @@
 import prismaClient from '../../../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../../../src';
-import { live_session_status, access_level, user } from '@prisma/client';
-import currUser from '../../../data/curr-user';
 import {
-  createTestLiveSession,
-  sampleBreakTimeFields,
-} from '../../../data/live-session';
-import { userFactory } from '../../../factories';
+  live_session_status,
+  access_level,
+  user,
+  live_session,
+} from '@prisma/client';
+import currUser from '../../../data/curr-user';
+import { userFactory, liveSessionFactory } from '../../../factories';
+import { LiveSessionWithAll } from '../../../factories/live-session-factory';
 
 describe('Live Session API', () => {
   let user1: user;
@@ -27,9 +29,13 @@ describe('Live Session API', () => {
     });
 
     test('Response_201_With_Break_Time', async () => {
-      const liveSession = await createTestLiveSession({
+      const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
@@ -59,9 +65,13 @@ describe('Live Session API', () => {
 
     // 다른 사용자의 live session에 break time을 생성하려는 요청은 401을 응답받아야한다.
     test('Response_401', async () => {
-      const liveSession = await createTestLiveSession({
+      const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: user1.id,
+        organizer: {
+          connect: {
+            id: user1.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
@@ -77,9 +87,13 @@ describe('Live Session API', () => {
     });
 
     test('Response_400_Interval(x)', async () => {
-      const liveSession = await createTestLiveSession({
+      const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
@@ -94,9 +108,13 @@ describe('Live Session API', () => {
     });
 
     test('Response_400_Duration(x)', async () => {
-      const liveSession = await createTestLiveSession({
+      const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
@@ -111,9 +129,13 @@ describe('Live Session API', () => {
     });
 
     test('Response_400_Interval(x)_Duration(x)', async () => {
-      const liveSession = await createTestLiveSession({
+      const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
@@ -127,36 +149,61 @@ describe('Live Session API', () => {
   });
 
   describe('GET /sessions/live/:live_session_id/break_time', () => {
-    let hardLiveSession;
-    let softLiveSession;
-    let otherUserHardLiveSession;
-    let otherUserSoftLiveSession;
+    let hardLiveSession: LiveSessionWithAll;
+    let softLiveSession: LiveSessionWithAll;
+    let otherUserHardLiveSession: LiveSessionWithAll;
+    let otherUserSoftLiveSession: LiveSessionWithAll;
 
     beforeAll(async () => {
-      hardLiveSession = await createTestLiveSession({
+      hardLiveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
-      softLiveSession = await createTestLiveSession({
+      softLiveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: currUser.id,
+        organizer: {
+          connect: {
+            id: currUser.id,
+          },
+        },
         status: live_session_status.OPENED,
-        break_time: sampleBreakTimeFields,
+        break_time: {
+          create: {
+            duration: 10,
+            interval: 50,
+          },
+        },
       });
 
-      otherUserHardLiveSession = await createTestLiveSession({
+      otherUserHardLiveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
-        organizer_id: user1.id,
+        organizer: {
+          connect: {
+            id: user1.id,
+          },
+        },
         status: live_session_status.OPENED,
       });
 
-      otherUserSoftLiveSession = await createTestLiveSession({
-        access_level: access_level.PUBLIC,
-        organizer_id: user1.id,
+      otherUserSoftLiveSession = await liveSessionFactory.createAndSave({
+        organizer: {
+          connect: {
+            id: user1.id,
+          },
+        },
         status: live_session_status.OPENED,
-        break_time: sampleBreakTimeFields,
+        break_time: {
+          create: {
+            duration: 10,
+            interval: 50,
+          },
+        },
       });
     });
 
@@ -170,7 +217,7 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toMatchObject(sampleBreakTimeFields);
+      expect(res.body.data).toMatchObject(softLiveSession.break_time!);
     });
 
     test('Response_200_With_Other_User_LiveSession_Break_Time', async () => {
@@ -179,7 +226,7 @@ describe('Live Session API', () => {
       );
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toMatchObject(sampleBreakTimeFields);
+      expect(res.body.data).toMatchObject(otherUserSoftLiveSession.break_time!);
     });
 
     test('Response_204_With_Break_Time', async () => {
