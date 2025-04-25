@@ -1,4 +1,4 @@
-import type { PagiNationData } from './pagination';
+import type { PagiNationData } from '../types/pagination';
 
 export interface GetFollowersInput extends PagiNationData {
   userId: number;

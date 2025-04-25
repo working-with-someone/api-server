@@ -10,7 +10,7 @@ import type {
   GetFollowersInput,
   GetFollowingInput,
   GetFollowingsInput,
-} from '../types/follow';
+} from './follow.service.d';
 
 import { Prisma } from '@prisma/client';
 

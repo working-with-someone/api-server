@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
-import { AttachedLiveSession } from '../../session/live';
-import { AttachedBreakTime } from '../../session/live/break-time';
+import { AttachedLiveSession } from '../../../middleware/session/live/live-session';
+import { AttachedBreakTime } from '../../../services/session/live/break-time';
 
-export { };
+export {};
 
 declare global {
   namespace Express {

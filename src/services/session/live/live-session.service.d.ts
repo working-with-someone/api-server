@@ -1,21 +1,15 @@
 import { Prisma } from '@prisma/client';
-import { PagiNationData } from '../../pagination';
+import { PagiNationData } from '../../../types/pagination';
 
 export interface GetLiveSessionsInput extends PagiNationData {
   userId: number;
   category: string;
 }
 
-export type AttachedLiveSession = Prisma.live_sessionGetPayload<{
-  omit: {
-    stream_key: true;
-  };
-}>;
-
 export interface createSessionInput
   extends Pick<
     Prisma.live_sessionCreateInput,
-    'title' | 'description' | 'category' | 'access_level'
+    'title' | 'description' | 'access_level' | 'category'
   > {
   userId: number;
   thumbnail?: Express.Multer.File;

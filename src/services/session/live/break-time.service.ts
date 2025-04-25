@@ -1,4 +1,4 @@
-import { CreateBreakTimeInput } from '../../../types/session/live/break-time';
+import { CreateBreakTimeInput } from './break-time';
 import prismaClient from '../../../database/clients/prisma';
 
 export async function createBreakTime(data: CreateBreakTimeInput) {

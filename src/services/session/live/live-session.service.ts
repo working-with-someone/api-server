@@ -1,9 +1,9 @@
 import prismaClient from '../../../database/clients/prisma';
 import type {
-  AttachedLiveSession,
   createSessionInput,
   GetLiveSessionsInput,
-} from '../../../types/session/live';
+} from './live-session.service.d';
+import type { AttachedLiveSession } from '../../../middleware/session/live/live-session';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';

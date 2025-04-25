@@ -7,6 +7,7 @@ import { deleteImage, uploadImage } from '../lib/s3';
 import { Prisma } from '@prisma/client';
 import { to } from '../config/path.config';
 import path from 'path';
+import type { UpdateUserInput } from './user.service.d';
 
 export async function getUser(userId: number, isSelf: boolean) {
   const user = await prismaClient.user.findFirst({
@@ -27,7 +28,7 @@ export async function getUser(userId: number, isSelf: boolean) {
   return getPublicUserInfo(user);
 }
 
-export async function updateUser(userId: number, data: user.updateUserInput) {
+export async function updateUser(userId: number, data: UpdateUserInput) {
   const _data: Prisma.userUpdateInput = {};
 
   const user = await prismaClient.user.findFirst({
