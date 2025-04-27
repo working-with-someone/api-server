@@ -66,7 +66,7 @@ export async function getLiveSession(data: {
 
 export async function getLiveSessions(data: GetLiveSessionsInput) {
   const whereCondition = {
-    category: data.category,
+    category_label: data.category,
     OR: [
       // curr user의 live session은 모두
       {
@@ -151,8 +151,21 @@ export async function createLiveSession(data: createSessionInput) {
       description: data.description,
       thumbnail_uri,
       access_level: data.access_level,
-      category: data.category,
-      organizer_id: data.userId,
+      category: {
+        connectOrCreate: {
+          where: {
+            label: data.category,
+          },
+          create: {
+            label: data.category,
+          },
+        },
+      },
+      organizer: {
+        connect: {
+          id: data.userId,
+        },
+      },
       status: live_session_status.READY,
       stream_key: streamKey,
     },

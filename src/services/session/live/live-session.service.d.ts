@@ -9,8 +9,9 @@ export interface GetLiveSessionsInput extends PagiNationData {
 export interface createSessionInput
   extends Pick<
     Prisma.live_sessionCreateInput,
-    'title' | 'description' | 'access_level' | 'category'
+    'title' | 'description' | 'access_level'
   > {
+  category: string;
   userId: number;
   thumbnail?: Express.Multer.File;
 }

@@ -1,10 +1,5 @@
 import { faker } from '@faker-js/faker';
-import {
-  Prisma,
-  PrismaClient,
-  live_session,
-  live_session_break_time,
-} from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { IFactory } from './factory';
 
 const prisma = new PrismaClient();
@@ -28,7 +23,6 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
     const title = overrides?.title || faker.lorem.words(3);
     const description = overrides?.description || faker.lorem.sentences(2);
     const thumbnail_uri = overrides?.thumbnail_uri || faker.image.url();
-    const category = overrides?.category || faker.lorem.word();
     const stream_key = overrides?.stream_key || faker.string.uuid();
     const access_level = overrides?.access_level || 'PUBLIC';
     const status = overrides?.status || 'READY';
@@ -38,7 +32,16 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
       title,
       description,
       thumbnail_uri,
-      category,
+      category: {
+        connectOrCreate: overrides?.category?.connectOrCreate || {
+          where: {
+            label: 'test',
+          },
+          create: {
+            label: 'test',
+          },
+        },
+      },
       stream_key,
       access_level,
       status,

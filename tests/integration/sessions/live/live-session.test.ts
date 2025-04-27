@@ -2,12 +2,12 @@ import prismaClient from '../../../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../../../src';
 import currUser from '../../../data/curr-user';
-import { live_session_status, access_level } from '@prisma/client';
-import categories from '../../../../static/data/category.json';
+import { live_session_status, access_level, category } from '@prisma/client';
 import httpStatusCode from 'http-status-codes';
 import { userFactory, liveSessionFactory } from '../../../factories';
 import { user } from '@prisma/client';
 import fs from 'node:fs';
+import categoryFactory from '../../../factories/category-factory';
 
 describe('Live Session API', () => {
   let user1: user;
@@ -285,14 +285,13 @@ describe('Live Session API', () => {
     });
 
     describe('Categorized_Live_Session', () => {
+      const categories: category[] = [];
       beforeAll(async () => {
-        for (const category of categories) {
-          await liveSessionFactory.createManyAndSave({
-            overrides: {
-              category: category.label,
-            },
-          });
-        }
+        categories.push(
+          ...(await categoryFactory.createManyAndSave({
+            count: 4,
+          }))
+        );
       });
 
       for (const category of categories) {
@@ -336,7 +335,7 @@ describe('Live Session API', () => {
         .set('Content-Type', 'multipart/form-data')
         .field('title', newLiveSession.title)
         .field('description', newLiveSession.description!)
-        .field('category', newLiveSession.category)
+        .field('category', 'test')
         .field('access_level', access_level.PUBLIC)
         .attach(
           'thumbnail',
@@ -363,7 +362,7 @@ describe('Live Session API', () => {
         .set('Content-Type', 'multipart/form-data')
         .field('title', newLiveSession.title)
         .field('description', newLiveSession.description!)
-        .field('category', newLiveSession.category)
+        .field('category', 'test')
         .field('access_level', access_level.PUBLIC);
 
       expect(res.statusCode).toEqual(201);
@@ -380,7 +379,7 @@ describe('Live Session API', () => {
         .set('Content-Type', 'multipart/form-data')
         .field('title', newLiveSession.title)
         .field('description', newLiveSession.description!)
-        .field('category', newLiveSession.category)
+        .field('category', 'test')
         .field('access_level', access_level.PUBLIC)
         .attach(
           'thumbnail',
@@ -407,7 +406,7 @@ describe('Live Session API', () => {
         .set('Content-Type', 'multipart/form-data')
         .field('title', newLiveSession.title)
         .field('description', newLiveSession.description!)
-        .field('category', newLiveSession.category)
+        .field('category', 'test')
         .field('access_level', access_level.PRIVATE);
 
       expect(res.statusCode).toEqual(201);
@@ -424,7 +423,7 @@ describe('Live Session API', () => {
         .set('Content-Type', 'multipart/form-data')
         .field('title', newLiveSession.title)
         .field('description', newLiveSession.description!)
-        .field('category', newLiveSession.category)
+        .field('category', 'test')
         .field('access_level', 5);
 
       expect(res.statusCode).toEqual(400);
