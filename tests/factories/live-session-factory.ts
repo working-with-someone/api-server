@@ -33,14 +33,17 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
       description,
       thumbnail_uri,
       category: {
-        connectOrCreate: overrides?.category?.connectOrCreate || {
-          where: {
-            label: 'test',
-          },
-          create: {
-            label: 'test',
-          },
-        },
+        connect: overrides?.category?.connect || undefined,
+        connectOrCreate: overrides?.category?.connect
+          ? undefined
+          : {
+              where: {
+                label: 'test',
+              },
+              create: {
+                label: 'test',
+              },
+            },
       },
       stream_key,
       access_level,

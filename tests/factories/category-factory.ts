@@ -13,7 +13,7 @@ class CategoryFactory implements IFactory<CategoryCreateInput, category> {
    * @returns 생성된 카테고리 객체
    */
   create(overrides?: Partial<CategoryCreateInput>): CategoryCreateInput {
-    const label = overrides?.label || faker.word.noun();
+    const label = overrides?.label || faker.string.uuid();
 
     const categoryData: CategoryCreateInput = {
       label,
