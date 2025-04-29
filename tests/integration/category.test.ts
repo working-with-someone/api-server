@@ -12,7 +12,7 @@ describe('Category API', () => {
   describe('GET /categories', () => {
     beforeAll(async () => {
       const categories = await categoryFactory.createManyAndSave({
-        count: 100,
+        count: 20,
       });
 
       for (const category of categories) {
