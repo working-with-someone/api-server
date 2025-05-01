@@ -111,6 +111,12 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
     omit: {
       stream_key: true,
     },
+    include: {
+      break_time: true,
+      category: true,
+      live_session_transition_log: true,
+      organizer: true,
+    },
   });
 
   const totalPages = Math.ceil(totalItems / data.per_page);
