@@ -91,7 +91,7 @@ model live_session {
   thumbnail_uri String
   status        live_session_status
   stream_key    String
-  // 1 : public 2 : followersOnly 3 : private
+
   access_level  access_level        @default(PUBLIC)
 
   created_at DateTime  @default(now())
@@ -106,6 +106,7 @@ model live_session {
 
   category_label String
   category       category @relation(fields: [category_label], references: [label])
+
 }
 
 enum live_session_status {
