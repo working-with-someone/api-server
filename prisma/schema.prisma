@@ -92,7 +92,7 @@ model live_session {
   status        live_session_status
   stream_key    String
 
-  access_level  access_level        @default(PUBLIC)
+  access_level access_level @default(PUBLIC)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now())
@@ -106,7 +106,6 @@ model live_session {
 
   category_label String
   category       category @relation(fields: [category_label], references: [label])
-
 }
 
 enum live_session_status {
@@ -148,8 +147,8 @@ model video_session {
   description   String? @db.Text
   thumbnail_uri String
   duration      BigInt
-  // 1 : public 2 : followersOnly 3 : private
-  access_level  Int     @default(1)
+
+  access_level Int @default(1)
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
