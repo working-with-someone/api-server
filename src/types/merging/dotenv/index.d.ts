@@ -33,5 +33,9 @@ declare namespace NodeJS {
 
     AWS_IAM_ACCESS_KEY: string;
     AWS_IAM_SECRET_ACCESS_KEY: string;
+
+    ES_SERVER_URL: string;
+    ES_USERNAME: string;
+    ES_PASSWORD: string;
   }
 }
