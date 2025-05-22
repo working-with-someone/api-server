@@ -8,4 +8,16 @@ const esClinet = new Client({
   },
 });
 
+const init = async () => {
+  const isExistt = await esClinet.indices.exists({
+    index: 'live_session',
+  });
+
+  if (!isExistt) {
+    await esClinet.indices.create({
+      index: 'live_session',
+    });
+  }
+};
+
 export default esClinet;
