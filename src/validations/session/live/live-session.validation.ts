@@ -46,3 +46,10 @@ export const updateLiveSessionStatus: RequestSchema = {
       .required(),
   }),
 };
+
+export const updateLiveSessionThumbnail: RequestSchema = {
+  params: joi.object().keys({
+    live_session_id: joi.string().required(),
+  }),
+  file: joi.object().required(),
+};

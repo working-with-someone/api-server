@@ -915,4 +915,76 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(403);
     });
   });
+
+  describe('PUT /sessions/live/:live_session_id/thumbnail', () => {
+    afterEach(async () => {
+      await prismaClient.live_session.deleteMany({});
+      await prismaClient.follow.deleteMany({});
+    });
+
+    test('Response_200_With_Updated_Live_Session_Thumbnail', async () => {
+      const liveSession = await liveSessionFactory.createAndSave({
+        access_level: access_level.PUBLIC,
+        organizer: {
+          connect: { id: currUser.id },
+        },
+      });
+
+      expect(liveSession).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${liveSession.id}/thumbnail`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach(
+          'thumbnail',
+          fs.createReadStream('./tests/data/images/image.png')
+        );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toBeDefined();
+
+      const thumbnailRes = await request(server).get(res.body.data);
+
+      expect(thumbnailRes.statusCode).toEqual(200);
+    });
+
+    test('Response_400_With_Thumbnail(x)', async () => {
+      const liveSession = await liveSessionFactory.createAndSave({
+        access_level: access_level.PUBLIC,
+        organizer: {
+          connect: { id: currUser.id },
+        },
+      });
+
+      expect(liveSession).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${liveSession.id}/thumbnail`)
+        .set('Content-Type', 'multipart/form-data')
+        .field('thumbnail', '');
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_403', async () => {
+      const liveSession = await liveSessionFactory.createAndSave({
+        access_level: access_level.PUBLIC,
+        organizer: {
+          connect: { id: user1.id },
+        },
+      });
+
+      expect(liveSession).toBeDefined();
+
+      const res = await request(server)
+        .put(`/sessions/live/${liveSession.id}/thumbnail`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach(
+          'thumbnail',
+          fs.createReadStream('./tests/data/images/image.png')
+        );
+
+      expect(res.statusCode).toEqual(403);
+    });
+  });
 });

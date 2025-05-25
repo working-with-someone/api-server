@@ -221,3 +221,29 @@ export async function updateLiveSessionStatus(data: {
 
   return updatedLiveSession.status;
 }
+
+export async function updateLiveSessionThumbnail(data: {
+  liveSession: AttachedLiveSession;
+  thumbnail: Express.Multer.File;
+}) {
+  const liveSession = data.liveSession;
+
+  let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
+
+  if (data.thumbnail) {
+    const key = await uploadImage('thumbnail', data.thumbnail);
+
+    thumbnail_uri = path.posix.join(to.media.images, key);
+  }
+
+  const updatedLiveSession = await prismaClient.live_session.update({
+    where: {
+      id: liveSession.id,
+    },
+    data: {
+      thumbnail_uri,
+    },
+  });
+
+  return updatedLiveSession.thumbnail_uri;
+}

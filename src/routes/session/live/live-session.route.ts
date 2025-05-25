@@ -39,6 +39,15 @@ router
     liveSessionController.updateLiveSessionStatus
   );
 
+router
+  .route('/:live_session_id/thumbnail')
+  .put(
+    multer().single('thumbnail'),
+    validate(liveSessionValidationSchema.updateLiveSessionThumbnail),
+    liveSessionMiddleware.attachLiveSessionOrNotfound,
+    liveSessionMiddleware.checkOwnerOrForbidden,
+    liveSessionController.updateLiveSessionThumbnail
+  );
 router.use('/:live_session_id/break_time', breakTimeRouter);
 
 export default router;

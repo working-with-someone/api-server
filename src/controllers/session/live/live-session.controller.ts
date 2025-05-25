@@ -58,3 +58,16 @@ export const updateLiveSessionStatus = asyncCatch(
     });
   }
 );
+
+export const updateLiveSessionThumbnail = asyncCatch(
+  async (req: Request, res: Response) => {
+    const thumbnail_uri = await liveSessionService.updateLiveSessionThumbnail({
+      liveSession: res.locals.liveSession,
+      thumbnail: req.file as Express.Multer.File,
+    });
+
+    return res.status(200).json({
+      data: thumbnail_uri,
+    });
+  }
+);
