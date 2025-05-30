@@ -4,6 +4,7 @@ import { PagiNationData } from '../../../types/pagination';
 export interface GetLiveSessionsInput extends PagiNationData {
   userId: number;
   category: string;
+  search: string;
 }
 
 export interface createSessionInput

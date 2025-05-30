@@ -23,6 +23,7 @@ export const getLiveSessions = asyncCatch(
         page: parseInt(req.query.page as string),
         userId: req.user.id,
         category: req.query.category as string,
+        search: req.query.search as string,
       });
 
     return res.status(200).json({

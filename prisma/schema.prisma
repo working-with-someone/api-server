@@ -106,6 +106,8 @@ model live_session {
 
   category_label String
   category       category @relation(fields: [category_label], references: [label])
+
+  @@fulltext([title, description])
 }
 
 enum live_session_status {

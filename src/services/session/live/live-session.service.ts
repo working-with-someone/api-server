@@ -67,6 +67,12 @@ export async function getLiveSession(data: {
 export async function getLiveSessions(data: GetLiveSessionsInput) {
   const whereCondition = {
     category_label: data.category,
+    title: {
+      search: data.search || undefined,
+    },
+    description: {
+      search: data.search || undefined,
+    },
     OR: [
       // curr user의 live session은 모두
       {
@@ -105,7 +111,6 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
 
   const liveSessions = await prismaClient.live_session.findMany({
     where: whereCondition,
-
     skip: (data.page - 1) * data.per_page,
     take: data.per_page,
     omit: {
