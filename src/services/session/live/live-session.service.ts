@@ -11,7 +11,7 @@ import { to } from '../../../config/path.config';
 
 import { checkFollowing } from '../../follow.service';
 import { Prisma, live_session_status, access_level } from '@prisma/client';
-import { generateStreamKey } from '../../../utils/generator';
+import randomString from 'randomstring';
 import { sanitize } from '../../../utils/sanitize';
 
 export async function isAllowedToLiveSession(data: {
@@ -145,7 +145,7 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
 
 export async function createLiveSession(data: createSessionInput) {
   const uuid = v4();
-  const streamKey = generateStreamKey();
+  const streamKey = randomString.generate(32);
 
   let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
 
