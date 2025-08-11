@@ -21,10 +21,10 @@ async function tearDown() {
   UserFactory.cleanup();
   categoryFactory.cleanup();
 
-  await clearTestDatabase();
+  await clearDatabase();
 }
 
-const clearTestDatabase = async () => {
+const clearDatabase = async () => {
   const initialCounts = await getTableCounts();
 
   await prismaClient.live_session_transition_log.deleteMany();

@@ -3,10 +3,10 @@
 import { category, PrismaClient, user } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
-import { generateStreamKey } from '../src/utils/generator';
-
+import path from 'node:path';
+import randomstring from 'randomstring';
 const prisma = new PrismaClient();
-
+import { to } from '../src/config/path.config';
 const USERS_COUNT = 20;
 const FOLLOWS_COUNT = 30;
 const LIVE_SESSIONS_COUNT = 10;
@@ -34,8 +34,27 @@ const generateRandomId = (): string => {
   return crypto.randomUUID();
 };
 
+const clearDatabase = async () => {
+  await prisma.live_session_transition_log.deleteMany();
+  await prisma.live_session_break_time.deleteMany();
+  await prisma.live_session_allow.deleteMany();
+  await prisma.video_session_break_time.deleteMany();
+  await prisma.video_session_allow.deleteMany();
+  await prisma.live_session.deleteMany();
+  await prisma.video_session.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.follow.deleteMany();
+  await prisma.oauth_client.deleteMany();
+  await prisma.pfp.deleteMany();
+  await prisma.email_verification.deleteMany();
+  await prisma.user.deleteMany();
+};
+
 async function main(): Promise<void> {
   console.log('Starting seed data generation 🌱');
+
+  console.log('Clearing existing data...');
+  await clearDatabase();
 
   if (
     process.env.MY_USER_NAME &&
@@ -169,7 +188,6 @@ async function main(): Promise<void> {
     categories.push(category);
     console.log(`✅  Category created: ${category.label}`);
   }
-
   console.log('Creating live sessions...');
   const liveSessionStatuses = ['READY', 'OPENED', 'BREAKED', 'CLOSED'];
   const accessLevels = ['PUBLIC', 'FOLLOWER_ONLY', 'PRIVATE'];
@@ -190,14 +208,14 @@ async function main(): Promise<void> {
           id: sessionId,
           title: faker.lorem.sentence().substring(0, 100),
           description: faker.lorem.paragraphs(2),
-          thumbnail_uri: faker.image.url(),
+          thumbnail_uri: path.posix.join(to.media.default.images, 'thumbnail'),
           category: {
             connect: {
               label: category.label,
             },
           },
           status: status,
-          stream_key: generateStreamKey(),
+          stream_key: randomstring.generate(32),
           access_level: accessLevel,
           started_at: status !== 'READY' ? faker.date.recent() : null,
           organizer: {
