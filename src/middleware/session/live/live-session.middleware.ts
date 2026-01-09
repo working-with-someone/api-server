@@ -20,6 +20,12 @@ const liveSessionMiddleware = {
       omit: {
         stream_key: true,
       },
+      include: {
+        allow: true,
+        category: true,
+        break_time: true,
+        live_session_transition_log: true,
+      },
     });
 
     if (!liveSession) {
