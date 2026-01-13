@@ -158,7 +158,7 @@ describe('Live Session API', () => {
           organizer: {
             connect: { id: user1.id },
           },
-          status: live_session_status.OPENED,
+          status: live_session_status.READY,
         },
       });
 
@@ -169,7 +169,7 @@ describe('Live Session API', () => {
           organizer: {
             connect: { id: currUser.id },
           },
-          status: live_session_status.OPENED,
+          status: live_session_status.BREAKED,
         },
       });
 
@@ -180,7 +180,7 @@ describe('Live Session API', () => {
           organizer: {
             connect: { id: currUser.id },
           },
-          status: live_session_status.OPENED,
+          status: live_session_status.CLOSED,
         },
       });
 
@@ -191,7 +191,7 @@ describe('Live Session API', () => {
           organizer: {
             connect: { id: currUser.id },
           },
-          status: live_session_status.OPENED,
+          status: live_session_status.READY,
         },
       });
     });
@@ -317,6 +317,98 @@ describe('Live Session API', () => {
         expect(res.status).toEqual(httpStatusCode.OK);
         expect(res.body.data).toBeDefined();
         expect(res.body.data).toHaveLength(0);
+      });
+    });
+
+    describe('Search_With_Status', () => {
+      test('Response_200_With_READY', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          status: live_session_status.READY,
+          per_page: 10,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body.data[0].status).toEqual(live_session_status.READY);
+      });
+
+      test('Response_200_With_OPENED', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          status: live_session_status.OPENED,
+          per_page: 10,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body.data[0].status).toEqual(live_session_status.OPENED);
+        expect(res.body.data[1].status).toEqual(live_session_status.OPENED);
+      });
+
+      test('Response_200_With_BREAKED', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          status: live_session_status.BREAKED,
+          per_page: 10,
+          page: 1,
+        });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body.data[0].status).toEqual(live_session_status.BREAKED);
+      });
+
+      test('Response_200_With_CLOSED', async () => {
+        const res = await request(server).get('/sessions/live').query({
+          status: live_session_status.CLOSED,
+          per_page: 10,
+          page: 1,
+        });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(2);
+        expect(res.body.data[0].status).toEqual(live_session_status.CLOSED);
+      });
+
+      test('Response_200_With_READY_AND_OPENED', async () => {
+        const res = await request(server)
+          .get('/sessions/live')
+          .query({
+            status: [live_session_status.READY, live_session_status.OPENED],
+            per_page: 10,
+            page: 1,
+          });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(4);
+      });
+
+      test('Response_200_With_BREAKED_AND_CLOSED', async () => {
+        const res = await request(server)
+          .get('/sessions/live')
+          .query({
+            status: [live_session_status.BREAKED, live_session_status.CLOSED],
+            per_page: 10,
+            page: 1,
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(4);
+      });
+
+      test('Response_200_With_ALL_Status', async () => {
+        const res = await request(server)
+          .get('/sessions/live')
+          .query({
+            status: [
+              live_session_status.READY,
+              live_session_status.OPENED,
+              live_session_status.BREAKED,
+              live_session_status.CLOSED,
+            ],
+            per_page: 10,
+            page: 1,
+          });
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(8);
       });
     });
   });

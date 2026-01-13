@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import asyncCatch from '../../../utils/asyncCatch';
 import { liveSessionService } from '../../../services';
+import { live_session_status } from '@prisma/client';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
@@ -24,6 +25,7 @@ export const getLiveSessions = asyncCatch(
         userId: req.user.id,
         category: req.query.category as string,
         search: req.query.search as string,
+        status: req.query.status as live_session_status | live_session_status[],
       });
 
     return res.status(200).json({

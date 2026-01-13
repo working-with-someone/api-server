@@ -14,6 +14,16 @@ export const getLiveSessions: RequestSchema = {
   query: pagiNationQuerySchema.keys({
     category: joi.string().optional(),
     search: joi.string().optional(),
+    status: [
+      joi
+        .string()
+        .valid(...Object.values(live_session_status))
+        .optional(),
+      joi
+        .array()
+        .items(joi.string().valid(...Object.values(live_session_status)))
+        .optional(),
+    ],
   }),
 };
 

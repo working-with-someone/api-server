@@ -65,6 +65,12 @@ export async function getLiveSession(data: {
 }
 
 export async function getLiveSessions(data: GetLiveSessionsInput) {
+  const statusArray = data.status
+    ? Array.isArray(data.status)
+      ? data.status
+      : [data.status]
+    : undefined;
+
   const whereCondition = {
     category_label: data.category,
     title: {
@@ -72,6 +78,9 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
     },
     description: {
       search: data.search || undefined,
+    },
+    status: {
+      in: statusArray,
     },
     OR: [
       // curr user의 live session은 모두
