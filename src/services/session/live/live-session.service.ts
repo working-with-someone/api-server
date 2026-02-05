@@ -129,7 +129,11 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
       break_time: true,
       category: true,
       live_session_transition_log: true,
-      organizer: true,
+      organizer: {
+        include: {
+          pfp: true,
+        },
+      },
     },
   });
 
