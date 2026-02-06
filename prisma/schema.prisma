@@ -148,7 +148,7 @@ model video_session {
   title         String  @db.VarChar(100)
   description   String? @db.Text
   thumbnail_uri String
-  duration      BigInt
+  duration      String
 
   access_level access_level @default(PUBLIC)
 
