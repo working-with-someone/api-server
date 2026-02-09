@@ -62,5 +62,23 @@ describe('Category API', () => {
         );
       }
     });
+
+    test('Response_200_Sorted_By_Video_Session_Count_Categories', async () => {
+      const per_page = 10;
+      const res = await request(server).get('/categories').query({
+        page: 1,
+        per_page,
+        sort: 'video_session_count',
+      });
+      expect(res.statusCode).toEqual(httpStatusCode.OK);
+      expect(res.body.data).toHaveLength(10);
+
+      // 내림차순으로 정렬되어있어야한다.
+      for (let i = 1; i < per_page; i++) {
+        expect(res.body.data[i]._count.video_session).toBeLessThanOrEqual(
+          res.body.data[i - 1]._count.video_session
+        );
+      }
+    });
   });
 });

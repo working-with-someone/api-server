@@ -301,75 +301,91 @@ async function main(): Promise<void> {
     }
   }
 
-  // Create video sessions
-  // console.log('Creating video sessions...');
+  console.log('Creating video sessions...');
 
-  // for (const category of categories) {
-  //   for (let i = 0; i < VIDEO_SESSIONS_COUNT; i++) {
-  //     const userIndex = Math.floor(Math.random() * USERS_COUNT);
-  //     const sessionId = generateRandomId();
-  //     const accessLevel = Math.floor(Math.random() * 3) + 1; // 1: public, 2: followersOnly, 3: private
+  for (const category of categories) {
+    for (let i = 0; i < VIDEO_SESSIONS_COUNT; i++) {
+      const userIndex = Math.floor(Math.random() * USERS_COUNT);
+      const sessionId = generateRandomId();
+      const accessLevel = accessLevels[
+        Math.floor(Math.random() * accessLevels.length)
+      ] as 'PUBLIC' | 'FOLLOWER_ONLY' | 'PRIVATE';
 
-  //     const videoSession = await prisma.video_session.create({
-  //       data: {
-  //         id: sessionId,
-  //         title: faker.lorem.sentence().substring(0, 100),
-  //         description: faker.lorem.paragraphs(2),
-  //         thumbnail_uri: faker.image.url(),
-  //         category: {
-  //           connect: {
-  //             label: category.label,
-  //           },
-  //         },
-  //         duration: BigInt(Math.floor(Math.random() * 3600) + 600), // between 10 minutes and 1 hour
-  //         access_level: accessLevel,
-  //         organizer: {
-  //           connect: {
-  //             id: users[userIndex].id,
-  //           },
-  //         },
-  //       },
-  //     });
+      const minutes = Math.floor(Math.random() * 176) + 5; // 5 - 180 minutes
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      const duration = `${String(hours).padStart(2, '0')}:${String(
+        mins
+      ).padStart(2, '0')}:00`;
 
-  //     // Create allow list for private sessions
-  //     if (accessLevel === 3) {
-  //       const allowCount = Math.floor(Math.random() * 5) + 1;
-  //       const allowedUserIndices = new Set<number>();
+      const videoSession = await prisma.video_session.create({
+        data: {
+          id: sessionId,
+          title: faker.lorem.sentence().substring(0, 100),
+          description: faker.lorem.paragraphs(2),
+          thumbnail_uri: path.posix.join(to.media.default.images, 'thumbnail'),
+          duration,
+          access_level: accessLevel,
+          organizer: {
+            connect: {
+              id: users[userIndex].id,
+            },
+          },
+          category: {
+            connect: {
+              label: category.label,
+            },
+          },
+        },
+      });
 
-  //       for (let j = 0; j < allowCount; j++) {
-  //         let allowedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+      console.log(
+        `✅  Video Session Created : ${videoSession.title} / ${videoSession.access_level} / ${videoSession.category_label}`
+      );
 
-  //         // Prevent duplicates and self-allowing
-  //         while (
-  //           allowedUserIndex === userIndex ||
-  //           allowedUserIndices.has(allowedUserIndex)
-  //         ) {
-  //           allowedUserIndex = Math.floor(Math.random() * USERS_COUNT);
-  //         }
+      // Create allow list for private sessions
+      if (accessLevel === 'PRIVATE') {
+        const allowCount = Math.floor(Math.random() * 5) + 1;
+        const allowedUserIndices = new Set<number>();
 
-  //         allowedUserIndices.add(allowedUserIndex);
+        for (let j = 0; j < allowCount; j++) {
+          let allowedUserIndex = Math.floor(Math.random() * USERS_COUNT);
 
-  //         await prisma.video_session_allow.create({
-  //           data: {
-  //             video_session_id: sessionId,
-  //             user_id: users[allowedUserIndex].id,
-  //           },
-  //         });
-  //       }
-  //     }
+          // Prevent duplicates and self-allowing
+          while (
+            allowedUserIndex === userIndex ||
+            allowedUserIndices.has(allowedUserIndex)
+          ) {
+            allowedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+          }
 
-  //     // Set break time for some sessions
-  //     if (i % 3 === 0) {
-  //       await prisma.video_session_break_time.create({
-  //         data: {
-  //           session_id: sessionId,
-  //           interval: (Math.floor(Math.random() * 5) + 1) * 10, // in 10-minute units
-  //           duration: (Math.floor(Math.random() * 3) + 1) * 5, // in 5-minute units
-  //         },
-  //       });
-  //     }
-  //   }
-  // }
+          allowedUserIndices.add(allowedUserIndex);
+
+          await prisma.video_session_allow.create({
+            data: {
+              video_session_id: sessionId,
+              user_id: users[allowedUserIndex].id,
+            },
+          });
+        }
+
+        console.log(`   ✅  allow list created`);
+      }
+
+      // Set break time for some sessions
+      if (i % 3 === 0) {
+        await prisma.video_session_break_time.create({
+          data: {
+            session_id: sessionId,
+            interval: (Math.floor(Math.random() * 5) + 1) * 10, // in 10-minute units
+            duration: (Math.floor(Math.random() * 3) + 1) * 5, // in 5-minute units
+          },
+        });
+
+        console.log(`   ✅  video Session break time created`);
+      }
+    }
+  }
 
   console.log('Seed data generation completed 🌱');
 }

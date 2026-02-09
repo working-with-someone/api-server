@@ -3,6 +3,7 @@ import * as mediaValidationSchema from './media.validation';
 import * as followValidationSchema from './follow.validation';
 import * as categoryValidationSchema from './category.validation';
 import * as liveSessionValidationSchema from './session/live/live-session.validation';
+import * as videoSessionValidationSchema from './session/video/video-session.validation';
 import * as breakTimeValidationSchema from './break-time.validation';
 
 export {
@@ -11,5 +12,6 @@ export {
   followValidationSchema,
   categoryValidationSchema,
   liveSessionValidationSchema,
+  videoSessionValidationSchema,
   breakTimeValidationSchema,
 };
