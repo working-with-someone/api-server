@@ -39,6 +39,8 @@ const clearDatabase = async () => {
   await prismaClient.pfp.deleteMany();
   await prismaClient.email_verification.deleteMany();
   await prismaClient.user.deleteMany();
+  await prismaClient.category.deleteMany();
+  await prismaClient.preferred_category.deleteMany();
 
   const finalCounts = await getTableCounts();
 
@@ -79,6 +81,8 @@ const getTableCounts = async () => {
   counts.pfp = await prismaClient.pfp.count();
   counts.email_verification = await prismaClient.email_verification.count();
   counts.user = await prismaClient.user.count();
+  counts.category = await prismaClient.category.count();
+  counts.preferred_category = await prismaClient.preferred_category.count();
 
   return counts;
 };

@@ -4,6 +4,7 @@ import { userValidationSchema } from '../../validations';
 import validate from '../../middleware/validate.middleware';
 import multer from 'multer';
 import { followingRouter, followerRouter } from './follow.route';
+import preferredRouter from './preferredCategory.route';
 import userEndpointMiddleware from '../../middleware/user/user.middleware';
 
 const router = Router();
@@ -32,5 +33,7 @@ router
 router.use('/:user_id/followings', followingRouter);
 // /users/:user_id/followers
 router.use('/:user_id/followers', followerRouter);
+// /users/:user_id/preferred-categories
+router.use('/:user_id/preferred-categories', preferredRouter);
 
 export default router;

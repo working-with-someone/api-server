@@ -31,6 +31,7 @@ model user {
 
   live_session_allow_list  live_session_allow[]
   video_session_allow_list video_session_allow[]
+  preferred_categories     preferred_category[]
 }
 
 model pfp {
@@ -185,6 +186,16 @@ model video_session_break_time {
 model category {
   label String @id
 
-  live_session  live_session[]
-  video_session video_session[]
+  live_session        live_session[]
+  video_session       video_session[]
+  preferredCategories preferred_category[]
+}
+
+model preferred_category {
+  user           user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id        Int
+  category       category @relation(fields: [category_label], references: [label], onDelete: Cascade)
+  category_label String
+
+  @@id([user_id, category_label])
 }
