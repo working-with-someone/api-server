@@ -19,7 +19,7 @@ export interface IFactory<CreateInput, Model> {
    * @param options - 오버라이드 필드 값 및 생성 개수
    * @returns 생성된 데이터 객체 배열
    */
-  createMany(options?: {
+  createMany?(options?: {
     overrides?: Partial<CreateInput>;
     count?: number;
   }): CreateInput[];
@@ -29,7 +29,7 @@ export interface IFactory<CreateInput, Model> {
    * @param options - 오버라이드 필드 값 및 생성 개수
    * @returns 저장된 데이터 객체 배열
    */
-  createManyAndSave(options?: {
+  createManyAndSave?(options?: {
     overrides?: Partial<CreateInput>;
     count?: number;
   }): Promise<Model[]>;
