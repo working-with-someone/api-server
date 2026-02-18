@@ -56,9 +56,13 @@ describe('Preferred Category API', () => {
 
   describe('POST /users/:user_id/preferred-categories/:category_label', () => {
     let categoryA: any;
+    let categoryB: any;
+    let categoryC: any;
 
     beforeEach(async () => {
       categoryA = await categoryFactory.createAndSave();
+      categoryB = await categoryFactory.createAndSave();
+      categoryC = await categoryFactory.createAndSave();
     });
 
     afterEach(async () => {
@@ -74,6 +78,27 @@ describe('Preferred Category API', () => {
       expect(res.body.data).toBeDefined();
       expect(res.body.data.user_id).toEqual(currUser.id);
       expect(res.body.data.category_label).toEqual(categoryA.label);
+      expect(res.body.data.priority).toEqual(0);
+    });
+
+    test('Response_201_With_Incremented_Priority', async () => {
+      const res1 = await request(server).post(
+        `/users/${currUser.id}/preferred-categories/${categoryA.label}`
+      );
+
+      expect(res1.body.data.priority).toEqual(0);
+
+      const res2 = await request(server).post(
+        `/users/${currUser.id}/preferred-categories/${categoryB.label}`
+      );
+
+      expect(res2.body.data.priority).toEqual(1);
+
+      const res3 = await request(server).post(
+        `/users/${currUser.id}/preferred-categories/${categoryC.label}`
+      );
+
+      expect(res3.body.data.priority).toEqual(2);
     });
 
     test('Response_409', async () => {

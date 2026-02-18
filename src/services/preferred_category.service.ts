@@ -50,7 +50,12 @@ export async function createPreferredCategory(
   }
 
   const createdPreferredCategory = await prismaClient.preferred_category.create(
-    { data }
+    {
+      data: {
+        ...data,
+        priority: preferredCategoryCount,
+      },
+    }
   );
 
   return createdPreferredCategory;

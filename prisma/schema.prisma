@@ -196,6 +196,7 @@ model preferred_category {
   user_id        Int
   category       category @relation(fields: [category_label], references: [label], onDelete: Cascade)
   category_label String
+  priority       Int      @default(0)
 
   @@id([user_id, category_label])
 }
