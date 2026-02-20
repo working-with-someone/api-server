@@ -36,4 +36,15 @@ preferredRouter
     preferredCategoryController.deletePreferredCategory
   );
 
+// update priority
+preferredRouter
+  .route('/:category_label/priority/:priority')
+  .put(
+    validate(preferredCategoryValidationSchema.updatePreferredCategoryPriority),
+    userEndpointMiddleware.attachUserOrNotfound,
+    userEndpointMiddleware.checkIsOwnerOrForbidden,
+    categoryEndpointMiddleware.checkCategoryExistOrNotFound,
+    preferredCategoryController.updatePreferredCategoryPriority
+  );
+
 export default preferredRouter;

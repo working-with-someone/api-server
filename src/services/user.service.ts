@@ -14,7 +14,9 @@ export async function getUser(userId: number, isSelf: boolean) {
     where: { id: userId },
     include: {
       pfp: true,
-      preferred_categories: true,
+      preferred_categories: {
+        orderBy: { priority: 'asc' },
+      },
     },
   });
 

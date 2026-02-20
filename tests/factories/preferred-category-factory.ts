@@ -1,30 +1,25 @@
-import { faker } from '@faker-js/faker';
-import { Prisma, PrismaClient, preferred_category } from '@prisma/client';
+import { PrismaClient, preferred_category } from '@prisma/client';
 import { IFactory } from './factory';
 const prisma = new PrismaClient();
-
-type PreferredCategoryCreateInput = Prisma.preferred_categoryCreateInput;
+import { CreatePreferredCategoryInput } from '../../src/services/preferred_category.service.d';
+import { preferredCategoryService } from '../../src/services';
 
 class PreferredCategoryFactory
-  implements IFactory<PreferredCategoryCreateInput, preferred_category>
+  implements IFactory<CreatePreferredCategoryInput, preferred_category>
 {
-  create(overrides: PreferredCategoryCreateInput) {
-    const data: PreferredCategoryCreateInput = {
-      user: overrides.user,
-      category: overrides.category,
+  create(data: CreatePreferredCategoryInput) {
+    return {
+      user_id: data.user_id,
+      category_label: data.category_label,
     };
-
-    return data;
   }
 
   async createAndSave(
-    overrides: PreferredCategoryCreateInput
+    data: CreatePreferredCategoryInput
   ): Promise<preferred_category> {
-    const data = this.create(overrides);
-
-    return await prisma.preferred_category.create({
-      data,
-    });
+    return await preferredCategoryService.createPreferredCategory(
+      this.create(data)
+    );
   }
 
   async cleanup(): Promise<void> {

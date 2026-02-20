@@ -34,3 +34,16 @@ export const deletePreferredCategory = asyncCatch(
     return res.status(httpStatusCodes.NO_CONTENT).end();
   }
 );
+
+export const updatePreferredCategoryPriority = asyncCatch(
+  async (req: Request, res: Response) => {
+    const updated =
+      await preferredCategoryService.updatePreferredCategoryPriority({
+        user_id: res.locals.user.id,
+        category_label: req.params.category_label,
+        priority: Number(req.params.priority),
+      });
+
+    return res.status(httpStatusCodes.OK).json({ data: updated });
+  }
+);
