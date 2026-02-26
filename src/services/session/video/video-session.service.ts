@@ -1,6 +1,11 @@
 import prismaClient from '../../../database/clients/prisma';
 import { checkFollowing } from '../../follow.service';
 import { access_level } from '@prisma/client';
+import { v4 } from 'uuid';
+import { uploadImage } from '../../../lib/s3';
+import path from 'node:path';
+import { to } from '../../../config/path.config';
+import { sanitize } from '../../../utils/sanitize';
 
 export async function isAllowedToVideoSession(data: {
   videoSession: any;
@@ -38,6 +43,50 @@ export async function isAllowedToVideoSession(data: {
   }
 
   return true;
+}
+
+export async function createVideoSession(data: any) {
+  const uuid = v4();
+
+  let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
+
+  if (data.thumbnail) {
+    const key = await uploadImage('thumbnail', data.thumbnail);
+
+    thumbnail_uri = path.posix.join(to.media.images, key);
+  }
+
+  const videoSession = await prismaClient.video_session.create({
+    data: {
+      id: uuid,
+      title: data.title,
+      description: data.description,
+      thumbnail_uri,
+      duration: String(data.duration),
+      access_level: data.access_level,
+      category: {
+        connectOrCreate: {
+          where: { label: data.category },
+          create: { label: data.category },
+        },
+      },
+      organizer: {
+        connect: { id: data.userId },
+      },
+    },
+    include: {
+      break_time: true,
+      category: true,
+      organizer: {
+        include: {
+          pfp: true,
+        },
+      },
+      allow: true,
+    },
+  });
+
+  return sanitize(videoSession, {});
 }
 
 export async function getVideoSession(data: {

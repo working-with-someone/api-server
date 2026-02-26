@@ -15,6 +15,14 @@ videoSessionRouter
   );
 
 videoSessionRouter
+  .route('/')
+  .post(
+    multer().single('thumbnail'),
+    validate(videoSessionValidationSchema.createVideoSession),
+    videoSessionController.createVideoSession
+  );
+
+videoSessionRouter
   .route('/:video_session_id')
   .get(
     validate(videoSessionValidationSchema.getVideoSession),

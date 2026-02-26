@@ -3,6 +3,7 @@ import request from 'supertest';
 import server from '../../../../src';
 import currUser from '../../../data/curr-user';
 import { access_level, user } from '@prisma/client';
+import fs from 'node:fs';
 import httpStatusCode from 'http-status-codes';
 import { videoSessionFactory } from '../../../factories/video-session-factory';
 import { userFactory } from '../../../factories';
@@ -177,6 +178,86 @@ describe('Video Session API', () => {
         expect(res.body.data).toBeDefined();
         expect(res.body.data).toHaveLength(0);
       });
+    });
+  });
+
+  describe('POST /sessions/video', () => {
+    // 생성된 session을 모두 제거
+    afterAll(async () => {
+      await videoSessionFactory.cleanup();
+    });
+
+    test('Response_201_With_Public_Video_Session', async () => {
+      const newVideoSession = videoSessionFactory.create();
+
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('title', newVideoSession.title)
+        .field('description', newVideoSession.description!)
+        .field('category', 'test')
+        .field('access_level', access_level.PUBLIC)
+        .field('duration', parseInt(newVideoSession.duration))
+        .attach(
+          'thumbnail',
+          fs.createReadStream('./tests/data/images/image.png')
+        );
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
+
+      const thumbnailRes = await request(server).get(
+        res.body.data.thumbnail_uri
+      );
+
+      expect(thumbnailRes.statusCode).toEqual(200);
+    });
+
+    test('Response_201_With_Public_Video_Session_thumbnail(x)', async () => {
+      const newVideoSession = videoSessionFactory.create();
+
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('title', newVideoSession.title)
+        .field('description', newVideoSession.description!)
+        .field('category', 'test')
+        .field('access_level', access_level.PUBLIC)
+        .field('duration', parseInt(newVideoSession.duration));
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
+    });
+
+    test('Response_201_With_Private_Video_Session_thumbnail(x)', async () => {
+      const newVideoSession = videoSessionFactory.create();
+
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('title', newVideoSession.title)
+        .field('description', newVideoSession.description!)
+        .field('category', 'test')
+        .field('access_level', access_level.PRIVATE)
+        .field('duration', parseInt(newVideoSession.duration));
+
+      expect(res.statusCode).toEqual(201);
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
+    });
+
+    test('Response_400_With_access_level(?)', async () => {
+      const newVideoSession = videoSessionFactory.create();
+
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('title', newVideoSession.title)
+        .field('description', newVideoSession.description!)
+        .field('category', 'test')
+        .field('access_level', 5)
+        .field('duration', parseInt(newVideoSession.duration));
+
+      expect(res.statusCode).toEqual(400);
     });
   });
 });

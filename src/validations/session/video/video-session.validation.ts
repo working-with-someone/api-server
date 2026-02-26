@@ -20,7 +20,7 @@ export const getVideoSessions: RequestSchema = {
 export const createVideoSession: RequestSchema = {
   body: joi.object().keys({
     title: joi.string().required(),
-    description: joi.string().required(),
+    description: joi.string().optional(),
     access_level: joi
       .number()
       .valid(
@@ -29,8 +29,8 @@ export const createVideoSession: RequestSchema = {
         access_level.PRIVATE
       )
       .required(),
-    category: joi.string().required(),
-    duration: joi.number().required(),
+    category: joi.string().optional(),
+    duration: joi.number().optional(),
     thumbnail: joi.optional(),
   }),
   file: joi.object().optional(),
