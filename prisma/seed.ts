@@ -321,6 +321,7 @@ async function main(): Promise<void> {
       const videoSession = await prisma.video_session.create({
         data: {
           id: sessionId,
+          video_id: generateRandomId(),
           title: faker.lorem.sentence().substring(0, 100),
           description: faker.lorem.paragraphs(2),
           thumbnail_uri: path.posix.join(to.media.default.images, 'thumbnail'),

@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { IFactory } from './factory';
 import { VideoSessionWithAll } from '../../src/@types/video-session';
+import { v4 } from 'uuid';
 
 const prisma = new PrismaClient();
 
@@ -36,6 +37,7 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
               },
             },
       },
+      video_id: v4(),
       access_level,
       duration,
       created_at: overrides?.created_at || new Date(),

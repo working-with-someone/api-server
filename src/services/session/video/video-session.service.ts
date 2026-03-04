@@ -1,6 +1,13 @@
 import prismaClient from '../../../database/clients/prisma';
 import { checkFollowing } from '../../follow.service';
 import { access_level } from '@prisma/client';
+import { v4 } from 'uuid';
+import { uploadImage } from '../../../lib/s3';
+import path from 'node:path';
+import { sanitize } from '../../../utils/sanitize';
+import { CreateVideoSessionInput } from './video-session';
+import { Input as MediaInfo, ALL_FORMATS, UrlSource } from 'mediabunny';
+import { mediaServer, to } from '../../../config/path.config';
 
 export async function isAllowedToVideoSession(data: {
   videoSession: any;
@@ -38,6 +45,61 @@ export async function isAllowedToVideoSession(data: {
   }
 
   return true;
+}
+
+export async function createVideoSession(data: CreateVideoSessionInput) {
+  let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
+
+  if (data.thumbnail) {
+    const key = await uploadImage('thumbnail', data.thumbnail);
+
+    thumbnail_uri = path.posix.join(to.media.images, key);
+  }
+
+  const videoURL = path.posix.join(
+    mediaServer.to.staticServer.video.href,
+    data.video_id
+  );
+
+  const mediaInfo = new MediaInfo({
+    source: new UrlSource(videoURL),
+    formats: ALL_FORMATS,
+  });
+
+  const duration = await mediaInfo.computeDuration();
+  const videoSession = await prismaClient.video_session.create({
+    data: {
+      id: v4(),
+      video_id: data.video_id,
+      title: data.title || Date.now().toString(),
+      description: data.description,
+      thumbnail_uri,
+      duration: duration.toString(),
+      access_level: data.access_level,
+      category: data.category_label
+        ? {
+            connect: {
+              label: data.category_label,
+            },
+          }
+        : undefined,
+      organizer: {
+        connect: { id: data.userId },
+      },
+    },
+    include: {
+      break_time: true,
+      category: true,
+      organizer: {
+        include: {
+          pfp: true,
+        },
+      },
+      allow: true,
+    },
+  });
+
+  return sanitize(videoSession, {});
 }
 
 export async function getVideoSession(data: {

@@ -27,3 +27,15 @@ export const getVideoSessions = asyncCatch(
     return res.status(200).json({ data: videoSessions, pagination });
   }
 );
+
+export const createVideoSession = asyncCatch(
+  async (req: Request, res: Response) => {
+    const session = await videoSessionService.createVideoSession({
+      ...req.body,
+      userId: req.session.userId!,
+      thumbnail: req.file,
+    });
+
+    return res.status(201).json({ data: session });
+  }
+);

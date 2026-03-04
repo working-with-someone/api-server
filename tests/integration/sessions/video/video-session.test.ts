@@ -1,3 +1,30 @@
+// Mock mediabunny to avoid real media server calls during tests
+jest.mock('mediabunny', () => {
+  class MockUrlSource {
+    url: string;
+    constructor(url: string) {
+      this.url = url;
+    }
+  }
+
+  class MockMediaInfo {
+    opts: any;
+    constructor(opts: any) {
+      this.opts = opts;
+    }
+
+    async computeDuration() {
+      return 1000; // return a fixed duration (ms or seconds as expected)
+    }
+  }
+
+  return {
+    Input: MockMediaInfo,
+    ALL_FORMATS: [],
+    UrlSource: MockUrlSource,
+  };
+});
+
 import prismaClient from '../../../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../../../src';
@@ -177,6 +204,42 @@ describe('Video Session API', () => {
         expect(res.body.data).toBeDefined();
         expect(res.body.data).toHaveLength(0);
       });
+    });
+  });
+
+  describe('POST /sessions/video', () => {
+    // 생성된 session을 모두 제거
+    afterAll(async () => {
+      await videoSessionFactory.cleanup();
+    });
+
+    test('Response_201_With_Only_Required_Fields', async () => {
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('video_id', 'test-video-id')
+        .field('access_level', access_level.PUBLIC);
+
+      expect(res.statusCode).toEqual(201);
+
+      expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
+
+      const thumbnailRes = await request(server).get(
+        res.body.data.thumbnail_uri
+      );
+
+      expect(thumbnailRes.statusCode).toEqual(200);
+    });
+
+    test('Response_400_With_Only_Non_Required_Fields', async () => {
+      const res = await request(server)
+        .post('/sessions/video')
+        .set('Content-Type', 'multipart/form-data')
+        .field('title', 'Test Video Session')
+        .field('description', 'This is a test video session')
+        .field('category_label', 'test');
+
+      expect(res.statusCode).toEqual(400);
     });
   });
 });

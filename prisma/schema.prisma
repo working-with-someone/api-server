@@ -150,6 +150,7 @@ model video_session {
   description   String? @db.Text
   thumbnail_uri String
   duration      String
+  video_id      String
 
   access_level access_level @default(PUBLIC)
 
@@ -162,8 +163,8 @@ model video_session {
 
   break_time video_session_break_time?
 
-  category_label String
-  category       category @relation(fields: [category_label], references: [label])
+  category_label String?
+  category       category? @relation(fields: [category_label], references: [label])
 }
 
 model video_session_allow {

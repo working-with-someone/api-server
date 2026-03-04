@@ -4,6 +4,7 @@ declare namespace NodeJS {
     HOST: string;
     PORT: string;
     SERVER_URL: string;
+    MEDIA_STATIC_SERVER_ORIGIN: string;
 
     APP_SECRET: string;
     TOKEN_USER_SECRET: string;
