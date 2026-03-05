@@ -99,6 +99,14 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
     return savedSessions;
   }
 
+  async delete(where: Prisma.video_sessionWhereInput): Promise<void> {
+    await prisma.video_session.deleteMany({ where });
+  }
+
+  async deleteMany(where: Prisma.video_sessionWhereInput): Promise<void> {
+    await prisma.video_session.deleteMany({ where });
+  }
+
   async cleanup(): Promise<void> {
     await prisma.video_session.deleteMany({});
   }

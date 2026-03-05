@@ -75,6 +75,14 @@ class CategoryFactory implements IFactory<CategoryCreateInput, category> {
     return savedCategories;
   }
 
+  async delete(where: Prisma.categoryWhereInput): Promise<void> {
+    await prisma.category.deleteMany({ where });
+  }
+
+  async deleteMany(where: Prisma.categoryWhereInput): Promise<void> {
+    await prisma.category.deleteMany({ where });
+  }
+
   async cleanup(): Promise<void> {
     await prisma.category.deleteMany({});
   }

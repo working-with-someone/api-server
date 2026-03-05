@@ -114,6 +114,14 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
     return savedSessions;
   }
 
+  async delete(where: Prisma.live_sessionWhereInput): Promise<void> {
+    await prisma.live_session.deleteMany({ where });
+  }
+
+  async deleteMany(where: Prisma.live_sessionWhereInput): Promise<void> {
+    await prisma.live_session.deleteMany({ where });
+  }
+
   async cleanup(): Promise<void> {
     await prisma.live_session.deleteMany({});
   }

@@ -109,6 +109,14 @@ class UserFactory implements IFactory<UserCreateInput, user> {
     return savedUsers;
   }
 
+  async delete(where: Prisma.userWhereInput): Promise<void> {
+    await prisma.user.deleteMany({ where });
+  }
+
+  async deleteMany(where: Prisma.userWhereInput): Promise<void> {
+    await prisma.user.deleteMany({ where });
+  }
+
   async cleanup(): Promise<void> {
     await prisma.user.deleteMany({});
   }

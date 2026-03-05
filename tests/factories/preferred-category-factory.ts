@@ -1,4 +1,4 @@
-import { PrismaClient, preferred_category } from '@prisma/client';
+import { Prisma, PrismaClient, preferred_category } from '@prisma/client';
 import { IFactory } from './factory';
 const prisma = new PrismaClient();
 import { CreatePreferredCategoryInput } from '../../src/services/preferred_category.service.d';
@@ -20,6 +20,14 @@ class PreferredCategoryFactory
     return await preferredCategoryService.createPreferredCategory(
       this.create(data)
     );
+  }
+
+  async delete(where: Prisma.preferred_categoryWhereInput): Promise<void> {
+    await prisma.preferred_category.deleteMany({ where });
+  }
+
+  async deleteMany(where: Prisma.preferred_categoryWhereInput): Promise<void> {
+    await prisma.preferred_category.deleteMany({ where });
   }
 
   async cleanup(): Promise<void> {
