@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import asyncCatch from '../../../utils/asyncCatch';
 import { videoSessionService } from '../../../services';
+import { wwsError } from '../../../utils/wwsError';
+import httpStatusCode from 'http-status-codes';
 
 export const getVideoSession = asyncCatch(
   async (req: Request, res: Response) => {
@@ -37,5 +39,27 @@ export const createVideoSession = asyncCatch(
     });
 
     return res.status(201).json({ data: session });
+  }
+);
+
+export const updateVideoSession = asyncCatch(
+  async (req: Request, res: Response) => {
+    const videoSession = res.locals.videoSession;
+
+    // only organizer can update
+    if (videoSession.organizer_id !== req.session.userId) {
+      throw new wwsError(httpStatusCode.FORBIDDEN);
+    }
+
+    const updated = await videoSessionService.updateVideoSession({
+      videoSession,
+      userId: req.session.userId!,
+      title: req.body.title,
+      description: req.body.description,
+      access_level: req.body.access_level,
+      category_label: req.body.category_label,
+    });
+
+    return res.status(200).json({ data: updated });
   }
 );

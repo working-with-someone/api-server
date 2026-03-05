@@ -51,3 +51,22 @@ export const updateVideoSessionThumbnail: RequestSchema = {
   }),
   file: joi.object().required(),
 };
+
+export const updateVideoSession: RequestSchema = {
+  params: joi.object().keys({
+    video_session_id: joi.string().required(),
+  }),
+  body: joi.object().keys({
+    title: joi.string().optional(),
+    description: joi.string().optional(),
+    access_level: joi
+      .number()
+      .valid(
+        access_level.PUBLIC,
+        access_level.FOLLOWER_ONLY,
+        access_level.PRIVATE
+      )
+      .optional(),
+    category_label: joi.string().optional(),
+  }),
+};

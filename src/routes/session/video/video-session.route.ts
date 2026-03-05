@@ -31,4 +31,13 @@ videoSessionRouter
     videoSessionController.getVideoSession
   );
 
+videoSessionRouter
+  .route('/:video_session_id')
+  .put(
+    validate(videoSessionValidationSchema.updateVideoSession),
+    videoSessionMiddleware.attachVideoSessionOrNotfound,
+    videoSessionMiddleware.checkOwnerOrForbidden,
+    videoSessionController.updateVideoSession
+  );
+
 export default videoSessionRouter;

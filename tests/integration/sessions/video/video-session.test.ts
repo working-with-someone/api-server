@@ -35,6 +35,7 @@ import { videoSessionFactory } from '../../../factories/video-session-factory';
 import { userFactory } from '../../../factories';
 import categoryFactory from '../../../factories/category-factory';
 import type { category } from '@prisma/client';
+import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 
 describe('Video Session API', () => {
   let user1: user;
@@ -240,6 +241,141 @@ describe('Video Session API', () => {
         .field('category_label', 'test');
 
       expect(res.statusCode).toEqual(400);
+    });
+  });
+
+  describe('PUT /sessions/video/:video_session_id', () => {
+    let videoSession: VideoSessionWithAll;
+
+    beforeEach(async () => {
+      videoSession = await videoSessionFactory.createAndSave({
+        access_level: access_level.PUBLIC,
+        organizer: { connect: { id: currUser.id } },
+      });
+    });
+
+    afterAll(async () => {
+      videoSessionFactory.cleanup();
+    });
+
+    test('Response_200_With_Updated_Title', async () => {
+      const newTitle = 'Updated Video Session Title';
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ title: newTitle });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveProperty('title', newTitle);
+    });
+
+    test('Response_200_With_Updated_Description', async () => {
+      const newDescription = 'Updated description for the video session';
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ description: newDescription });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveProperty('description', newDescription);
+    });
+
+    test('Response_200_With_Updated_Access_Level', async () => {
+      const newAccessLevel = access_level.PRIVATE;
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ access_level: newAccessLevel });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveProperty('access_level', newAccessLevel);
+    });
+
+    test('Response_200_With_Updated_Category', async () => {
+      const newCategoryLabel = 'updated-category';
+
+      const category = await categoryFactory.createAndSave({
+        label: newCategoryLabel,
+      });
+
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ category_label: category.label });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.category).toHaveProperty('label', category.label);
+
+      await categoryFactory.delete({ label: newCategoryLabel });
+    });
+
+    test('Response_400_With_Invalid_Access_Level', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ access_level: 999 });
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_400_With_Nonexistent_Category', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ category_label: 'nonexistent-category' });
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_400_With_Empty_Title', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ title: '' });
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_400_With_Empty_Description', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ description: '' });
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_403_When_User_Is_Not_Organizer', async () => {
+      const otherUser = await userFactory.createAndSave();
+      const newCategoryLabel = 'some-category';
+
+      const category = await categoryFactory.createAndSave({
+        label: newCategoryLabel,
+      });
+
+      const otherUserVideoSession = await videoSessionFactory.createAndSave({
+        access_level: access_level.PUBLIC,
+        organizer: { connect: { id: otherUser.id } },
+      });
+
+      const res = await request(server)
+        .put(`/sessions/video/${otherUserVideoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ title: 'Attempted Update' });
+
+      expect(res.statusCode).toEqual(403);
+
+      await userFactory.delete({ id: otherUser.id });
+      await categoryFactory.delete({ label: newCategoryLabel });
+    });
+
+    test('Response_404_When_Video_Session_Does_Not_Exist', async () => {
+      const res = await request(server)
+        .put('/sessions/video/doesNotExistVideoSessionId')
+        .set('Content-Type', 'application/json')
+        .send({ title: 'Attempted Update' });
+
+      expect(res.statusCode).toEqual(404);
     });
   });
 });

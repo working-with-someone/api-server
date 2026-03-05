@@ -1,13 +1,18 @@
 import prismaClient from '../../../database/clients/prisma';
 import { checkFollowing } from '../../follow.service';
-import { access_level } from '@prisma/client';
+import { access_level, Prisma, PrismaClient } from '@prisma/client';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
 import { sanitize } from '../../../utils/sanitize';
-import { CreateVideoSessionInput } from './video-session';
+import {
+  CreateVideoSessionInput,
+  UpdateVideoSessionInput,
+} from './video-session';
 import { Input as MediaInfo, ALL_FORMATS, UrlSource } from 'mediabunny';
 import { mediaServer, to } from '../../../config/path.config';
+import { wwsError } from '../../../utils/wwsError';
+import httpStatusCodes from 'http-status-codes';
 
 export async function isAllowedToVideoSession(data: {
   videoSession: any;
@@ -100,6 +105,50 @@ export async function createVideoSession(data: CreateVideoSessionInput) {
   });
 
   return sanitize(videoSession, {});
+}
+
+export async function updateVideoSession(data: UpdateVideoSessionInput) {
+  const updateData: Prisma.video_sessionUpdateInput = {};
+
+  if (typeof data.title !== 'undefined') updateData.title = data.title;
+  if (typeof data.description !== 'undefined')
+    updateData.description = data.description;
+  if (typeof data.access_level !== 'undefined')
+    updateData.access_level = data.access_level;
+
+  if (typeof data.category_label !== 'undefined') {
+    const categoryExists = await prismaClient.category.findUnique({
+      where: { label: data.category_label },
+    });
+
+    if (!categoryExists) {
+      throw new wwsError(
+        httpStatusCodes.BAD_REQUEST,
+        'Category does not exist'
+      );
+    }
+
+    updateData.category = {
+      connect: { label: data.category_label },
+    };
+  }
+
+  const updated = await prismaClient.video_session.update({
+    where: { id: data.videoSession.id },
+    data: updateData,
+    include: {
+      break_time: true,
+      category: true,
+      organizer: {
+        include: {
+          pfp: true,
+        },
+      },
+      allow: true,
+    },
+  });
+
+  return sanitize(updated, {});
 }
 
 export async function getVideoSession(data: {

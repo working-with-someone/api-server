@@ -21,3 +21,10 @@ export interface CreateVideoSessionInput
   userId: number;
   thumbnail?: Express.Multer.File;
 }
+
+export interface UpdateVideoSessionInput
+  extends Partial<Prisma.video_sessionUpdateInput> {
+  userId: number;
+  videoSession: any;
+  category_label?: string;
+}

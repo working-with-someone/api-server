@@ -30,6 +30,18 @@ const videoSessionMiddleware = {
     return next();
   },
 
+  checkOwnerOrForbidden: async function (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const videoSession = res.locals.videoSession;
+    if (req.session.userId !== videoSession?.organizer_id) {
+      return next(new wwsError(httpStatusCode.FORBIDDEN));
+    }
+    return next();
+  },
+
   checkAllowedOrForbidden: async function (
     req: Request,
     res: Response,
