@@ -36,6 +36,7 @@ import { userFactory } from '../../../factories';
 import categoryFactory from '../../../factories/category-factory';
 import type { category } from '@prisma/client';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
+import fs from 'node:fs';
 
 describe('Video Session API', () => {
   let user1: user;
@@ -255,7 +256,7 @@ describe('Video Session API', () => {
     });
 
     afterAll(async () => {
-      videoSessionFactory.cleanup();
+      await videoSessionFactory.cleanup();
     });
 
     test('Response_200_With_Updated_Title', async () => {
@@ -307,6 +308,22 @@ describe('Video Session API', () => {
       expect(res.body.data.category).toHaveProperty('label', category.label);
 
       await categoryFactory.delete({ label: newCategoryLabel });
+    });
+
+    test('Response_200_With_Thumbnail', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'multipart/form-data')
+        .attach(
+          'thumbnail',
+          fs.createReadStream('./tests/data/images/image.png')
+        );
+
+      const thumbnailRes = await request(server).get(
+        res.body.data.thumbnail_uri
+      );
+
+      expect(thumbnailRes.statusCode).toEqual(200);
     });
 
     test('Response_400_With_Invalid_Access_Level', async () => {

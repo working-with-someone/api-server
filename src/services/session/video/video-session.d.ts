@@ -27,4 +27,5 @@ export interface UpdateVideoSessionInput
   userId: number;
   videoSession: any;
   category_label?: string;
+  thumbnail?: Express.Multer.File;
 }

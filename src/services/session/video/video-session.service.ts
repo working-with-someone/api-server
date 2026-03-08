@@ -110,6 +110,16 @@ export async function createVideoSession(data: CreateVideoSessionInput) {
 export async function updateVideoSession(data: UpdateVideoSessionInput) {
   const updateData: Prisma.video_sessionUpdateInput = {};
 
+  let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
+
+  if (data.thumbnail) {
+    const key = await uploadImage('thumbnail', data.thumbnail);
+
+    thumbnail_uri = path.posix.join(to.media.images, key);
+
+    updateData.thumbnail_uri = thumbnail_uri;
+  }
+
   if (typeof data.title !== 'undefined') updateData.title = data.title;
   if (typeof data.description !== 'undefined')
     updateData.description = data.description;

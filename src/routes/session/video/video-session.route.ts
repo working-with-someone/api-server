@@ -34,6 +34,7 @@ videoSessionRouter
 videoSessionRouter
   .route('/:video_session_id')
   .put(
+    multer().single('thumbnail'),
     validate(videoSessionValidationSchema.updateVideoSession),
     videoSessionMiddleware.attachVideoSessionOrNotfound,
     videoSessionMiddleware.checkOwnerOrForbidden,

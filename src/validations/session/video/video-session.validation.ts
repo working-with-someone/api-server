@@ -68,5 +68,7 @@ export const updateVideoSession: RequestSchema = {
       )
       .optional(),
     category_label: joi.string().optional(),
+    thumbnail: joi.optional(),
   }),
+  file: joi.object().optional(),
 };
