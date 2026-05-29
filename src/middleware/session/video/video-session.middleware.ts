@@ -18,6 +18,11 @@ const videoSessionMiddleware = {
         allow: true,
         category: true,
         break_time: true,
+        organizer: {
+          include: {
+            pfp: true,
+          },
+        },
       },
     });
 
