@@ -32,6 +32,7 @@ model user {
   live_session_allow_list  live_session_allow[]
   video_session_allow_list video_session_allow[]
   preferred_categories     preferred_category[]
+  comments                 comment[]
 }
 
 model pfp {
@@ -106,7 +107,8 @@ model live_session {
   live_session_transition_log live_session_transition_log[]
 
   category_label String
-  category       category @relation(fields: [category_label], references: [label])
+  category       category  @relation(fields: [category_label], references: [label])
+  comments       comment[]
 
   @@fulltext([title, description])
 }
@@ -165,6 +167,7 @@ model video_session {
 
   category_label String?
   category       category? @relation(fields: [category_label], references: [label])
+  comments       comment[]
 }
 
 model video_session_allow {
@@ -200,4 +203,18 @@ model preferred_category {
   priority       Int      @default(0)
 
   @@id([user_id, category_label])
+}
+
+model comment {
+  id         BigInt   @id @default(autoincrement())
+  content    String   @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  user_id    Int
+  user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  video_session_id String?
+  video_session    video_session? @relation(fields: [video_session_id], references: [id], onDelete: Cascade)
+  live_session_id  String?
+  live_session     live_session?  @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
 }
