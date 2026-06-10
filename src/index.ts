@@ -2,6 +2,7 @@ import s3Client from './database/clients/s3';
 import redisClient from './database/clients/redis';
 import app from './app';
 import prismaClient from './database/clients/prisma';
+import './patch/global';
 
 const server = app.listen(process.env.PORT, () => {
   console.log(`Server is listening on port ${process.env.PORT} 🔥`);

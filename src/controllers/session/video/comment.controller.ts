@@ -9,9 +9,6 @@ export const getComment = asyncCatch(async (req: Request, res: Response) => {
   });
 
   return res.status(httpStatusCode.OK).json({
-    data: {
-      ...comment,
-      id: comment.id.toString(),
-    },
+    data: comment,
   });
 });
