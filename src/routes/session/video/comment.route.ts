@@ -9,6 +9,14 @@ const commentRouter = Router({
 });
 
 commentRouter
+  .route('/')
+  .get(
+    validate(commentValidationSchema.getVideoSessionComments),
+    videoSessionMiddleware.attachVideoSessionOrNotfound,
+    commentController.getComments
+  );
+
+commentRouter
   .route('/:comment_id')
   .get(
     validate(commentValidationSchema.getVideoSessionComment),

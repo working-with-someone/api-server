@@ -31,7 +31,7 @@ class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
     });
   }
 
-  createMany?(
+  createMany(
     options?:
       | {
           overrides?: Partial<Prisma.commentCreateInput> | undefined;
@@ -44,7 +44,7 @@ class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
     return Array.from({ length: count }, () => this.create(overrides));
   }
 
-  async createManyAndSave?(
+  async createManyAndSave(
     options?:
       | {
           overrides?: Partial<Prisma.commentCreateInput> | undefined;

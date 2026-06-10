@@ -22,6 +22,57 @@ describe('Comment API', () => {
       await commentFactory.cleanup();
     });
 
+    describe('GET /session/video/:video_session_id/comment', () => {
+      beforeAll(async () => {
+        await commentFactory.createManyAndSave({
+          count: 30,
+          overrides: {
+            video_session: {
+              connect: { id: videoSession.id },
+            },
+          },
+        });
+      });
+
+      afterAll(async () => {
+        await commentFactory.cleanup();
+      });
+
+      test('Response_200_With_1_Comments', async () => {
+        const res = await request(server).get(
+          `/sessions/video/${videoSession.id}/comment`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(1);
+      });
+
+      test('Response_200_With_10_Comments', async () => {
+        const res = await request(server).get(
+          `/sessions/video/${videoSession.id}/comment?per_page=10`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+      });
+
+      test('Response_200_With_10_Comments_Sorted_By_Recent', async () => {
+        const res = await request(server).get(
+          `/sessions/video/${videoSession.id}/comment?per_page=10&sort=recent`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.data).toEqual(
+          [...res.body.data].sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+        );
+      });
+    });
+
     describe('GET /session/video/:video_session_id/comment/:comment_id', () => {
       let comment: comment;
 

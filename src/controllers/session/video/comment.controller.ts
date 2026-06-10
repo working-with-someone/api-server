@@ -3,6 +3,20 @@ import asyncCatch from '../../../utils/asyncCatch';
 import { commentService } from '../../../services/';
 import httpStatusCode from 'http-status-codes';
 
+export const getComments = asyncCatch(async (req: Request, res: Response) => {
+  const comments = await commentService.getComments({
+    sessionType: 'video',
+    sessionId: req.params.session_id,
+    page: parseInt(req.query.page as string),
+    per_page: parseInt(req.query.per_page as string),
+    sort: req.query.sort as string,
+  });
+
+  return res.status(httpStatusCode.OK).json({
+    data: comments,
+  });
+});
+
 export const getComment = asyncCatch(async (req: Request, res: Response) => {
   const comment = await commentService.getComment({
     comment_id: parseInt(req.params.comment_id),
