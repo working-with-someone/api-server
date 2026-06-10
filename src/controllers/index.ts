@@ -5,6 +5,7 @@ import * as categoryController from './category.controller';
 import * as preferredCategoryController from './preferred_category.controller';
 import * as liveSessionController from './session/live/live-session.controller';
 import * as videoSessionController from './session/video/video-session.controller';
+import * as commentController from './session/video/comment.controller';
 
 export {
   userController,
@@ -14,4 +15,5 @@ export {
   preferredCategoryController,
   liveSessionController,
   videoSessionController,
+  commentController,
 };
