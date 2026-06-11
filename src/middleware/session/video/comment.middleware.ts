@@ -23,6 +23,20 @@ const commentMiddleware = {
 
     return next();
   },
+
+  checkOwnerOrForbidden: async function (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const comment = res.locals.comment;
+
+    if (req.session.userId !== comment?.user_id) {
+      return next(new wwsError(httpStatusCode.FORBIDDEN));
+    }
+
+    return next();
+  },
 };
 
 export default commentMiddleware;

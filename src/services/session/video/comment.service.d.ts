@@ -19,3 +19,10 @@ export interface CreateCommentInput {
   sessionId: string;
   content: string;
 }
+
+export interface DeleteCommentInput {
+  comment_id: bigint;
+  sessionType: SessionType;
+  sessionId: string;
+  currUserId: number;
+}

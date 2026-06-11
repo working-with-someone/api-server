@@ -5,6 +5,8 @@ import request from 'supertest';
 import type { comment } from '@prisma/client';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import currUser from '../../../data/curr-user';
+import { user } from '@prisma/client';
+import { userFactory } from '../../../factories';
 
 describe('Comment API', () => {
   afterAll((done) => {
@@ -14,8 +16,10 @@ describe('Comment API', () => {
   describe('Video_Session_Comment', () => {
     let videoSession: VideoSessionWithAll;
     let commentDisabledVideoSEssion: VideoSessionWithAll;
+    let user1: user;
 
     beforeAll(async () => {
+      user1 = await userFactory.createAndSave();
       videoSession = await videoSessionFactory.createAndSave();
       commentDisabledVideoSEssion = await videoSessionFactory.createAndSave({
         comment_enabled: false,
@@ -23,6 +27,7 @@ describe('Comment API', () => {
     });
 
     afterAll(async () => {
+      await userFactory.cleanup();
       await videoSessionFactory.cleanup();
       await commentFactory.cleanup();
     });
@@ -153,6 +158,56 @@ describe('Comment API', () => {
         const res = await request(server)
           .post(`/sessions/video/${commentDisabledVideoSEssion.id}/comment`)
           .send({ content: 'Test Comment' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.FORBIDDEN);
+      });
+    });
+
+    describe('DELETE /session/video/:video_session_id/comment/:comment_id', () => {
+      let comment: comment;
+      let otherUserComment: comment;
+
+      beforeEach(async () => {
+        comment = await commentFactory.createAndSave({
+          video_session: {
+            connect: { id: videoSession.id },
+          },
+        });
+
+        otherUserComment = await commentFactory.createAndSave({
+          video_session: {
+            connect: { id: videoSession.id },
+          },
+          user: {
+            connect: { id: user1.id },
+          },
+        });
+      });
+
+      afterAll(async () => {
+        await commentFactory.cleanup();
+      });
+
+      test('Response_204', async () => {
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/comment/${comment.id}`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+      });
+
+      test('Response_404_When_Comment_Does_Not_Exist', async () => {
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/comment/99999`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NOT_FOUND);
+      });
+
+      test('Response_403_When_User_Is_Not_The_Owner_Of_The_Comment', async () => {
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/comment/${otherUserComment.id}`
+        );
 
         expect(res.statusCode).toEqual(httpStatusCode.FORBIDDEN);
       });

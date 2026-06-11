@@ -30,6 +30,13 @@ commentRouter
     videoSessionMiddleware.attachVideoSessionOrNotfound,
     commentMiddleware.attachCommentOrNotfound,
     commentController.getComment
+  )
+  .delete(
+    validate(commentValidationSchema.deleteVideoSessionComment),
+    videoSessionMiddleware.attachVideoSessionOrNotfound,
+    commentMiddleware.attachCommentOrNotfound,
+    commentMiddleware.checkOwnerOrForbidden,
+    commentController.deleteComment
   );
 
 export default commentRouter;

@@ -39,3 +39,14 @@ export const createComment = asyncCatch(async (req: Request, res: Response) => {
     data: createdComment,
   });
 });
+
+export const deleteComment = asyncCatch(async (req: Request, res: Response) => {
+  const deletedComment = await commentService.deleteComment({
+    comment_id: res.locals.comment.id,
+    sessionType: 'video',
+    sessionId: req.params.video_session_id,
+    currUserId: req.session.userId!,
+  });
+
+  return res.status(httpStatusCode.NO_CONTENT).end();
+});

@@ -5,6 +5,7 @@ import {
   CreateCommentInput,
   GetCommentInput,
   GetCommentsInput,
+  DeleteCommentInput,
 } from './comment.service.d';
 import { Prisma } from '@prisma/client';
 
@@ -32,10 +33,12 @@ export async function getComments(input: GetCommentsInput) {
   return comments;
 }
 
-export async function deleteComment(id: number) {
+export async function deleteComment(input: DeleteCommentInput) {
   const deletedComment = await prismaClient.comment.delete({
     where: {
-      id,
+      id: input.comment_id,
+      live_session_id: input.sessionType === 'live' ? input.sessionId : null,
+      video_session_id: input.sessionType === 'video' ? input.sessionId : null,
     },
   });
 
