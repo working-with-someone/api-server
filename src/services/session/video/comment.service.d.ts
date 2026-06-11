@@ -1,8 +1,8 @@
 type SessionType = 'live' | 'video';
 type commentSortKeyword = 'recent';
-
+import { Prisma } from '@prisma/client';
 export interface GetCommentInput {
-  comment_id: number;
+  comment: Prisma.commentGetPayload<false>;
 }
 
 export interface GetCommentsInput {

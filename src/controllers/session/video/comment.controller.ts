@@ -19,7 +19,7 @@ export const getComments = asyncCatch(async (req: Request, res: Response) => {
 
 export const getComment = asyncCatch(async (req: Request, res: Response) => {
   const comment = await commentService.getComment({
-    comment_id: parseInt(req.params.comment_id),
+    comment: res.locals.comment,
   });
 
   return res.status(httpStatusCode.OK).json({

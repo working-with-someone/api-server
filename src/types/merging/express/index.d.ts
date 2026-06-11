@@ -21,6 +21,7 @@ declare global {
       breakTime: AttachedBreakTime;
       user: Prisma.userGetPayload<false>;
       following: Prisma.followGetPayload<false>;
+      comment: Prisma.commentGetPayload<false>;
     }
   }
 }

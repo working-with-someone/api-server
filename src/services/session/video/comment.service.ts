@@ -9,17 +9,7 @@ import {
 import { Prisma } from '@prisma/client';
 
 export async function getComment(input: GetCommentInput) {
-  const comment = await prismaClient.comment.findUnique({
-    where: {
-      id: input.comment_id,
-    },
-  });
-
-  if (!comment) {
-    throw new wwsError(httpStatusCodes.NOT_FOUND, 'Comment not found');
-  }
-
-  return comment;
+  return input.comment;
 }
 
 export async function getComments(input: GetCommentsInput) {
