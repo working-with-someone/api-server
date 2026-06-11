@@ -110,6 +110,7 @@ model live_session {
   category       category  @relation(fields: [category_label], references: [label])
   comments       comment[]
 
+
   @@fulltext([title, description])
 }
 
@@ -162,6 +163,8 @@ model video_session {
   organizer_id Int
   organizer    user                  @relation(fields: [organizer_id], references: [id], onDelete: Cascade)
   allow        video_session_allow[]
+
+  comment_enabled Boolean @default(true)
 
   break_time video_session_break_time?
 

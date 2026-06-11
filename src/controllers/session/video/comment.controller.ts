@@ -26,3 +26,16 @@ export const getComment = asyncCatch(async (req: Request, res: Response) => {
     data: comment,
   });
 });
+
+export const createComment = asyncCatch(async (req: Request, res: Response) => {
+  const createdComment = await commentService.createComment({
+    userId: req.session.userId!,
+    sessionType: 'video',
+    sessionId: req.params.video_session_id,
+    content: req.body.content,
+  });
+
+  return res.status(httpStatusCode.CREATED).json({
+    data: createdComment,
+  });
+});

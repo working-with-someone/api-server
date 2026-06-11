@@ -65,6 +65,20 @@ const videoSessionMiddleware = {
 
     return next();
   },
+
+  checkCommentEnabledOrForbidden: async function (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    const videoSession = res.locals.videoSession;
+
+    if (!videoSession?.comment_enabled) {
+      return next(new wwsError(httpStatusCode.FORBIDDEN));
+    }
+
+    return next();
+  },
 };
 
 export default videoSessionMiddleware;

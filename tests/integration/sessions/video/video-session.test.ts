@@ -292,6 +292,16 @@ describe('Video Session API', () => {
       expect(res.body.data).toHaveProperty('access_level', newAccessLevel);
     });
 
+    test('Response_200_With_Updated_Comment_Enabled', async () => {
+      const res = await request(server)
+        .put(`/sessions/video/${videoSession.id}`)
+        .set('Content-Type', 'application/json')
+        .send({ comment_enabled: false });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveProperty('comment_enabled', false);
+    });
+
     test('Response_200_With_Updated_Category', async () => {
       const newCategoryLabel = 'updated-category';
 

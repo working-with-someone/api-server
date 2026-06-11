@@ -34,6 +34,7 @@ export const createVideoSession: RequestSchema = {
     title: joi.string().optional(),
     description: joi.string().optional(),
     category_label: joi.string().optional(),
+    comment_enabled: joi.boolean().optional(),
     thumbnail: joi.optional(),
   }),
   file: joi.object().optional(),
@@ -68,6 +69,7 @@ export const updateVideoSession: RequestSchema = {
       )
       .optional(),
     category_label: joi.string().optional(),
+    comment_enabled: joi.boolean().optional(),
     thumbnail: joi.optional(),
   }),
   file: joi.object().optional(),

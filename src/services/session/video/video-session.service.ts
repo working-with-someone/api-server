@@ -81,6 +81,7 @@ export async function createVideoSession(data: CreateVideoSessionInput) {
       thumbnail_uri,
       duration: duration.toString(),
       access_level: data.access_level,
+      comment_enabled: data.comment_enabled,
       category: data.category_label
         ? {
             connect: {
@@ -125,6 +126,8 @@ export async function updateVideoSession(data: UpdateVideoSessionInput) {
     updateData.description = data.description;
   if (typeof data.access_level !== 'undefined')
     updateData.access_level = data.access_level;
+  if (typeof data.comment_enabled !== 'undefined')
+    updateData.comment_enabled = data.comment_enabled;
 
   if (typeof data.category_label !== 'undefined') {
     const categoryExists = await prismaClient.category.findUnique({

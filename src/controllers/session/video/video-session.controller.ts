@@ -58,6 +58,7 @@ export const updateVideoSession = asyncCatch(
       description: req.body.description,
       access_level: req.body.access_level,
       category_label: req.body.category_label,
+      comment_enabled: req.body.comment_enabled,
       thumbnail: req.file,
     });
 

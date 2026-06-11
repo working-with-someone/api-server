@@ -14,6 +14,12 @@ commentRouter
     validate(commentValidationSchema.getVideoSessionComments),
     videoSessionMiddleware.attachVideoSessionOrNotfound,
     commentController.getComments
+  )
+  .post(
+    validate(commentValidationSchema.createVideoSessionComment),
+    videoSessionMiddleware.attachVideoSessionOrNotfound,
+    videoSessionMiddleware.checkCommentEnabledOrForbidden,
+    commentController.createComment
   );
 
 commentRouter

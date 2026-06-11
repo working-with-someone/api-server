@@ -39,6 +39,7 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
       },
       video_id: v4(),
       access_level,
+      comment_enabled: overrides?.comment_enabled ?? true,
       duration,
       created_at: overrides?.created_at || new Date(),
       updated_at: overrides?.updated_at || new Date(),

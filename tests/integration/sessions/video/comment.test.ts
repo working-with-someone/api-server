@@ -4,6 +4,7 @@ import { videoSessionFactory, commentFactory } from '../../../factories';
 import request from 'supertest';
 import type { comment } from '@prisma/client';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
+import currUser from '../../../data/curr-user';
 
 describe('Comment API', () => {
   afterAll((done) => {
@@ -12,9 +13,13 @@ describe('Comment API', () => {
 
   describe('Video_Session_Comment', () => {
     let videoSession: VideoSessionWithAll;
+    let commentDisabledVideoSEssion: VideoSessionWithAll;
 
     beforeAll(async () => {
       videoSession = await videoSessionFactory.createAndSave();
+      commentDisabledVideoSEssion = await videoSessionFactory.createAndSave({
+        comment_enabled: false,
+      });
     });
 
     afterAll(async () => {
@@ -98,6 +103,58 @@ describe('Comment API', () => {
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.NOT_FOUND);
+      });
+    });
+
+    describe('POST /session/video/:video_session_id/comment', () => {
+      afterAll(async () => {
+        await commentFactory.cleanup();
+      });
+
+      test('Response_200_With_Created_Comment', async () => {
+        const res = await request(server)
+          .post(`/sessions/video/${videoSession.id}/comment`)
+          .send({ content: 'Test Comment' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.CREATED);
+        expect(res.body.data).toHaveProperty(
+          'video_session_id',
+          videoSession.id
+        );
+        expect(res.body.data).toHaveProperty('user_id', currUser.id);
+        expect(res.body.data).toHaveProperty('content', 'Test Comment');
+      });
+
+      test('Response_400_With_Empty_Content', async () => {
+        const res = await request(server)
+          .post(`/sessions/video/${videoSession.id}/comment`)
+          .send({
+            content: '',
+          });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+
+      test('Response_403_When_Comment_Is_Disabled', async () => {
+        const disabledVideoSession = await videoSessionFactory.createAndSave({
+          comment_enabled: false,
+        });
+
+        const res = await request(server)
+          .post(`/sessions/video/${disabledVideoSession.id}/comment`)
+          .send({ content: 'Test Comment' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.FORBIDDEN);
+
+        await videoSessionFactory.delete({ id: disabledVideoSession.id });
+      });
+
+      test('Response_403_When_Comment_Is_Disabled', async () => {
+        const res = await request(server)
+          .post(`/sessions/video/${commentDisabledVideoSEssion.id}/comment`)
+          .send({ content: 'Test Comment' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.FORBIDDEN);
       });
     });
   });

@@ -13,7 +13,7 @@ export interface CreateVideoSessionInput
   extends Partial<
     Pick<
       Prisma.video_sessionCreateInput,
-      'title' | 'description' | 'access_level' | 'category'
+      'title' | 'description' | 'access_level' | 'comment_enabled' | 'category'
     >
   > {
   video_id: string;

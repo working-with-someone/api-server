@@ -24,3 +24,9 @@ export const getVideoSessionComment: RequestSchema = {
     comment_id: joi.number().required(),
   }),
 };
+
+export const createVideoSessionComment: RequestSchema = {
+  body: joi.object().keys({
+    content: joi.string().required(),
+  }),
+};
