@@ -17,7 +17,6 @@ dotenv.config({
 
 async function tearDown() {
   await deleteAllUploadedS3Object();
-  currUser.delete();
   UserFactory.cleanup();
   categoryFactory.cleanup();
 

@@ -47,7 +47,7 @@ class CurrUser implements CurrentUser {
 
   async insert() {
     if (await this.isInserted()) {
-      throw new Error('curr user already inserted');
+      return;
     }
 
     await prismaClient.user.create({
@@ -104,6 +104,10 @@ class CurrUser implements CurrentUser {
   }
 
   async delete() {
+    if (!(await this.isInserted())) {
+      return;
+    }
+
     await prismaClient.user.delete({
       where: {
         id: this.id,

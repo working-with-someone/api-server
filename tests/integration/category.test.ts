@@ -3,8 +3,18 @@ import server from '../../src';
 import httpStatusCode from 'http-status-codes';
 import categoryFactory from '../factories/category-factory';
 import { liveSessionFactory } from '../factories';
+import currUser from '../data/curr-user';
+import { after } from 'node:test';
 
 describe('Category API', () => {
+  beforeAll(async () => {
+    await currUser.insert();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
+  });
+
   afterAll((done) => {
     server.close(done);
   });

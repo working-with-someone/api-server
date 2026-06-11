@@ -41,10 +41,13 @@ import fs from 'node:fs';
 describe('Video Session API', () => {
   let user1: user;
   beforeAll(async () => {
+    await currUser.insert();
     user1 = await userFactory.createAndSave();
   });
 
   afterAll(async () => {
+    await currUser.delete();
+
     await new Promise((resolve, reject) => {
       server.on('close', resolve);
       server.close();

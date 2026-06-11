@@ -11,8 +11,14 @@ describe('Follow API', () => {
   let user3: user;
 
   beforeAll(async () => {
+    await currUser.insert();
     [user1, user2, user3] = await userFactory.createManyAndSave({ count: 3 });
   });
+
+  afterAll(async () => {
+    currUser.delete();
+  });
+
   afterAll((done) => {
     server.close(done);
   });

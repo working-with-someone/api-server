@@ -9,6 +9,14 @@ import { user } from '@prisma/client';
 import { userFactory } from '../../../factories';
 
 describe('Comment API', () => {
+  beforeAll(async () => {
+    await currUser.insert();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
+  });
+
   afterAll((done) => {
     server.close(done);
   });

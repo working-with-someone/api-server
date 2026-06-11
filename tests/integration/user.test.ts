@@ -13,7 +13,12 @@ describe('User API', () => {
   let otherUser1: user;
 
   beforeAll(async () => {
+    await currUser.insert();
     otherUser1 = await userFactory.createAndSave();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
   });
 
   afterAll((done) => {

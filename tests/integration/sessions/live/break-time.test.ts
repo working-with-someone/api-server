@@ -1,12 +1,7 @@
 import prismaClient from '../../../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../../../src';
-import {
-  live_session_status,
-  access_level,
-  user,
-  live_session,
-} from '@prisma/client';
+import { live_session_status, access_level, user } from '@prisma/client';
 import currUser from '../../../data/curr-user';
 import { userFactory, liveSessionFactory } from '../../../factories';
 import { LiveSessionWithAll } from '../../../factories/live-session-factory';
@@ -15,7 +10,12 @@ describe('Live Session API', () => {
   let user1: user;
 
   beforeAll(async () => {
+    await currUser.insert();
     user1 = await userFactory.createAndSave();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
   });
 
   afterAll((done) => {

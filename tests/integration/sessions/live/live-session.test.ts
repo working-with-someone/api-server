@@ -13,7 +13,12 @@ describe('Live Session API', () => {
   let user1: user;
 
   beforeAll(async () => {
+    await currUser.insert();
     user1 = await userFactory.createAndSave();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
   });
 
   afterAll((done) => {

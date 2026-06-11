@@ -11,7 +11,12 @@ describe('Preferred Category API', () => {
   let otherUser: any;
 
   beforeAll(async () => {
+    await currUser.insert();
     otherUser = await userFactory.createAndSave();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
   });
 
   afterAll((done) => {

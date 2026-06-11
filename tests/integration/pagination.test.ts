@@ -7,6 +7,14 @@ import { liveSessionFactory } from '../factories';
 import currUser from '../data/curr-user';
 
 describe('Pagination', () => {
+  beforeAll(async () => {
+    await currUser.insert();
+  });
+
+  afterAll(async () => {
+    await currUser.delete();
+  });
+
   afterAll((done) => {
     server.close(done);
   });
