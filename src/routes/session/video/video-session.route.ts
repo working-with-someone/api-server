@@ -41,6 +41,10 @@ videoSessionRouter
     videoSessionController.updateVideoSession
   );
 
-videoSessionRouter.use('/:video_session_id/comment', commentRouter);
+videoSessionRouter.use(
+  '/:video_session_id/comment',
+  videoSessionMiddleware.attachVideoSessionOrNotfound,
+  commentRouter
+);
 
 export default videoSessionRouter;
