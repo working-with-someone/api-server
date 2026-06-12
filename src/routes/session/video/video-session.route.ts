@@ -5,6 +5,8 @@ import validate from '../../../middleware/validate.middleware';
 import videoSessionMiddleware from '../../../middleware/session/video/video-session.middleware';
 import multer from 'multer';
 import commentRouter from './comment.route';
+import likeRouter from './like.route';
+
 const videoSessionRouter = Router();
 
 videoSessionRouter
@@ -45,6 +47,12 @@ videoSessionRouter.use(
   '/:video_session_id/comment',
   videoSessionMiddleware.attachVideoSessionOrNotfound,
   commentRouter
+);
+
+videoSessionRouter.use(
+  '/:video_session_id/like',
+  videoSessionMiddleware.attachVideoSessionOrNotfound,
+  likeRouter
 );
 
 export default videoSessionRouter;

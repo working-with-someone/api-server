@@ -22,6 +22,7 @@ declare global {
       user: Prisma.userGetPayload<false>;
       following: Prisma.followGetPayload<false>;
       comment: Prisma.commentGetPayload<false>;
+      like: Prisma.session_likeGetPayload<false>;
     }
   }
 }
