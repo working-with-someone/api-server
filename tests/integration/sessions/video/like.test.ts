@@ -68,5 +68,41 @@ describe('Like API', () => {
         expect(res.statusCode).toEqual(httpStatusCode.NOT_FOUND);
       });
     });
+
+    describe('POST /session/video/:video_session_id/like', () => {
+      afterAll(async () => {
+        await likeFactory.cleanup();
+      });
+
+      test('Response_201_With_Created_Like', async () => {
+        const res = await request(server)
+          .post(`/sessions/video/${videoSession.id}/like`)
+          .send();
+
+        expect(res.statusCode).toEqual(httpStatusCode.CREATED);
+        expect(res.body.data.user_id).toEqual(currUser.id);
+      });
+
+      test('Response_409_When_Like_Already_Exists', async () => {
+        await likeFactory.createAndSave({
+          video_session: {
+            connect: {
+              id: videoSession.id,
+            },
+          },
+          user: {
+            connect: {
+              id: currUser.id,
+            },
+          },
+        });
+
+        const res = await request(server).post(
+          `/sessions/video/${videoSession.id}/like`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.CONFLICT);
+      });
+    });
   });
 });

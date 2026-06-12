@@ -14,6 +14,11 @@ likeRouter
     validate(videoSessionLikeValidationSchema.getVideoSessionLikes),
     videoSessionLikeMiddleware.attachLikeOrNotfound,
     likeController.getVideoSessionLike
+  )
+  .post(
+    validate(videoSessionLikeValidationSchema.createVideoSessionLike),
+    videoSessionLikeMiddleware.checkLikeDoesNotExistOrConflict,
+    likeController.createVideoSessionLike
   );
 
 export default likeRouter;

@@ -7,8 +7,15 @@ const getVideoSessionLikes: RequestSchema = {
   }),
 };
 
+const createVideoSessionLike: RequestSchema = {
+  params: joi.object().keys({
+    video_session_id: joi.string().required(),
+  }),
+};
+
 const videoSessionLikeValidationSchema = {
   getVideoSessionLikes,
+  createVideoSessionLike,
 };
 
 export default videoSessionLikeValidationSchema;
