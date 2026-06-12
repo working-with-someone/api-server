@@ -16,7 +16,7 @@ describe('Follow API', () => {
   });
 
   afterAll(async () => {
-    currUser.delete();
+    await currUser.delete();
   });
 
   afterAll((done) => {
