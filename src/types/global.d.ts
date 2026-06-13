@@ -1,7 +1,3 @@
-declare global {
-  interface BigInt {
-    toJSON(): string;
-  }
+interface BigInt {
+  toJSON(): string;
 }
-
-export {};

@@ -18,5 +18,8 @@
   ],
   "exclude": [
     "node_modules",
-  ]
+  ],
+  "ts-node": {
+    "files": true // ts-node가 global.d.ts 파일을 강제로 로드하도록 설정
+  }
 }
