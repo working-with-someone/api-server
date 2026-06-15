@@ -23,6 +23,11 @@ const videoSessionMiddleware = {
             pfp: true,
           },
         },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
       },
     });
 

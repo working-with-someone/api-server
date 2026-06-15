@@ -10,25 +10,49 @@ async function getVideoSessionLike(input: GetVideoSessionLikeInput) {
 }
 
 async function createVideoSessionLike(input: CreateVideoSessionLikeInput) {
-  const createdLike = await prismaClient.video_session_like.create({
-    data: {
-      user_id: input.userId,
-      video_session_id: input.videoSessionId,
-    },
-  });
+  const [createdLike] = await prismaClient.$transaction([
+    prismaClient.video_session_like.create({
+      data: {
+        user_id: input.userId,
+        video_session_id: input.videoSessionId,
+      },
+    }),
+    prismaClient.video_session.update({
+      where: {
+        id: input.videoSessionId,
+      },
+      data: {
+        like_count: {
+          increment: 1,
+        },
+      },
+    }),
+  ]);
 
   return createdLike;
 }
 
 async function deleteVideoSessionLike(input: DeleteVideoSessionLikeInput) {
-  const deletedLike = await prismaClient.video_session_like.delete({
-    where: {
-      user_id_video_session_id: {
-        user_id: input.userId,
-        video_session_id: input.videoSessionId,
+  const [deletedLike] = await prismaClient.$transaction([
+    prismaClient.video_session_like.delete({
+      where: {
+        user_id_video_session_id: {
+          user_id: input.userId,
+          video_session_id: input.videoSessionId,
+        },
       },
-    },
-  });
+    }),
+    prismaClient.video_session.update({
+      where: {
+        id: input.videoSessionId,
+      },
+      data: {
+        like_count: {
+          decrement: 1,
+        },
+      },
+    }),
+  ]);
 
   return deletedLike;
 }

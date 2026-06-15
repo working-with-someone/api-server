@@ -5,6 +5,7 @@ import currUser from '../../../data/curr-user';
 import { videoSessionFactory } from '../../../factories';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import likeFactory from '../../../factories/video-session-like-factory';
+import prismaClient from '../../../../src/database/clients/prisma';
 
 describe('Like API', () => {
   beforeAll(async () => {
@@ -83,6 +84,31 @@ describe('Like API', () => {
         expect(res.body.data.user_id).toEqual(currUser.id);
       });
 
+      test('Response_201_With_Incremented_Video_Session_Like_Count', async () => {
+        const videoSessionBefore = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        const res = await request(server)
+          .post(`/sessions/video/${videoSession.id}/like`)
+          .send();
+
+        expect(res.statusCode).toEqual(httpStatusCode.CREATED);
+        expect(res.body.data.user_id).toEqual(currUser.id);
+
+        const videoSessionAfter = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        expect(videoSessionAfter!.like_count).toEqual(
+          videoSessionBefore!.like_count + 1
+        );
+      });
+
       test('Response_409_When_Like_Already_Exists', async () => {
         await likeFactory.createAndSave({
           video_session: {
@@ -106,14 +132,14 @@ describe('Like API', () => {
     });
 
     describe('DELETE /session/video/:video_session_id/like', () => {
-      beforeAll(async () => {
+      beforeEach(async () => {
         await likeFactory.createAndSave({
           user: { connect: { id: currUser.id } },
           video_session: { connect: { id: videoSession.id } },
         });
       });
 
-      afterAll(async () => {
+      afterEach(async () => {
         await likeFactory.cleanup();
       });
 
@@ -123,6 +149,30 @@ describe('Like API', () => {
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+      });
+
+      test('Response_209_With_Decremented_Video_Session_Like_Count', async () => {
+        const videoSessionBefore = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/like`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+
+        const videoSessionAfter = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        expect(videoSessionAfter!.like_count).toEqual(
+          videoSessionBefore!.like_count - 1
+        );
       });
 
       test('Response_404_When_Like_Does_Not_Exist', async () => {
