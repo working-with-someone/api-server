@@ -13,9 +13,16 @@ const createVideoSessionLike: RequestSchema = {
   }),
 };
 
+const deleteVideoSessionLike: RequestSchema = {
+  params: joi.object().keys({
+    video_session_id: joi.string().required(),
+  }),
+};
+
 const videoSessionLikeValidationSchema = {
   getVideoSessionLikes,
   createVideoSessionLike,
+  deleteVideoSessionLike,
 };
 
 export default videoSessionLikeValidationSchema;

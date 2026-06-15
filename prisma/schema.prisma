@@ -33,7 +33,8 @@ model user {
   video_session_allow_list video_session_allow[]
   preferred_categories     preferred_category[]
   comments                 comment[]
-  likes                    session_like[]
+  video_session_likes      video_session_like[]
+  live_session_likes       live_session_like[]
 }
 
 model pfp {
@@ -108,9 +109,11 @@ model live_session {
   live_session_transition_log live_session_transition_log[]
 
   category_label String
-  category       category       @relation(fields: [category_label], references: [label])
+  category       category  @relation(fields: [category_label], references: [label])
   comments       comment[]
-  sessionLikes   session_like[]
+
+  likes      live_session_like[]
+  like_count Int                 @default(0)
 
   @@fulltext([title, description])
 }
@@ -170,9 +173,11 @@ model video_session {
   break_time video_session_break_time?
 
   category_label String?
-  category       category?      @relation(fields: [category_label], references: [label])
+  category       category? @relation(fields: [category_label], references: [label])
   comments       comment[]
-  sessionLikes   session_like[]
+
+  likes      video_session_like[]
+  like_count Int                  @default(0)
 }
 
 model video_session_allow {
@@ -224,15 +229,26 @@ model comment {
   live_session     live_session?  @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
 }
 
-model session_like {
-  id      BigInt @id @default(autoincrement())
+model video_session_like {
   user_id Int
-  user    user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   created_at DateTime @default(now())
 
-  video_session_id String?
-  video_session    video_session? @relation(fields: [video_session_id], references: [id], onDelete: Cascade)
-  live_session_id  String?
-  live_session     live_session?  @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
+  video_session_id String
+  video_session    video_session @relation(fields: [video_session_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, video_session_id])
+}
+
+model live_session_like {
+  user_id Int
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  live_session_id String
+  live_session    live_session @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, live_session_id])
 }

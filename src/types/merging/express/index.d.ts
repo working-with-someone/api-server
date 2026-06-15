@@ -22,7 +22,8 @@ declare global {
       user: Prisma.userGetPayload<false>;
       following: Prisma.followGetPayload<false>;
       comment: Prisma.commentGetPayload<false>;
-      like: Prisma.session_likeGetPayload<false>;
+      video_session_like: Prisma.video_session_likeGetPayload<false>;
+      live_session_like: Prisma.live_session_likeGetPayload<false>;
     }
   }
 }

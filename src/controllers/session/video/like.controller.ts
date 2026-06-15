@@ -22,9 +22,21 @@ const createVideoSessionLike = asyncCatch(
   }
 );
 
+const deleteVideoSessionLike = asyncCatch(
+  async (req: Request, res: Response) => {
+    const deletedLike = await videoSessionLikeService.deleteVideoSessionLike({
+      userId: req.session.userId!,
+      videoSessionId: req.params.video_session_id,
+    });
+
+    return res.status(httpStatusCodes.NO_CONTENT).end();
+  }
+);
+
 const likeController = {
   getVideoSessionLike,
   createVideoSessionLike,
+  deleteVideoSessionLike,
 };
 
 export default likeController;

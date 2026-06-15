@@ -10,10 +10,12 @@ const attachLikeOrNotfound = async (
 ) => {
   const videoSession = res.locals.videoSession;
 
-  const like = await prismaClient.session_like.findFirst({
+  const like = await prismaClient.video_session_like.findUnique({
     where: {
-      video_session_id: videoSession.id,
-      user_id: req.session.userId,
+      user_id_video_session_id: {
+        user_id: req.session.userId!,
+        video_session_id: videoSession.id,
+      },
     },
   });
 
@@ -33,10 +35,12 @@ const checkLikeDoesNotExistOrConflict = async (
 ) => {
   const videoSession = res.locals.videoSession;
 
-  const like = await prismaClient.session_like.findFirst({
+  const like = await prismaClient.video_session_like.findUnique({
     where: {
-      video_session_id: videoSession.id,
-      user_id: req.session.userId,
+      user_id_video_session_id: {
+        user_id: req.session.userId!,
+        video_session_id: videoSession.id,
+      },
     },
   });
 

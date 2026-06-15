@@ -19,6 +19,11 @@ likeRouter
     validate(videoSessionLikeValidationSchema.createVideoSessionLike),
     videoSessionLikeMiddleware.checkLikeDoesNotExistOrConflict,
     likeController.createVideoSessionLike
+  )
+  .delete(
+    validate(videoSessionLikeValidationSchema.deleteVideoSessionLike),
+    videoSessionLikeMiddleware.attachLikeOrNotfound,
+    likeController.deleteVideoSessionLike
   );
 
 export default likeRouter;

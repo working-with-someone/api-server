@@ -4,7 +4,7 @@ import request from 'supertest';
 import currUser from '../../../data/curr-user';
 import { videoSessionFactory } from '../../../factories';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
-import likeFactory from '../../../factories/session-like-factory';
+import likeFactory from '../../../factories/video-session-like-factory';
 
 describe('Like API', () => {
   beforeAll(async () => {
@@ -70,7 +70,7 @@ describe('Like API', () => {
     });
 
     describe('POST /session/video/:video_session_id/like', () => {
-      afterAll(async () => {
+      afterEach(async () => {
         await likeFactory.cleanup();
       });
 
@@ -102,6 +102,43 @@ describe('Like API', () => {
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.CONFLICT);
+      });
+    });
+
+    describe('DELETE /session/video/:video_session_id/like', () => {
+      beforeAll(async () => {
+        await likeFactory.createAndSave({
+          user: { connect: { id: currUser.id } },
+          video_session: { connect: { id: videoSession.id } },
+        });
+      });
+
+      afterAll(async () => {
+        await likeFactory.cleanup();
+      });
+
+      test('Response_209', async () => {
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/like`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+      });
+
+      test('Response_404_When_Like_Does_Not_Exist', async () => {
+        const notLikedVideoSession = await videoSessionFactory.createAndSave({
+          organizer: {
+            connect: {
+              id: currUser.id,
+            },
+          },
+        });
+
+        const res = await request(server).get(
+          `/sessions/video/${notLikedVideoSession.id}/like`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NOT_FOUND);
       });
     });
   });
