@@ -34,26 +34,58 @@ export async function getComments(input: GetCommentsInput) {
 }
 
 export async function deleteComment(input: DeleteCommentInput) {
-  const deletedComment = await prismaClient.comment.delete({
-    where: {
-      id: input.comment_id,
-      live_session_id: input.sessionType === 'live' ? input.sessionId : null,
-      video_session_id: input.sessionType === 'video' ? input.sessionId : null,
-    },
-  });
+  const transaction: any[] = [
+    prismaClient.comment.delete({
+      where: {
+        id: input.comment_id,
+        live_session_id: input.sessionType === 'live' ? input.sessionId : null,
+        video_session_id:
+          input.sessionType === 'video' ? input.sessionId : null,
+      },
+    }),
+  ];
+
+  if (input.sessionType === 'live') {
+    transaction.push(undefined);
+  } else if (input.sessionType === 'video') {
+    transaction.push(
+      prismaClient.video_session.update({
+        where: { id: input.sessionId },
+        data: { comment_count: { decrement: 1 } },
+      })
+    );
+  }
+
+  const [deletedComment] = await prismaClient.$transaction(transaction);
 
   return deletedComment;
 }
 
 export async function createComment(input: CreateCommentInput) {
-  const createdCommnet = await prismaClient.comment.create({
-    data: {
-      content: input.content,
-      user_id: input.userId,
-      live_session_id: input.sessionType === 'live' ? input.sessionId : null,
-      video_session_id: input.sessionType === 'video' ? input.sessionId : null,
-    },
-  });
+  const transaction: any[] = [
+    prismaClient.comment.create({
+      data: {
+        content: input.content,
+        user_id: input.userId,
+        live_session_id: input.sessionType === 'live' ? input.sessionId : null,
+        video_session_id:
+          input.sessionType === 'video' ? input.sessionId : null,
+      },
+    }),
+  ];
 
-  return createdCommnet;
+  if (input.sessionType === 'live') {
+    transaction.push(undefined);
+  } else if (input.sessionType === 'video') {
+    transaction.push(
+      prismaClient.video_session.update({
+        where: { id: input.sessionId },
+        data: { comment_count: { increment: 1 } },
+      })
+    );
+  }
+
+  const [createdComment] = await prismaClient.$transaction(transaction);
+
+  return createdComment;
 }

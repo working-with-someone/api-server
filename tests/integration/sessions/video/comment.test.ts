@@ -7,6 +7,7 @@ import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import currUser from '../../../data/curr-user';
 import { user } from '@prisma/client';
 import { userFactory } from '../../../factories';
+import prismaClient from '../../../../src/database/clients/prisma';
 
 describe('Comment API', () => {
   beforeAll(async () => {
@@ -124,7 +125,7 @@ describe('Comment API', () => {
         await commentFactory.cleanup();
       });
 
-      test('Response_200_With_Created_Comment', async () => {
+      test('Response_201_With_Created_Comment', async () => {
         const res = await request(server)
           .post(`/sessions/video/${videoSession.id}/comment`)
           .send({ content: 'Test Comment' });
@@ -136,6 +137,30 @@ describe('Comment API', () => {
         );
         expect(res.body.data).toHaveProperty('user_id', currUser.id);
         expect(res.body.data).toHaveProperty('content', 'Test Comment');
+      });
+
+      test('Response_201_And_Must_Be_Incremented_Video_Session_Comment_Count', async () => {
+        const videoSessionBefore = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        const res = await request(server)
+          .post(`/sessions/video/${videoSession.id}/comment`)
+          .send({ content: 'Test Comment' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.CREATED);
+
+        const videoSessionAfter = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        expect(videoSessionAfter!.comment_count).toEqual(
+          videoSessionBefore!.comment_count + 1
+        );
       });
 
       test('Response_400_With_Empty_Content', async () => {
@@ -202,6 +227,30 @@ describe('Comment API', () => {
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+      });
+
+      test('Response_204_And_Must_Be_Decremented_Video_Session_Comment_Count', async () => {
+        const videoSessionBefore = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        const res = await request(server).delete(
+          `/sessions/video/${videoSession.id}/comment/${comment.id}`
+        );
+
+        expect(res.statusCode).toEqual(httpStatusCode.NO_CONTENT);
+
+        const videoSessionAfter = await prismaClient.video_session.findUnique({
+          where: {
+            id: videoSession.id,
+          },
+        });
+
+        expect(videoSessionAfter!.comment_count).toEqual(
+          videoSessionBefore!.comment_count - 1
+        );
       });
 
       test('Response_404_When_Comment_Does_Not_Exist', async () => {
