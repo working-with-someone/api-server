@@ -11,7 +11,7 @@ const commentMiddleware = {
   ) {
     const { comment_id } = req.params;
 
-    const comment = await prismaClient.comment.findFirst({
+    const comment = await prismaClient.video_session_comment.findFirst({
       where: { id: parseInt(comment_id) },
     });
 

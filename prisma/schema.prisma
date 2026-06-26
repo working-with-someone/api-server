@@ -32,7 +32,7 @@ model user {
   live_session_allow_list  live_session_allow[]
   video_session_allow_list video_session_allow[]
   preferred_categories     preferred_category[]
-  comments                 comment[]
+  comments                 video_session_comment[]
   video_session_likes      video_session_like[]
   live_session_likes       live_session_like[]
 }
@@ -109,8 +109,7 @@ model live_session {
   live_session_transition_log live_session_transition_log[]
 
   category_label String
-  category       category  @relation(fields: [category_label], references: [label])
-  comments       comment[]
+  category       category @relation(fields: [category_label], references: [label])
 
   likes      live_session_like[]
   like_count Int                 @default(0)
@@ -175,8 +174,8 @@ model video_session {
   category_label String?
   category       category? @relation(fields: [category_label], references: [label])
 
-  comments      comment[]
-  comment_count Int       @default(0)
+  comments      video_session_comment[]
+  comment_count Int                     @default(0)
 
   likes      video_session_like[]
   like_count Int                  @default(0)
@@ -217,7 +216,7 @@ model preferred_category {
   @@id([user_id, category_label])
 }
 
-model comment {
+model video_session_comment {
   id         BigInt   @id @default(autoincrement())
   content    String   @db.Text
   created_at DateTime @default(now())
@@ -225,10 +224,8 @@ model comment {
   user_id    Int
   user       user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  video_session_id String?
+  video_session_id String
   video_session    video_session? @relation(fields: [video_session_id], references: [id], onDelete: Cascade)
-  live_session_id  String?
-  live_session     live_session?  @relation(fields: [live_session_id], references: [id], onDelete: Cascade)
 }
 
 model video_session_like {

@@ -1,6 +1,4 @@
 import prismaClient from '../../../database/clients/prisma';
-import { wwsError } from '../../../utils/wwsError';
-import httpStatusCodes from 'http-status-codes';
 import {
   CreateCommentInput,
   GetCommentInput,
@@ -14,16 +12,22 @@ export async function getComment(input: GetCommentInput) {
 }
 
 export async function getComments(input: GetCommentsInput) {
-  const orderBy: Prisma.commentOrderByWithRelationInput = {};
+  const orderBy: Prisma.video_session_commentOrderByWithRelationInput = {};
 
   if (input.sort === 'recent') {
     orderBy['created_at'] = 'desc';
   }
 
-  const comments = await prismaClient.comment.findMany({
+  const comments = await prismaClient.video_session_comment.findMany({
     where: {
-      live_session_id: input.sessionType === 'live' ? input.sessionId : null,
-      video_session_id: input.sessionType === 'video' ? input.sessionId : null,
+      video_session_id: input.videoSessionId,
+    },
+    include: {
+      user: {
+        include: {
+          pfp: true,
+        },
+      },
     },
     skip: (input.page - 1) * input.per_page,
     take: input.per_page,
@@ -35,26 +39,17 @@ export async function getComments(input: GetCommentsInput) {
 
 export async function deleteComment(input: DeleteCommentInput) {
   const transaction: any[] = [
-    prismaClient.comment.delete({
+    prismaClient.video_session_comment.delete({
       where: {
         id: input.comment_id,
-        live_session_id: input.sessionType === 'live' ? input.sessionId : null,
-        video_session_id:
-          input.sessionType === 'video' ? input.sessionId : null,
+        video_session_id: input.videoSessionId,
       },
     }),
+    prismaClient.video_session.update({
+      where: { id: input.videoSessionId },
+      data: { comment_count: { decrement: 1 } },
+    }),
   ];
-
-  if (input.sessionType === 'live') {
-    transaction.push(undefined);
-  } else if (input.sessionType === 'video') {
-    transaction.push(
-      prismaClient.video_session.update({
-        where: { id: input.sessionId },
-        data: { comment_count: { decrement: 1 } },
-      })
-    );
-  }
 
   const [deletedComment] = await prismaClient.$transaction(transaction);
 
@@ -63,27 +58,25 @@ export async function deleteComment(input: DeleteCommentInput) {
 
 export async function createComment(input: CreateCommentInput) {
   const transaction: any[] = [
-    prismaClient.comment.create({
+    prismaClient.video_session_comment.create({
       data: {
         content: input.content,
         user_id: input.userId,
-        live_session_id: input.sessionType === 'live' ? input.sessionId : null,
-        video_session_id:
-          input.sessionType === 'video' ? input.sessionId : null,
+        video_session_id: input.videoSessionId,
+      },
+      include: {
+        user: {
+          include: {
+            pfp: true,
+          },
+        },
       },
     }),
+    prismaClient.video_session.update({
+      where: { id: input.videoSessionId },
+      data: { comment_count: { increment: 1 } },
+    }),
   ];
-
-  if (input.sessionType === 'live') {
-    transaction.push(undefined);
-  } else if (input.sessionType === 'video') {
-    transaction.push(
-      prismaClient.video_session.update({
-        where: { id: input.sessionId },
-        data: { comment_count: { increment: 1 } },
-      })
-    );
-  }
 
   const [createdComment] = await prismaClient.$transaction(transaction);
 

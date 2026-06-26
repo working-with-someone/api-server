@@ -2,7 +2,7 @@ import server from '../../../../src';
 import httpStatusCode from 'http-status-codes';
 import { videoSessionFactory, commentFactory } from '../../../factories';
 import request from 'supertest';
-import type { comment } from '@prisma/client';
+import type { video_session_comment } from '@prisma/client';
 import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import currUser from '../../../data/curr-user';
 import { user } from '@prisma/client';
@@ -93,7 +93,7 @@ describe('Comment API', () => {
     });
 
     describe('GET /session/video/:video_session_id/comment/:comment_id', () => {
-      let comment: comment;
+      let comment: video_session_comment;
 
       beforeEach(async () => {
         comment = await commentFactory.createAndSave({
@@ -197,8 +197,8 @@ describe('Comment API', () => {
     });
 
     describe('DELETE /session/video/:video_session_id/comment/:comment_id', () => {
-      let comment: comment;
-      let otherUserComment: comment;
+      let comment: video_session_comment;
+      let otherUserComment: video_session_comment;
 
       beforeEach(async () => {
         comment = await commentFactory.createAndSave({

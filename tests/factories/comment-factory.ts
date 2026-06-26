@@ -1,32 +1,34 @@
-import { Prisma, PrismaClient, comment } from '@prisma/client';
+import { Prisma, PrismaClient, video_session_comment } from '@prisma/client';
 import { IFactory } from './factory';
 import { faker } from '@faker-js/faker';
 import currUser from '../data/curr-user';
 
 const prisma = new PrismaClient();
 
-class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
+class CommentFactory
+  implements
+    IFactory<Prisma.video_session_commentCreateInput, video_session_comment>
+{
   create(
-    overrides?: Partial<Prisma.commentCreateInput> | undefined
-  ): Prisma.commentCreateInput {
-    const commentData: Prisma.commentCreateInput = {
+    overrides?: Partial<Prisma.video_session_commentCreateInput> | undefined
+  ): Prisma.video_session_commentCreateInput {
+    const commentData: Prisma.video_session_commentCreateInput = {
       content: overrides?.content || faker.lorem.sentence(),
       user: {
         connect: overrides?.user?.connect || { id: currUser.id },
       },
 
       video_session: overrides?.video_session || undefined,
-      live_session: overrides?.live_session || undefined,
     };
     return commentData;
   }
 
   async createAndSave(
-    overrides?: Partial<Prisma.commentCreateInput> | undefined
-  ): Promise<comment> {
+    overrides?: Partial<Prisma.video_session_commentCreateInput> | undefined
+  ): Promise<video_session_comment> {
     const data = this.create(overrides);
 
-    return prisma.comment.create({
+    return prisma.video_session_comment.create({
       data,
     });
   }
@@ -34,11 +36,13 @@ class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
   createMany(
     options?:
       | {
-          overrides?: Partial<Prisma.commentCreateInput> | undefined;
+          overrides?:
+            | Partial<Prisma.video_session_commentCreateInput>
+            | undefined;
           count?: number;
         }
       | undefined
-  ): Prisma.commentCreateInput[] {
+  ): Prisma.video_session_commentCreateInput[] {
     const { overrides = {}, count = 1 } = options ?? {};
 
     return Array.from({ length: count }, () => this.create(overrides));
@@ -47,19 +51,21 @@ class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
   async createManyAndSave(
     options?:
       | {
-          overrides?: Partial<Prisma.commentCreateInput> | undefined;
+          overrides?:
+            | Partial<Prisma.video_session_commentCreateInput>
+            | undefined;
           count?: number;
         }
       | undefined
-  ): Promise<comment[]> {
+  ): Promise<video_session_comment[]> {
     const { overrides = {}, count = 1 } = options ?? {};
     const commentDataArray = Array.from({ length: count }, () =>
       this.create(overrides)
     );
-    const savedComments: comment[] = [];
+    const savedComments: video_session_comment[] = [];
 
     for (const commentData of commentDataArray) {
-      const saved = await prisma.comment.create({
+      const saved = await prisma.video_session_comment.create({
         data: commentData,
       });
       savedComments.push(saved);
@@ -68,16 +74,18 @@ class CommentFactory implements IFactory<Prisma.commentCreateInput, comment> {
     return savedComments;
   }
 
-  async delete(where: Prisma.commentWhereInput): Promise<void> {
-    await prisma.comment.deleteMany({ where });
+  async delete(where: Prisma.video_session_commentWhereInput): Promise<void> {
+    await prisma.video_session_comment.deleteMany({ where });
   }
 
-  async deleteMany(where: Prisma.commentWhereInput): Promise<void> {
-    await prisma.comment.deleteMany({ where });
+  async deleteMany(
+    where: Prisma.video_session_commentWhereInput
+  ): Promise<void> {
+    await prisma.video_session_comment.deleteMany({ where });
   }
 
   async cleanup(): Promise<void> {
-    await prisma.comment.deleteMany({});
+    await prisma.video_session_comment.deleteMany({});
   }
 }
 
