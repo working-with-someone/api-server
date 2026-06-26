@@ -4,7 +4,7 @@ import * as categoryService from './category.service';
 import * as preferredCategoryService from './preferred_category.service';
 import * as liveSessionService from './session/live/live-session.service';
 import * as videoSessionService from './session/video/video-session.service';
-import * as commentService from './session/video/comment.service';
+import * as videoSessionCommentService from './session/video/comment/index.service';
 
 export {
   userService,
@@ -13,5 +13,5 @@ export {
   preferredCategoryService,
   liveSessionService,
   videoSessionService,
-  commentService,
+  videoSessionCommentService,
 };

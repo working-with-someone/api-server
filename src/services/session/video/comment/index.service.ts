@@ -1,10 +1,10 @@
-import prismaClient from '../../../database/clients/prisma';
+import prismaClient from '../../../../database/clients/prisma';
 import {
   CreateCommentInput,
   GetCommentInput,
   GetCommentsInput,
   DeleteCommentInput,
-} from './comment.service.d';
+} from '.';
 import { Prisma } from '@prisma/client';
 
 export async function getComment(input: GetCommentInput) {

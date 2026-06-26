@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import asyncCatch from '../../../utils/asyncCatch';
-import { commentService } from '../../../services/';
+import asyncCatch from '../../../../utils/asyncCatch';
+import { videoSessionCommentService } from '../../../../services';
 import httpStatusCode from 'http-status-codes';
 
 export const getComments = asyncCatch(async (req: Request, res: Response) => {
-  const comments = await commentService.getComments({
+  const comments = await videoSessionCommentService.getComments({
     videoSessionId: req.params.session_id,
     page: parseInt(req.query.page as string),
     per_page: parseInt(req.query.per_page as string),
@@ -17,7 +17,7 @@ export const getComments = asyncCatch(async (req: Request, res: Response) => {
 });
 
 export const getComment = asyncCatch(async (req: Request, res: Response) => {
-  const comment = await commentService.getComment({
+  const comment = await videoSessionCommentService.getComment({
     comment: res.locals.comment,
   });
 
@@ -27,7 +27,7 @@ export const getComment = asyncCatch(async (req: Request, res: Response) => {
 });
 
 export const createComment = asyncCatch(async (req: Request, res: Response) => {
-  const createdComment = await commentService.createComment({
+  const createdComment = await videoSessionCommentService.createComment({
     userId: req.session.userId!,
     videoSessionId: req.params.video_session_id,
     content: req.body.content,
@@ -39,7 +39,7 @@ export const createComment = asyncCatch(async (req: Request, res: Response) => {
 });
 
 export const deleteComment = asyncCatch(async (req: Request, res: Response) => {
-  const deletedComment = await commentService.deleteComment({
+  const deletedComment = await videoSessionCommentService.deleteComment({
     comment_id: res.locals.comment.id,
     videoSessionId: req.params.video_session_id,
     currUserId: req.session.userId!,

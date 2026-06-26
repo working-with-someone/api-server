@@ -1,6 +1,6 @@
 import joi from 'joi';
-import { RequestSchema } from '../../../middleware/validate.middleware';
-import { pagiNationQuerySchema } from '../../pagination.validation';
+import { RequestSchema } from '../../../../middleware/validate.middleware';
+import { pagiNationQuerySchema } from '../../../pagination.validation';
 
 const commentSortKey = ['recent'];
 
