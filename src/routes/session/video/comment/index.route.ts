@@ -4,12 +4,13 @@ import { videoSessionCommentValidationSchema } from '../../../../validations';
 import videoSessionMiddleware from '../../../../middleware/session/video/video-session.middleware';
 import { videoSessionCommentController } from '../../../../controllers';
 import { videoSessionCommentMiddleware } from '../../../../middleware';
+import videoSessionCommentLikeRouter from './like.route';
 
-const commentRouter = Router({
+const videoSessionCommentRouter = Router({
   mergeParams: true,
 });
 
-commentRouter
+videoSessionCommentRouter
   .route('/')
   .get(
     validate(videoSessionCommentValidationSchema.getVideoSessionComments),
@@ -21,7 +22,7 @@ commentRouter
     videoSessionCommentController.createComment
   );
 
-commentRouter
+videoSessionCommentRouter
   .route('/:comment_id')
   .get(
     validate(videoSessionCommentValidationSchema.getVideoSessionComment),
@@ -35,4 +36,10 @@ commentRouter
     videoSessionCommentController.deleteComment
   );
 
-export default commentRouter;
+videoSessionCommentRouter.use(
+  '/:comment_id/like',
+  videoSessionCommentMiddleware.attachCommentOrNotfound,
+  videoSessionCommentLikeRouter
+);
+
+export default videoSessionCommentRouter;

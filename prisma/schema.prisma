@@ -35,6 +35,7 @@ model user {
   comments                 video_session_comment[]
   video_session_likes      video_session_like[]
   live_session_likes       live_session_like[]
+  videoSessionCommentLikes video_session_comment_like[]
 }
 
 model pfp {
@@ -226,6 +227,21 @@ model video_session_comment {
 
   video_session_id String
   video_session    video_session? @relation(fields: [video_session_id], references: [id], onDelete: Cascade)
+
+  likes      video_session_comment_like[]
+  like_count Int                          @default(0)
+}
+
+model video_session_comment_like {
+  video_session_comment_id BigInt
+  video_session_comment    video_session_comment @relation(fields: [video_session_comment_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+
+  user_id Int
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, video_session_comment_id])
 }
 
 model video_session_like {

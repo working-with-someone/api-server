@@ -8,3 +8,6 @@ export type VideoSessionWithAll = Prisma.video_sessionGetPayload<{
     category: true;
   };
 }>;
+
+export type VideoSessionCommentWithAll =
+  Prisma.video_session_commentGetPayload<{}>;

@@ -1,13 +1,13 @@
-import server from '../../../../src';
+import server from '../../../../../src';
 import httpStatusCode from 'http-status-codes';
-import { videoSessionFactory, commentFactory } from '../../../factories';
+import { videoSessionFactory, commentFactory } from '../../../../factories';
 import request from 'supertest';
 import type { video_session_comment } from '@prisma/client';
-import { VideoSessionWithAll } from '../../../../src/@types/video-session';
-import currUser from '../../../data/curr-user';
+import { VideoSessionWithAll } from '../../../../../src/@types/video-session';
+import currUser from '../../../../data/curr-user';
 import { user } from '@prisma/client';
-import { userFactory } from '../../../factories';
-import prismaClient from '../../../../src/database/clients/prisma';
+import { userFactory } from '../../../../factories';
+import prismaClient from '../../../../../src/database/clients/prisma';
 
 describe('Comment API', () => {
   beforeAll(async () => {

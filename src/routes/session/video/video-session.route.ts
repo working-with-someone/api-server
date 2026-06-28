@@ -4,7 +4,7 @@ import { videoSessionValidationSchema } from '../../../validations';
 import validate from '../../../middleware/validate.middleware';
 import videoSessionMiddleware from '../../../middleware/session/video/video-session.middleware';
 import multer from 'multer';
-import commentRouter from './comment/index.route';
+import videoSessionCommentRouter from './comment/index.route';
 import likeRouter from './like.route';
 
 const videoSessionRouter = Router();
@@ -46,7 +46,7 @@ videoSessionRouter
 videoSessionRouter.use(
   '/:video_session_id/comment',
   videoSessionMiddleware.attachVideoSessionOrNotfound,
-  commentRouter
+  videoSessionCommentRouter
 );
 
 videoSessionRouter.use(

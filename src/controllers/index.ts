@@ -6,6 +6,7 @@ import * as preferredCategoryController from './preferred_category.controller';
 import * as liveSessionController from './session/live/live-session.controller';
 import * as videoSessionController from './session/video/video-session.controller';
 import * as videoSessionCommentController from './session/video/comment/index.controller';
+import * as videoSessionCommentLikeController from './session/video/comment/like.controller';
 
 export {
   userController,
@@ -16,4 +17,5 @@ export {
   liveSessionController,
   videoSessionController,
   videoSessionCommentController,
+  videoSessionCommentLikeController,
 };
