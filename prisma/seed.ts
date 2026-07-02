@@ -11,6 +11,9 @@ const USERS_COUNT = 20;
 const FOLLOWS_COUNT = 30;
 const LIVE_SESSIONS_COUNT = 10;
 const VIDEO_SESSIONS_COUNT = 15;
+const VIDEO_SESSION_COMMENT_COUNT = 4;
+const VIDEO_SESSION_LIKE_COUNT = 6;
+const VIDEO_SESSION_COMMENT_LIKE_COUNT = 3;
 
 // some keywords for '?? with me'
 const categorieLabels = [
@@ -40,6 +43,9 @@ const clearDatabase = async () => {
   await prisma.live_session_allow.deleteMany();
   await prisma.video_session_break_time.deleteMany();
   await prisma.video_session_allow.deleteMany();
+  await prisma.video_session_comment_like.deleteMany();
+  await prisma.video_session_comment.deleteMany();
+  await prisma.video_session_like.deleteMany();
   await prisma.live_session.deleteMany();
   await prisma.video_session.deleteMany();
   await prisma.category.deleteMany();
@@ -384,6 +390,93 @@ async function main(): Promise<void> {
         });
 
         console.log(`   ✅  video Session break time created`);
+      }
+
+      const likedUserIndices = new Set<number>();
+      const likeCount = Math.min(VIDEO_SESSION_LIKE_COUNT, USERS_COUNT - 1);
+
+      for (let j = 0; j < likeCount; j++) {
+        let likedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+
+        while (likedUserIndex === userIndex || likedUserIndices.has(likedUserIndex)) {
+          likedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+        }
+
+        likedUserIndices.add(likedUserIndex);
+
+        await prisma.video_session_like.create({
+          data: {
+            video_session_id: sessionId,
+            user_id: users[likedUserIndex].id,
+          },
+        });
+      }
+
+      if (likeCount > 0) {
+        await prisma.video_session.update({
+          where: { id: sessionId },
+          data: { like_count: likeCount },
+        });
+      }
+
+      const commentCount = Math.floor(Math.random() * (VIDEO_SESSION_COMMENT_COUNT + 1));
+
+      for (let j = 0; j < commentCount; j++) {
+        const commentAuthorIndex = Math.floor(Math.random() * USERS_COUNT);
+        const comment = await prisma.video_session_comment.create({
+          data: {
+            content: faker.lorem.sentences(2),
+            user: {
+              connect: {
+                id: users[commentAuthorIndex].id,
+              },
+            },
+            video_session: {
+              connect: {
+                id: sessionId,
+              },
+            },
+          },
+        });
+
+        const commentLikedUserIndices = new Set<number>();
+        const commentLikeCount = Math.floor(
+          Math.random() * (Math.min(VIDEO_SESSION_COMMENT_LIKE_COUNT, USERS_COUNT - 1) + 1)
+        );
+
+        for (let k = 0; k < commentLikeCount; k++) {
+          let commentLikedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+
+          while (
+            commentLikedUserIndex === commentAuthorIndex ||
+            commentLikedUserIndices.has(commentLikedUserIndex)
+          ) {
+            commentLikedUserIndex = Math.floor(Math.random() * USERS_COUNT);
+          }
+
+          commentLikedUserIndices.add(commentLikedUserIndex);
+
+          await prisma.video_session_comment_like.create({
+            data: {
+              video_session_comment_id: comment.id,
+              user_id: users[commentLikedUserIndex].id,
+            },
+          });
+        }
+
+        if (commentLikeCount > 0) {
+          await prisma.video_session_comment.update({
+            where: { id: comment.id },
+            data: { like_count: commentLikeCount },
+          });
+        }
+      }
+
+      if (commentCount > 0) {
+        await prisma.video_session.update({
+          where: { id: sessionId },
+          data: { comment_count: commentCount },
+        });
       }
     }
   }
