@@ -28,6 +28,12 @@ export async function getComments(input: GetCommentsInput) {
           pfp: true,
         },
       },
+      // user의 해당 comment like 여부
+      likes: {
+        where: {
+          user_id: input.userId,
+        },
+      },
     },
     skip: (input.page - 1) * input.per_page,
     take: input.per_page,

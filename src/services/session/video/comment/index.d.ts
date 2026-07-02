@@ -6,6 +6,7 @@ export interface GetCommentInput {
 }
 
 export interface GetCommentsInput {
+  userId: number;
   videoSessionId: string;
   page: number;
   per_page: number;
