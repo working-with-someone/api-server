@@ -6,7 +6,7 @@ import httpStatusCode from 'http-status-codes';
 export const getComments = asyncCatch(async (req: Request, res: Response) => {
   const comments = await videoSessionCommentService.getComments({
     userId: req.session.userId!,
-    videoSessionId: req.params.session_id,
+    videoSessionId: req.params.video_session_id,
     page: parseInt(req.query.page as string),
     per_page: parseInt(req.query.per_page as string),
     sort: req.query.sort as string,

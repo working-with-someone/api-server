@@ -57,13 +57,15 @@ describe('Comment API', () => {
         await commentFactory.cleanup();
       });
 
-      test('Response_200_With_1_Comments', async () => {
+      test('Response_200', async () => {
         const res = await request(server).get(
           `/sessions/video/${videoSession.id}/comment`
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.OK);
         expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0].video_session_id).toEqual(videoSession.id);
+
       });
 
       test('Response_200_With_10_Comments', async () => {
@@ -73,7 +75,12 @@ describe('Comment API', () => {
 
         expect(res.statusCode).toEqual(httpStatusCode.OK);
         expect(res.body.data).toHaveLength(10);
+
+        for (const comment of res.body.data) {
+          expect(comment.video_session_id).toEqual(videoSession.id);
+        }
       });
+
 
       test('Response_200_With_10_Comments_Sorted_By_Recent', async () => {
         const res = await request(server).get(
