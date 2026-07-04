@@ -1,12 +1,12 @@
-import prismaClient from '../../src/database/clients/prisma';
-import server from '../../src';
+import prismaClient from '../../../src/database/clients/prisma';
+import server from '../../../src';
 import request from 'supertest';
 import fs from 'fs';
-import { loadImage } from '../../src/lib/s3';
-import { to } from '../../src/config/path.config';
+import { loadImage } from '../../../src/lib/s3';
+import { to } from '../../../src/config/path.config';
 import path from 'path';
-import currUser from '../data/curr-user';
-import { userFactory } from '../factories';
+import currUser from '../../data/curr-user';
+import { userFactory } from '../../factories';
 import { user } from '@prisma/client';
 
 describe('User API', () => {

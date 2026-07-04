@@ -1,6 +1,6 @@
 import express from 'express';
 
-import userRoute from './user/user.route';
+import userRoute from './user/index.route';
 import mediaRoute from './media.route';
 import categoryRoute from './category/category.route';
 import sessionRouter from './session';

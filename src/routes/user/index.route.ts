@@ -6,6 +6,7 @@ import multer from 'multer';
 import { followingRouter, followerRouter } from './follow.route';
 import preferredRouter from './preferredCategory.route';
 import userEndpointMiddleware from '../../middleware/user/user.middleware';
+import userSessionsRouter from './sessions/index.route';
 
 const router = Router();
 
@@ -35,5 +36,7 @@ router.use('/:user_id/followings', followingRouter);
 router.use('/:user_id/followers', followerRouter);
 // /users/:user_id/preferred-categories
 router.use('/:user_id/preferred-categories', preferredRouter);
+// /users/:user_id/sessions
+router.use('/:user_id/sessions', userSessionsRouter);
 
 export default router;

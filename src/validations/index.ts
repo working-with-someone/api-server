@@ -1,4 +1,4 @@
-import * as userValidationSchema from './user.validation';
+import * as userValidationSchema from './user/index.validation';
 import * as mediaValidationSchema from './media.validation';
 import * as followValidationSchema from './follow.validation';
 import * as categoryValidationSchema from './category.validation';
@@ -7,6 +7,7 @@ import * as liveSessionValidationSchema from './session/live/live-session.valida
 import * as videoSessionValidationSchema from './session/video/video-session.validation';
 import * as breakTimeValidationSchema from './break-time.validation';
 import * as videoSessionCommentValidationSchema from './session/video/comment/index.validation';
+import * as userVideoSessionValidationSchema from './user/sessions/video/index.validation';
 
 export {
   userValidationSchema,
@@ -18,4 +19,5 @@ export {
   videoSessionValidationSchema,
   breakTimeValidationSchema,
   videoSessionCommentValidationSchema,
+  userVideoSessionValidationSchema
 };

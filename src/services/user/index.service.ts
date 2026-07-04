@@ -1,13 +1,13 @@
-import prismaClient from '../database/clients/prisma';
-import { wwsError } from '../utils/wwsError';
+import prismaClient from '../../database/clients/prisma';
+import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import pick from '../utils/pick';
-import type { user } from '../types/user';
-import { deleteImage, uploadImage } from '../lib/s3';
+import pick from '../../utils/pick';
+import type { user } from '../../types/user';
+import { deleteImage, uploadImage } from '../../lib/s3';
 import { Prisma } from '@prisma/client';
-import { to } from '../config/path.config';
+import { to } from '../../config/path.config';
 import path from 'path';
-import type { UpdateUserInput } from './user.service.d';
+import type { UpdateUserInput } from './index.service.d';
 
 export async function getUser(userId: number, isSelf: boolean) {
   const user = await prismaClient.user.findFirst({

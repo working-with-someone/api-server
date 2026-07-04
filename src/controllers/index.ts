@@ -1,4 +1,4 @@
-import * as userController from './user.controller';
+import * as userController from './user/index.controller';
 import * as mediaController from './media.controller';
 import * as followController from './follow.controller';
 import * as categoryController from './category.controller';
@@ -7,6 +7,7 @@ import * as liveSessionController from './session/live/live-session.controller';
 import * as videoSessionController from './session/video/video-session.controller';
 import * as videoSessionCommentController from './session/video/comment/index.controller';
 import * as videoSessionCommentLikeController from './session/video/comment/like.controller';
+import * as userVideoSessionController from './user/sessions/video/index.controller';
 
 export {
   userController,
@@ -18,4 +19,5 @@ export {
   videoSessionController,
   videoSessionCommentController,
   videoSessionCommentLikeController,
+  userVideoSessionController
 };
