@@ -18,7 +18,7 @@ const attachUserOrNotfound = async (
   });
 
   if (!user) {
-    return next(new wwsError(httpStatusCode.NOT_FOUND));
+    return next(new wwsError(httpStatusCode.NOT_FOUND, 'user not found'));
   }
 
   res.locals.user = user;

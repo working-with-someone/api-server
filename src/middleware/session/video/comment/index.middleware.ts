@@ -15,7 +15,7 @@ export async function attachCommentOrNotfound(
   });
 
   if (!comment) {
-    return next(new wwsError(httpStatusCode.NOT_FOUND));
+    return next(new wwsError(httpStatusCode.NOT_FOUND, 'video session comment not found'));
   }
 
   res.locals.comment = comment;

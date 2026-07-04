@@ -17,7 +17,7 @@ export const checkCategoryExistOrNotFound = async (
 
   if (!category) {
     return next(
-      new wwsError(httpStatusCode.NOT_FOUND, 'can not found category')
+      new wwsError(httpStatusCode.NOT_FOUND, 'category not found')
     );
   }
 

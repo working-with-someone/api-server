@@ -44,7 +44,7 @@ export async function loadImage(option: s3APIOption) {
     // type declaration에서는 readable로 명시되어있지 않지만, readable이다.
     return res.Body as Readable;
   } catch (err) {
-    throw new wwsError(404, 'can not found image');
+    throw new wwsError(404, 'image not found');
   }
 }
 

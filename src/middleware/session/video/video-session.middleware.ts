@@ -32,7 +32,7 @@ const videoSessionMiddleware = {
     });
 
     if (!videoSession) {
-      return next(new wwsError(httpStatusCode.NOT_FOUND));
+      return next(new wwsError(httpStatusCode.NOT_FOUND, 'video session not found'));
     }
 
     res.locals.videoSession = videoSession;

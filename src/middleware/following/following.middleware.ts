@@ -20,7 +20,7 @@ export const attachFollowingOrNotFound = async (
 
   if (!following) {
     return next(
-      new wwsError(httpStatusCode.NOT_FOUND, 'can not found following')
+      new wwsError(httpStatusCode.NOT_FOUND, 'following not found')
     );
   }
 
@@ -44,7 +44,7 @@ export const checkTargetUserExistOrNotFound = async (
 
   if (!user) {
     return next(
-      new wwsError(httpStatusCode.NOT_FOUND, 'can not found following user')
+      new wwsError(httpStatusCode.NOT_FOUND, 'following user not found')
     );
   }
 

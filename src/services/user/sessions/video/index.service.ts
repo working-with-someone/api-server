@@ -57,7 +57,7 @@ export async function getUserVideoSession(input: GetUserVideoSessionInput) {
     });
 
     if (!videoSession) {
-        throw new wwsError(httpStatusCodes.NOT_FOUND, 'Video session not found');
+        throw new wwsError(httpStatusCodes.NOT_FOUND, 'video session not found');
     }
 
     if (videoSession.access_level === access_level.PRIVATE || videoSession.access_level === access_level.FOLLOWER_ONLY) {

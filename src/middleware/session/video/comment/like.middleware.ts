@@ -24,7 +24,7 @@ const attachLikeOrNotfound = async (
     return next(
       new wwsError(
         httpStatusCode.NOT_FOUND,
-        'can not found like about this comment'
+        'video session comment like not found'
       )
     );
   }

@@ -29,7 +29,7 @@ const liveSessionMiddleware = {
     });
 
     if (!liveSession) {
-      return next(new wwsError(httpStatusCode.NOT_FOUND));
+      return next(new wwsError(httpStatusCode.NOT_FOUND, 'live session not found'));
     }
 
     res.locals.liveSession = liveSession;

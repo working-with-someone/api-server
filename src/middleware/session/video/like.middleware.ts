@@ -20,7 +20,7 @@ const attachLikeOrNotfound = async (
   });
 
   if (!like) {
-    return next(new wwsError(httpStatusCode.NOT_FOUND));
+    return next(new wwsError(httpStatusCode.NOT_FOUND, 'video session like not found'));
   }
 
   res.locals.like = like;
