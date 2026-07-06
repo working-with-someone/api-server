@@ -10,6 +10,8 @@ import helmet from 'helmet';
 import cors from 'cors';
 import sessionConfig from './config/session.config';
 import correlator from 'express-correlation-id';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './docs/swagger';
 
 const app = express();
 
@@ -32,6 +34,11 @@ app.use(session(sessionConfig));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/docs.json', (req, res) => {
+  return res.status(200).json(swaggerSpec);
+});
 
 // log request
 app.use(requestLogger);
