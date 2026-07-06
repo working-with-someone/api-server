@@ -40,6 +40,9 @@ export async function getUserVideoSessions(input: GetUserVideoSessionsInput) {
                 },
             ],
         },
+        include: {
+            organizer: true
+        },
         skip: (input.page - 1) * input.per_page,
         take: input.per_page,
 
@@ -54,6 +57,9 @@ export async function getUserVideoSession(input: GetUserVideoSessionInput) {
             id: input.videoSessionId,
             organizer_id: input.userId,
         },
+        include: {
+            organizer: true
+        }
     });
 
     if (!videoSession) {
