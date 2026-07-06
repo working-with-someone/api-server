@@ -8,4 +8,6 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/tests/jest/setup/auth.ts'],
   globalTeardown: '<rootDir>/tests/jest/global/tear-down.ts',
   globalSetup: '<rootDir>/tests/jest/global/setup.ts',
+
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 };
