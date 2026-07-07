@@ -1,8 +1,9 @@
 type SessionType = 'live' | 'video';
 type commentSortKeyword = 'recent';
-import { Prisma } from '@prisma/client';
+import { PublicVideoSessionComment } from '../../../../types/contracts/comment';
+
 export interface GetCommentInput {
-  comment: Prisma.video_session_commentGetPayload<false>;
+  comment: PublicVideoSessionComment
 }
 
 export interface GetCommentsInput {

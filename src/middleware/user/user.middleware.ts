@@ -15,6 +15,9 @@ const attachUserOrNotfound = async (
       // validator에서 number임이 검증된다.
       id: parseInt(user_id),
     },
+    include: {
+      pfp: true,
+    },
   });
 
   if (!user) {

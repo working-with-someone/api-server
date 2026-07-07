@@ -1,15 +1,17 @@
 import prismaClient from '../../database/clients/prisma';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
-import pick from '../../utils/pick';
-import type { user } from '../../types/user';
 import { deleteImage, uploadImage } from '../../lib/s3';
 import { Prisma } from '@prisma/client';
 import { to } from '../../config/path.config';
 import path from 'path';
 import type { UpdateUserInput } from './index.service.d';
+import { PublicUser } from '../../types/contracts/user';
 
-export async function getUser(userId: number, isSelf: boolean) {
+export async function getUser(
+  userId: number,
+  isSelf: boolean
+): Promise<PublicUser> {
   const user = await prismaClient.user.findFirst({
     where: { id: userId },
     include: {
@@ -18,20 +20,22 @@ export async function getUser(userId: number, isSelf: boolean) {
         orderBy: { priority: 'asc' },
       },
     },
+    omit: {
+      encrypted_password: true,
+    },
   });
 
   if (!user) {
     throw new wwsError(httpStatusCode.NOT_FOUND, '사용자를 찾을 수 없습니다.');
   }
 
-  if (isSelf) {
-    return user;
-  }
-
-  return getPublicUserInfo(user);
+  return user;
 }
 
-export async function updateUser(userId: number, data: UpdateUserInput) {
+export async function updateUser(
+  userId: number,
+  data: UpdateUserInput
+): Promise<PublicUser | null> {
   const _data: Prisma.userUpdateInput = {};
 
   const user = await prismaClient.user.findFirst({
@@ -90,19 +94,10 @@ export async function updateUser(userId: number, data: UpdateUserInput) {
     include: {
       pfp: true,
     },
+    omit: {
+      encrypted_password: true,
+    },
   });
 
   return updatedUser;
 }
-
-export const getPublicUserInfo = (
-  user: Record<string, any>
-): user.PublicUserInfo =>
-  pick(user, [
-    'id',
-    'username',
-    'pfp',
-    'email',
-    'followers_count',
-    'followings_count',
-  ]);

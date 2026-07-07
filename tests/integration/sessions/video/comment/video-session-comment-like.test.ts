@@ -4,15 +4,13 @@ import request from 'supertest';
 import currUser from '../../../../data/curr-user';
 import videoSessionCommentLikeFactory from '../../../../factories/video-session-comment-like-factory';
 import prismaClient from '../../../../../src/database/clients/prisma';
-import {
-  VideoSessionCommentWithAll,
-  VideoSessionWithAll,
-} from '../../../../../src/@types/video-session';
 import { commentFactory, videoSessionFactory } from '../../../../factories';
+import { PublicVideoSession } from '../../../../../src/types/contracts/video-session';
+import { PublicVideoSessionComment } from '../../../../../src/types/contracts/comment';
 
 describe('Video Session Comment Like API', () => {
-  let videoSession: VideoSessionWithAll;
-  let videoSessionComment: VideoSessionCommentWithAll;
+  let videoSession: PublicVideoSession
+  let videoSessionComment: PublicVideoSessionComment;
 
   beforeAll(async () => {
     await currUser.insert();

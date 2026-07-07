@@ -4,12 +4,17 @@ import {
   CreateVideoSessionLikeInput,
   DeleteVideoSessionLikeInput,
 } from './like.service.d';
+import { PublicVideoSessionLike } from '../../../types/contracts/like';
 
-async function getVideoSessionLike(input: GetVideoSessionLikeInput) {
+async function getVideoSessionLike(
+  input: GetVideoSessionLikeInput
+): Promise<PublicVideoSessionLike> {
   return input.like;
 }
 
-async function createVideoSessionLike(input: CreateVideoSessionLikeInput) {
+async function createVideoSessionLike(
+  input: CreateVideoSessionLikeInput
+): Promise<PublicVideoSessionLike> {
   const [createdLike] = await prismaClient.$transaction([
     prismaClient.video_session_like.create({
       data: {
@@ -33,7 +38,7 @@ async function createVideoSessionLike(input: CreateVideoSessionLikeInput) {
 }
 
 async function deleteVideoSessionLike(input: DeleteVideoSessionLikeInput) {
-  const [deletedLike] = await prismaClient.$transaction([
+  await prismaClient.$transaction([
     prismaClient.video_session_like.delete({
       where: {
         user_id_video_session_id: {
@@ -53,8 +58,6 @@ async function deleteVideoSessionLike(input: DeleteVideoSessionLikeInput) {
       },
     }),
   ]);
-
-  return deletedLike;
 }
 
 const videoSessionLikeService = {

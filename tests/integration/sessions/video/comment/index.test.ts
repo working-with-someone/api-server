@@ -3,11 +3,11 @@ import httpStatusCode from 'http-status-codes';
 import { videoSessionFactory, commentFactory } from '../../../../factories';
 import request from 'supertest';
 import type { video_session_comment } from '@prisma/client';
-import { VideoSessionWithAll } from '../../../../../src/@types/video-session';
 import currUser from '../../../../data/curr-user';
 import { user } from '@prisma/client';
 import { userFactory } from '../../../../factories';
 import prismaClient from '../../../../../src/database/clients/prisma';
+import { PublicVideoSession } from '../../../../../src/types/contracts/video-session';
 
 describe('Comment API', () => {
   beforeAll(async () => {
@@ -23,14 +23,14 @@ describe('Comment API', () => {
   });
 
   describe('Video_Session_Comment', () => {
-    let videoSession: VideoSessionWithAll;
-    let commentDisabledVideoSEssion: VideoSessionWithAll;
+    let videoSession: PublicVideoSession;
+    let commentDisabledVideoSession: PublicVideoSession;
     let user1: user;
 
     beforeAll(async () => {
       user1 = await userFactory.createAndSave();
       videoSession = await videoSessionFactory.createAndSave();
-      commentDisabledVideoSEssion = await videoSessionFactory.createAndSave({
+      commentDisabledVideoSession = await videoSessionFactory.createAndSave({
         comment_enabled: false,
       });
     });
@@ -65,37 +65,137 @@ describe('Comment API', () => {
         expect(res.statusCode).toEqual(httpStatusCode.OK);
         expect(res.body.data).toHaveLength(1);
         expect(res.body.data[0].video_session_id).toEqual(videoSession.id);
-
       });
 
-      test('Response_200_With_10_Comments', async () => {
-        const res = await request(server).get(
-          `/sessions/video/${videoSession.id}/comment?per_page=10`
-        );
+      describe('Sort', () => {
+        test('Response_200_With_10_Comments_Sorted_By_Recent', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?per_page=10&sort=recent`
+          );
 
-        expect(res.statusCode).toEqual(httpStatusCode.OK);
-        expect(res.body.data).toHaveLength(10);
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(10);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 1,
+            per_page: 10,
+            hasMore: true,
+            prevPage: null,
+            nextPage: 2,
+          });
+          expect(res.body.data).toEqual(
+            [...res.body.data].sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+            )
+          );
+        });
 
-        for (const comment of res.body.data) {
-          expect(comment.video_session_id).toEqual(videoSession.id);
-        }
+        test('Response_200_With_10_Comments_When_Sort_Is_Not_Provided', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?per_page=10`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(10);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 1,
+            per_page: 10,
+            hasMore: true,
+            prevPage: null,
+            nextPage: 2,
+          });
+        });
+
+        test('Response_400_When_Sort_Value_Is_Invalid', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?per_page=10&sort=oldest`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+        });
+
+        test('Response_400_When_Sort_Value_Is_Empty_String', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?per_page=10&sort=`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+        });
       });
 
+      describe('Pagination', () => {
+        test('Response_400_When_Page_Is_Zero', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?page=0&per_page=10`
+          );
 
-      test('Response_200_With_10_Comments_Sorted_By_Recent', async () => {
-        const res = await request(server).get(
-          `/sessions/video/${videoSession.id}/comment?per_page=10&sort=recent`
-        );
+          expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+        });
 
-        expect(res.statusCode).toEqual(httpStatusCode.OK);
-        expect(res.body.data).toHaveLength(10);
-        expect(res.body.data).toEqual(
-          [...res.body.data].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          )
-        );
+        test('Response_First_Page_With_Correct_Pagination_Meta_Data', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?page=1&per_page=10`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(10);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 1,
+            per_page: 10,
+            hasMore: true,
+            prevPage: null,
+            nextPage: 2,
+          });
+        });
+
+        test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?page=2&per_page=10`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(10);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 2,
+            per_page: 10,
+            hasMore: true,
+            prevPage: 1,
+            nextPage: 3,
+          });
+        });
+
+        test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?page=3&per_page=10`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(10);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 3,
+            per_page: 10,
+            hasMore: false,
+            prevPage: 2,
+            nextPage: null,
+          });
+        });
+
+        test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+          const res = await request(server).get(
+            `/sessions/video/${videoSession.id}/comment?page=4&per_page=10`
+          );
+
+          expect(res.statusCode).toEqual(httpStatusCode.OK);
+          expect(res.body.data).toHaveLength(0);
+          expect(res.body.pagination).toMatchObject({
+            currPage: 4,
+            per_page: 10,
+            hasMore: false,
+            prevPage: 3,
+            nextPage: null,
+          });
+        });
       });
     });
 
@@ -196,7 +296,7 @@ describe('Comment API', () => {
 
       test('Response_403_When_Comment_Is_Disabled', async () => {
         const res = await request(server)
-          .post(`/sessions/video/${commentDisabledVideoSEssion.id}/comment`)
+          .post(`/sessions/video/${commentDisabledVideoSession.id}/comment`)
           .send({ content: 'Test Comment' });
 
         expect(res.statusCode).toEqual(httpStatusCode.FORBIDDEN);

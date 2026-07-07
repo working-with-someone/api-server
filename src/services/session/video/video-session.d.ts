@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { PagiNationData } from '../../../types/pagination';
+import { PagiNationData, PaginationMeta } from '../../../types/pagination';
 import { live_session_status } from '@prisma/client';
 
 export interface GetLiveSessionsInput extends PagiNationData {

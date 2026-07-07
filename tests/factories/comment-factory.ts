@@ -2,6 +2,7 @@ import { Prisma, PrismaClient, video_session_comment } from '@prisma/client';
 import { IFactory } from './factory';
 import { faker } from '@faker-js/faker';
 import currUser from '../data/curr-user';
+import { PublicVideoSessionComment } from '../../src/types/contracts/comment';
 
 const prisma = new PrismaClient();
 
@@ -25,11 +26,19 @@ class CommentFactory
 
   async createAndSave(
     overrides?: Partial<Prisma.video_session_commentCreateInput> | undefined
-  ): Promise<video_session_comment> {
+  ): Promise<PublicVideoSessionComment> {
     const data = this.create(overrides);
 
     return prisma.video_session_comment.create({
       data,
+      include: {
+        user: {
+          include: {
+            pfp: true,
+          },
+        },
+        video_session: true,
+      },
     });
   }
 

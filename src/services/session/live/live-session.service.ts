@@ -3,7 +3,6 @@ import type {
   createSessionInput,
   GetLiveSessionsInput,
 } from './live-session.service.d';
-import type { AttachedLiveSession } from '../../../middleware/session/live/live-session';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
@@ -13,11 +12,18 @@ import { checkFollowing } from '../../follow.service';
 import { Prisma, live_session_status, access_level } from '@prisma/client';
 import randomString from 'randomstring';
 import { sanitize } from '../../../utils/sanitize';
+import {
+  PublicLiveSession,
+  PublicLiveSessionStatus,
+  PublicLiveSessionThumbnailUri,
+} from '../../../types/contracts/live-session';
+import { PaginatedResult } from '../../../types/pagination';
+import { buildPagenationMeta } from '../../../utils/pagination';
 
 export async function isAllowedToLiveSession(data: {
-  liveSession: AttachedLiveSession;
+  liveSession: PublicLiveSession;
   userId: number;
-}) {
+}): Promise<boolean> {
   const liveSession = data.liveSession;
 
   const organizer_id = liveSession.organizer_id;
@@ -58,13 +64,15 @@ export async function isAllowedToLiveSession(data: {
 }
 
 export async function getLiveSession(data: {
-  liveSession: AttachedLiveSession;
+  liveSession: PublicLiveSession;
   userId: number;
-}) {
+}): Promise<PublicLiveSession> {
   return data.liveSession;
 }
 
-export async function getLiveSessions(data: GetLiveSessionsInput) {
+export async function getLiveSessions(
+  data: GetLiveSessionsInput
+): Promise<PaginatedResult<PublicLiveSession[], 'liveSessions'>> {
   const statusArray = data.status
     ? Array.isArray(data.status)
       ? data.status
@@ -121,7 +129,7 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
   const liveSessions = await prismaClient.live_session.findMany({
     where: whereCondition,
     skip: (data.page - 1) * data.per_page,
-    take: data.per_page,
+    take: data.per_page + 1,
     omit: {
       stream_key: true,
     },
@@ -137,26 +145,21 @@ export async function getLiveSessions(data: GetLiveSessionsInput) {
     },
   });
 
-  const totalPages = Math.ceil(totalItems / data.per_page);
-  const hasMore = data.page < totalPages;
-  const previousPage = data.page > 1 ? data.page - 1 : null;
-  const nextPage = hasMore ? data.page + 1 : null;
+  const pagination = buildPagenationMeta(liveSessions, data.page, data.per_page);
+
+  if (pagination.hasMore) {
+    liveSessions.pop();
+  }
 
   return {
     liveSessions,
-    pagination: {
-      currentPage: data.page,
-      totalPages,
-      totalItems,
-      per_page: data.per_page,
-      hasMore,
-      previousPage,
-      nextPage,
-    },
+    pagination,
   };
 }
 
-export async function createLiveSession(data: createSessionInput) {
+export async function createLiveSession(
+  data: createSessionInput
+): Promise<PublicLiveSession> {
   const uuid = v4();
   const streamKey = randomString.generate(32);
 
@@ -193,19 +196,28 @@ export async function createLiveSession(data: createSessionInput) {
       status: live_session_status.READY,
       stream_key: streamKey,
     },
+    include: {
+      break_time: true,
+      category: true,
+      live_session_transition_log: true,
+      organizer: {
+        include: {
+          pfp: true,
+        },
+      },
+    },
+    omit: {
+      stream_key: true,
+    },
   });
 
-  const sanitizedLiveSession = sanitize(liveSession, {
-    exclude: ['stream_key'],
-  });
-
-  return sanitizedLiveSession;
+  return liveSession;
 }
 
 export async function updateLiveSessionStatus(data: {
-  liveSession: AttachedLiveSession;
+  liveSession: PublicLiveSession;
   status: live_session_status;
-}) {
+}): Promise<PublicLiveSessionStatus> {
   const liveSession = data.liveSession;
 
   const updateInput: Prisma.live_sessionUpdateInput = {
@@ -241,9 +253,9 @@ export async function updateLiveSessionStatus(data: {
 }
 
 export async function updateLiveSessionThumbnail(data: {
-  liveSession: AttachedLiveSession;
+  liveSession: PublicLiveSession;
   thumbnail: Express.Multer.File;
-}) {
+}): Promise<PublicLiveSessionThumbnailUri> {
   const liveSession = data.liveSession;
 
   let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');

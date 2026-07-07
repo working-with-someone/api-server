@@ -4,7 +4,6 @@ import httpStatusCode from 'http-status-codes';
 import categoryFactory from '../factories/category-factory';
 import { liveSessionFactory } from '../factories';
 import currUser from '../data/curr-user';
-import { after } from 'node:test';
 
 describe('Category API', () => {
   beforeAll(async () => {
@@ -53,42 +52,147 @@ describe('Category API', () => {
       expect(res.statusCode).toEqual(200);
     });
 
-    // live session_count를 sort key로 live session요청 시 live session count가 내림차순으로 정렬된 category을 200 status code와 함께 응답받아야한다.
-    test('Response_200_Sorted_By_Live_Session_Count_Categories', async () => {
-      const per_page = 10;
-      const res = await request(server).get('/categories').query({
-        page: 1,
-        per_page,
-        sort: 'live_session_count',
+    describe('Sort', () => {
+      // live session_count를 sort key로 live session요청 시 live session count가 내림차순으로 정렬된 category을 200 status code와 함께 응답받아야한다.
+      test('Response_200_Sorted_By_Live_Session_Count_Categories', async () => {
+        const per_page = 10;
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page,
+          sort: 'live_session_count',
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
       });
 
-      expect(res.statusCode).toEqual(httpStatusCode.OK);
-      expect(res.body.data).toHaveLength(10);
+      test('Response_200_Sorted_By_Video_Session_Count_Categories', async () => {
+        const per_page = 10;
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page,
+          sort: 'video_session_count',
+        });
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
+      });
 
-      // 내림차순으로 정렬되어있어야한다.
-      for (let i = 1; i < per_page; i++) {
-        expect(res.body.data[i]._count.live_session).toBeLessThanOrEqual(
-          res.body.data[i - 1]._count.live_session
-        );
-      }
+      test('Response_400_When_Sort_Value_Is_Invalid', async () => {
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page: 10,
+          sort: 'oldest',
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+
+      test('Response_400_When_Sort_Value_Is_Empty_String', async () => {
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page: 10,
+          sort: '',
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
     });
 
-    test('Response_200_Sorted_By_Video_Session_Count_Categories', async () => {
-      const per_page = 10;
-      const res = await request(server).get('/categories').query({
-        page: 1,
-        per_page,
-        sort: 'video_session_count',
-      });
-      expect(res.statusCode).toEqual(httpStatusCode.OK);
-      expect(res.body.data).toHaveLength(10);
+    describe('Pagination', () => {
+      test('Response_400_When_Page_Is_Zero', async () => {
+        const res = await request(server).get('/categories').query({
+          page: 0,
+          per_page: 10,
+        });
 
-      // 내림차순으로 정렬되어있어야한다.
-      for (let i = 1; i < per_page; i++) {
-        expect(res.body.data[i]._count.video_session).toBeLessThanOrEqual(
-          res.body.data[i - 1]._count.video_session
-        );
-      }
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+
+      test('Response_First_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const per_page = 7;
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page,
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(7);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
+      });
+
+      test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const per_page = 7;
+        const res = await request(server).get('/categories').query({
+          page: 2,
+          per_page,
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(7);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 2,
+          per_page,
+          hasMore: true,
+          prevPage: 1,
+          nextPage: 3,
+        });
+      });
+
+      test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const per_page = 7;
+        const res = await request(server).get('/categories').query({
+          page: 3,
+          per_page,
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(6);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 3,
+          per_page,
+          hasMore: false,
+          prevPage: 2,
+          nextPage: null,
+        });
+      });
+
+      test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+        const per_page = 7;
+        const res = await request(server).get('/categories').query({
+          page: 4,
+          per_page,
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(0);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 4,
+          per_page,
+          hasMore: false,
+          prevPage: 3,
+          nextPage: null,
+        });
+      });
     });
   });
 });

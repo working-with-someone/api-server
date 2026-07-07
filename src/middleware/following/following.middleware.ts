@@ -16,12 +16,17 @@ export const attachFollowingOrNotFound = async (
       follower_user_id: user.id,
       following_user_id: parseInt(following_user_id),
     },
+    include: {
+      following: {
+        include: {
+          pfp: true,
+        },
+      },
+    },
   });
 
   if (!following) {
-    return next(
-      new wwsError(httpStatusCode.NOT_FOUND, 'following not found')
-    );
+    return next(new wwsError(httpStatusCode.NOT_FOUND, 'following not found'));
   }
 
   res.locals.following = following;

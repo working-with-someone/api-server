@@ -24,6 +24,7 @@ export const getVideoSessions = asyncCatch(
         userId: req.session.userId!,
         category: req.query.category as string,
         search: req.query.search as string,
+        sort: req.query.sort as string,
       });
 
     return res.status(200).json({ data: videoSessions, pagination });

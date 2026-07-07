@@ -13,7 +13,9 @@ const videoSessionMiddleware = {
     const { video_session_id } = req.params;
 
     const videoSession = await prismaClient.video_session.findFirst({
-      where: { id: video_session_id },
+      where: {
+        id: video_session_id,
+      },
       include: {
         allow: true,
         category: true,
@@ -32,7 +34,9 @@ const videoSessionMiddleware = {
     });
 
     if (!videoSession) {
-      return next(new wwsError(httpStatusCode.NOT_FOUND, 'video session not found'));
+      return next(
+        new wwsError(httpStatusCode.NOT_FOUND, 'video session not found')
+      );
     }
 
     res.locals.videoSession = videoSession;

@@ -13,11 +13,14 @@ import { Input as MediaInfo, ALL_FORMATS, UrlSource } from 'mediabunny';
 import { mediaServer, to } from '../../../config/path.config';
 import { wwsError } from '../../../utils/wwsError';
 import httpStatusCodes from 'http-status-codes';
+import { PublicVideoSession } from '../../../types/contracts/video-session';
+import { PaginatedResult } from '../../../types/pagination';
+import { buildPagenationMeta } from '../../../utils/pagination';
 
 export async function isAllowedToVideoSession(data: {
   videoSession: any;
   userId: number;
-}) {
+}): Promise<boolean> {
   const videoSession = data.videoSession;
 
   const organizer_id = videoSession.organizer_id;
@@ -52,7 +55,9 @@ export async function isAllowedToVideoSession(data: {
   return true;
 }
 
-export async function createVideoSession(data: CreateVideoSessionInput) {
+export async function createVideoSession(
+  data: CreateVideoSessionInput
+): Promise<PublicVideoSession> {
   let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
 
   if (data.thumbnail) {
@@ -105,10 +110,12 @@ export async function createVideoSession(data: CreateVideoSessionInput) {
     },
   });
 
-  return sanitize(videoSession, {});
+  return videoSession;
 }
 
-export async function updateVideoSession(data: UpdateVideoSessionInput) {
+export async function updateVideoSession(
+  data: UpdateVideoSessionInput
+): Promise<PublicVideoSession> {
   const updateData: Prisma.video_sessionUpdateInput = {};
 
   let thumbnail_uri = path.posix.join(to.media.default.images, 'thumbnail');
@@ -161,13 +168,13 @@ export async function updateVideoSession(data: UpdateVideoSessionInput) {
     },
   });
 
-  return sanitize(updated, {});
+  return updated;
 }
 
 export async function getVideoSession(data: {
   videoSession: any;
   userId: number;
-}) {
+}): Promise<PublicVideoSession> {
   return data.videoSession;
 }
 
@@ -177,7 +184,14 @@ export async function getVideoSessions(data: {
   userId: number;
   category?: string;
   search?: string;
-}) {
+  sort?: string;
+}): Promise<PaginatedResult<PublicVideoSession[], 'videoSessions'>> {
+  const orderBy: Prisma.video_sessionOrderByWithRelationInput = {};
+
+  if (data.sort === 'recent') {
+    orderBy['created_at'] = 'desc';
+  }
+
   const whereCondition = {
     category_label: data.category,
     title: {
@@ -210,14 +224,11 @@ export async function getVideoSessions(data: {
     ],
   };
 
-  const totalItems = await prismaClient.video_session.count({
-    where: whereCondition,
-  });
-
   const videoSessions = await prismaClient.video_session.findMany({
     where: whereCondition,
     skip: (data.page - 1) * data.per_page,
-    take: data.per_page,
+    take: data.per_page + 1, // Fetch one extra item to check if there's a next page
+    orderBy,
     include: {
       break_time: true,
       category: true,
@@ -229,21 +240,18 @@ export async function getVideoSessions(data: {
     },
   });
 
-  const totalPages = Math.ceil(totalItems / data.per_page);
-  const hasMore = data.page < totalPages;
-  const previousPage = data.page > 1 ? data.page - 1 : null;
-  const nextPage = hasMore ? data.page + 1 : null;
+  const pagination = buildPagenationMeta(
+    videoSessions,
+    data.page,
+    data.per_page
+  );
+
+  if (pagination.hasMore) {
+    videoSessions.pop(); // Remove the extra item used for pagination check
+  }
 
   return {
     videoSessions,
-    pagination: {
-      currentPage: data.page,
-      totalPages,
-      totalItems,
-      per_page: data.per_page,
-      hasMore,
-      previousPage,
-      nextPage,
-    },
+    pagination,
   };
 }

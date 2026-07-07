@@ -31,7 +31,7 @@ describe('User API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.id).toEqual(currUser.id);
-      expect(res.body.data.encrypted_password).toBeDefined();
+      expect(res.body.data.encrypted_password).toBeUndefined();
     });
 
     test('Response_200_With_Public_User_Info', async () => {
@@ -65,9 +65,6 @@ describe('User API', () => {
       const res = await request(server).get(`/users/self`);
 
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data.encrypted_password).toEqual(
-        user?.encrypted_password
-      );
     });
   });
 

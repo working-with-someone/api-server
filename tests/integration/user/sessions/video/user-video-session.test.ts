@@ -4,7 +4,6 @@ import server from '../../../../../src';
 import currUser from '../../../../data/curr-user';
 import { userFactory } from '../../../../factories';
 import { videoSessionFactory } from '../../../../factories/video-session-factory';
-import { VideoSessionWithAll } from '../../../../../src/@types/video-session';
 import prismaClient from '../../../../../src/database/clients/prisma';
 
 describe('User Video Session API', () => {
@@ -78,7 +77,91 @@ describe('User Video Session API', () => {
             expect(res.statusCode).toEqual(200);
             expect(Array.isArray(res.body.data)).toBe(true);
             expect(res.body.data.length).toEqual(10);
+            expect(res.body.pagination).toMatchObject({
+                currPage: 1,
+                per_page: 10,
+                hasMore: true,
+                prevPage: null,
+                nextPage: 2,
+            });
         })
+
+        describe('Pagination', () => {
+            test('Response_400_When_Page_Is_Zero', async () => {
+                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=0&per_page=10`);
+
+                expect(res.statusCode).toEqual(400);
+            });
+
+            test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+                await videoSessionFactory.createManyAndSave({
+                    count: 23,
+                    overrides: {
+                        organizer: { connect: { id: currUser.id } },
+                        access_level: access_level.PUBLIC
+                    },
+                });
+
+                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=2&per_page=10`);
+
+                expect(res.statusCode).toEqual(200);
+                expect(Array.isArray(res.body.data)).toBe(true);
+                expect(res.body.data.length).toEqual(10);
+                expect(res.body.pagination).toMatchObject({
+                    currPage: 2,
+                    per_page: 10,
+                    hasMore: true,
+                    prevPage: 1,
+                    nextPage: 3,
+                });
+            });
+
+            test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+                await videoSessionFactory.createManyAndSave({
+                    count: 23,
+                    overrides: {
+                        organizer: { connect: { id: currUser.id } },
+                        access_level: access_level.PUBLIC
+                    },
+                });
+
+                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=3&per_page=10`);
+
+                expect(res.statusCode).toEqual(200);
+                expect(Array.isArray(res.body.data)).toBe(true);
+                expect(res.body.data.length).toEqual(3);
+                expect(res.body.pagination).toMatchObject({
+                    currPage: 3,
+                    per_page: 10,
+                    hasMore: false,
+                    prevPage: 2,
+                    nextPage: null,
+                });
+            });
+
+            test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+                await videoSessionFactory.createManyAndSave({
+                    count: 23,
+                    overrides: {
+                        organizer: { connect: { id: currUser.id } },
+                        access_level: access_level.PUBLIC
+                    },
+                });
+
+                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=4&per_page=10`);
+
+                expect(res.statusCode).toEqual(200);
+                expect(Array.isArray(res.body.data)).toBe(true);
+                expect(res.body.data.length).toEqual(0);
+                expect(res.body.pagination).toMatchObject({
+                    currPage: 4,
+                    per_page: 10,
+                    hasMore: false,
+                    prevPage: 3,
+                    nextPage: null,
+                });
+            });
+        });
 
         // user는 본인의 private video session을 가져올 수 있다.
         test('Response_200_With_Current_User_Private_Video_Session', async () => {

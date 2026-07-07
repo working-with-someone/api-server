@@ -21,15 +21,21 @@ const liveSessionMiddleware = {
         stream_key: true,
       },
       include: {
-        allow: true,
-        category: true,
         break_time: true,
+        category: true,
         live_session_transition_log: true,
+        organizer: {
+          include: {
+            pfp: true,
+          },
+        },
       },
     });
 
     if (!liveSession) {
-      return next(new wwsError(httpStatusCode.NOT_FOUND, 'live session not found'));
+      return next(
+        new wwsError(httpStatusCode.NOT_FOUND, 'live session not found')
+      );
     }
 
     res.locals.liveSession = liveSession;

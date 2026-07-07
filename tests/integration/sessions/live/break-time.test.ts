@@ -4,7 +4,7 @@ import server from '../../../../src';
 import { live_session_status, access_level, user } from '@prisma/client';
 import currUser from '../../../data/curr-user';
 import { userFactory, liveSessionFactory } from '../../../factories';
-import { LiveSessionWithAll } from '../../../factories/live-session-factory';
+import { PrivateLiveASession } from '../../../../src/types/contracts/live-session';
 
 describe('Live Session API', () => {
   let user1: user;
@@ -149,10 +149,10 @@ describe('Live Session API', () => {
   });
 
   describe('GET /sessions/live/:live_session_id/break_time', () => {
-    let hardLiveSession: LiveSessionWithAll;
-    let softLiveSession: LiveSessionWithAll;
-    let otherUserHardLiveSession: LiveSessionWithAll;
-    let otherUserSoftLiveSession: LiveSessionWithAll;
+    let hardLiveSession: PrivateLiveASession;
+    let softLiveSession: PrivateLiveASession;
+    let otherUserHardLiveSession: PrivateLiveASession;
+    let otherUserSoftLiveSession: PrivateLiveASession;
 
     beforeAll(async () => {
       hardLiveSession = await liveSessionFactory.createAndSave({
@@ -229,20 +229,20 @@ describe('Live Session API', () => {
       expect(res.body.data).toMatchObject(otherUserSoftLiveSession.break_time!);
     });
 
-    test('Response_204_With_Break_Time', async () => {
+    test('Response_404', async () => {
       const res = await request(server).get(
         `/sessions/live/${hardLiveSession!.id}/break_time`
       );
 
-      expect(res.statusCode).toEqual(204);
+      expect(res.statusCode).toEqual(404);
     });
 
-    test('Response_204_With_Other_User_LiveSession_Break_Time', async () => {
+    test('Response_404_With_Other_User_LiveSession_Break_Time', async () => {
       const res = await request(server).get(
         `/sessions/live/${otherUserHardLiveSession!.id}/break_time`
       );
 
-      expect(res.statusCode).toEqual(204);
+      expect(res.statusCode).toEqual(404);
     });
   });
 });

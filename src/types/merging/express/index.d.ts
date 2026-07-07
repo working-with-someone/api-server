@@ -1,30 +1,31 @@
-import { Prisma } from '@prisma/client';
-import { AttachedLiveSession } from '../../../middleware/session/live/live-session';
-import { AttachedBreakTime } from '../../../services/session/live/break-time';
+import { PublicVideoSession } from '../../contracts/video-session';
+import { PublicVideoSessionComment } from '../../contracts/comment';
+import { PublicBreakTime } from '../../contracts/break-time';
+import { PublicLiveSession } from '../../contracts/live-session';
+import { PublicFollowing } from '../../contracts/follow';
+import {
+  PublicVideoSessionCommentLike,
+  PublicVideoSessionLike,
+} from '../../contracts/like';
+import { PublicUser } from '../../contracts/user';
 
 export {};
 
 declare global {
   namespace Express {
     interface Request {
-      user: Prisma.userGetPayload<{
-        select: {
-          id: true;
-          username: true;
-          email: true;
-        };
-      }>;
+      user: PublicUser;
     }
 
     interface Locals {
-      liveSession: AttachedLiveSession;
-      breakTime: AttachedBreakTime;
-      user: Prisma.userGetPayload<false>;
-      following: Prisma.followGetPayload<false>;
-      comment: Prisma.video_session_commentGetPayload<false>;
-      video_session_like: Prisma.video_session_likeGetPayload<false>;
-      live_session_like: Prisma.live_session_likeGetPayload<false>;
-      video_session_comment_like: Prisma.video_session_comment_likeGetPayload<false>;
+      liveSession: PublicLiveSession;
+      videoSession: PublicVideoSession;
+      videoSessionComment: PublicVideoSessionComment;
+      breakTime: PublicBreakTime;
+      user: PublicUser;
+      following: PublicFollowing;
+      like: PublicVideoSessionLike;
+      video_session_comment_like: PublicVideoSessionCommentLike;
     }
   }
 }

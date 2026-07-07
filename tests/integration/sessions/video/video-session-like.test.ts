@@ -3,9 +3,9 @@ import httpStatusCode from 'http-status-codes';
 import request from 'supertest';
 import currUser from '../../../data/curr-user';
 import { videoSessionFactory } from '../../../factories';
-import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import likeFactory from '../../../factories/video-session-like-factory';
 import prismaClient from '../../../../src/database/clients/prisma';
+import { PublicVideoSession } from '../../../../src/types/contracts/video-session';
 
 describe('Like API', () => {
   beforeAll(async () => {
@@ -21,7 +21,7 @@ describe('Like API', () => {
   });
 
   describe('Video_Session_Like', () => {
-    let videoSession: VideoSessionWithAll;
+    let videoSession: PublicVideoSession;
 
     beforeAll(async () => {
       videoSession = await videoSessionFactory.createAndSave();

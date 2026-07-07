@@ -9,7 +9,7 @@ const attachLikeOrNotfound = async (
   next: NextFunction
 ) => {
   const videoSession = res.locals.videoSession;
-  const comment = res.locals.comment;
+  const comment = res.locals.videoSessionComment;
 
   const like = await prismaClient.video_session_comment_like.findUnique({
     where: {
@@ -39,7 +39,7 @@ const checkLikeDoesNotExistOrConflict = async (
   res: Response,
   next: NextFunction
 ) => {
-  const comment = res.locals.comment;
+  const comment = res.locals.videoSessionComment;
 
   const like = await prismaClient.video_session_comment_like.findUnique({
     where: {

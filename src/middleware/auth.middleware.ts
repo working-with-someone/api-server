@@ -14,7 +14,11 @@ const authMiddleware = async (
         id: req.session.userId,
       },
       include: {
+        pfp: true,
         email_verification: true,
+      },
+      omit: {
+        encrypted_password: true,
       },
     });
 

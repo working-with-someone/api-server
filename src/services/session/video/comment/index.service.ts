@@ -6,12 +6,19 @@ import {
   DeleteCommentInput,
 } from '.';
 import { Prisma } from '@prisma/client';
+import { PublicVideoSessionComment } from '../../../../types/contracts/comment';
+import { PaginatedResult } from '../../../../types/pagination';
+import { buildPagenationMeta } from '../../../../utils/pagination';
 
-export async function getComment(input: GetCommentInput) {
+export async function getComment(
+  input: GetCommentInput
+): Promise<PublicVideoSessionComment> {
   return input.comment;
 }
 
-export async function getComments(input: GetCommentsInput) {
+export async function getComments(
+  input: GetCommentsInput
+): Promise<PaginatedResult<PublicVideoSessionComment[], 'comments'>> {
   const orderBy: Prisma.video_session_commentOrderByWithRelationInput = {};
 
   if (input.sort === 'recent') {
@@ -28,6 +35,7 @@ export async function getComments(input: GetCommentsInput) {
           pfp: true,
         },
       },
+      video_session: true,
       // user의 해당 comment like 여부
       likes: {
         where: {
@@ -36,15 +44,24 @@ export async function getComments(input: GetCommentsInput) {
       },
     },
     skip: (input.page - 1) * input.per_page,
-    take: input.per_page,
+    take: input.per_page + 1,
     orderBy,
   });
 
-  return comments;
+  const pagination = buildPagenationMeta(comments, input.page, input.per_page);
+
+  if (pagination.hasMore) {
+    comments.pop();
+  }
+
+  return {
+    comments,
+    pagination,
+  };
 }
 
 export async function deleteComment(input: DeleteCommentInput) {
-  const transaction: any[] = [
+  await prismaClient.$transaction([
     prismaClient.video_session_comment.delete({
       where: {
         id: input.comment_id,
@@ -55,15 +72,13 @@ export async function deleteComment(input: DeleteCommentInput) {
       where: { id: input.videoSessionId },
       data: { comment_count: { decrement: 1 } },
     }),
-  ];
-
-  const [deletedComment] = await prismaClient.$transaction(transaction);
-
-  return deletedComment;
+  ]);
 }
 
-export async function createComment(input: CreateCommentInput) {
-  const transaction: any[] = [
+export async function createComment(
+  input: CreateCommentInput
+): Promise<PublicVideoSessionComment> {
+  const [createdComment] = await prismaClient.$transaction([
     prismaClient.video_session_comment.create({
       data: {
         content: input.content,
@@ -76,15 +91,14 @@ export async function createComment(input: CreateCommentInput) {
             pfp: true,
           },
         },
+        video_session: true,
       },
     }),
     prismaClient.video_session.update({
       where: { id: input.videoSessionId },
       data: { comment_count: { increment: 1 } },
     }),
-  ];
-
-  const [createdComment] = await prismaClient.$transaction(transaction);
+  ]);
 
   return createdComment;
 }

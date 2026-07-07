@@ -215,6 +215,13 @@ describe('Live Session API', () => {
         expect(res.statusCode).toEqual(200);
 
         expect(res.body.data).toHaveLength(8);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 10,
+          hasMore: false,
+          prevPage: null,
+          nextPage: null,
+        });
       });
     });
 
@@ -241,6 +248,13 @@ describe('Live Session API', () => {
         expect(res.statusCode).toEqual(200);
 
         expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 12,
+          hasMore: false,
+          prevPage: null,
+          nextPage: null,
+        });
       });
     });
 
@@ -286,6 +300,13 @@ describe('Live Session API', () => {
         expect(res.statusCode).toEqual(200);
 
         expect(res.body.data).toHaveLength(12);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 12,
+          hasMore: false,
+          prevPage: null,
+          nextPage: null,
+        });
       });
     });
 

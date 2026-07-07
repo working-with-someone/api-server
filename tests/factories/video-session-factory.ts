@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { IFactory } from './factory';
-import { VideoSessionWithAll } from '../../src/@types/video-session';
 import { v4 } from 'uuid';
+import { PublicVideoSession } from '../../src/types/contracts/video-session';
 
 const prisma = new PrismaClient();
 
@@ -10,7 +10,7 @@ type OverRides = Prisma.video_sessionCreateInput & {
   organizer: { connect: { id: number } };
 };
 
-class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
+class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
   create(overrides?: Partial<OverRides>): OverRides {
     const id = overrides?.id || faker.string.uuid();
     const title = overrides?.title || faker.lorem.words(3);
@@ -29,13 +29,13 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
         connectOrCreate: overrides?.category?.connect
           ? undefined
           : {
-              where: {
-                label: 'test',
-              },
-              create: {
-                label: 'test',
-              },
+            where: {
+              label: 'test',
             },
+            create: {
+              label: 'test',
+            },
+          },
       },
       video_id: v4(),
       access_level,
@@ -53,12 +53,17 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
     return sessionData;
   }
 
-  createAndSave(overrides?: Partial<OverRides>): Promise<VideoSessionWithAll> {
+  createAndSave(overrides?: Partial<OverRides>): Promise<PublicVideoSession> {
     const data = this.create(overrides);
+
     return prisma.video_session.create({
       data,
       include: {
-        organizer: true,
+        organizer: {
+          include: {
+            pfp: true
+          }
+        },
         allow: true,
         break_time: true,
         category: true,
@@ -77,17 +82,21 @@ class VideoSessionFactory implements IFactory<OverRides, VideoSessionWithAll> {
   async createManyAndSave(options?: {
     overrides?: Partial<OverRides>;
     count?: number;
-  }): Promise<VideoSessionWithAll[]> {
+  }): Promise<PublicVideoSession[]> {
     const { overrides = {}, count = 1 } = options ?? {};
     const sessionsData = this.createMany({ overrides, count });
 
-    const savedSessions: VideoSessionWithAll[] = [];
+    const savedSessions: PublicVideoSession[] = [];
 
     for (const data of sessionsData) {
       const saved = await prisma.video_session.create({
         data,
         include: {
-          organizer: true,
+          organizer: {
+            include: {
+              pfp: true
+            }
+          },
           allow: true,
           break_time: true,
           category: true,

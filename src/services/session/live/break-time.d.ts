@@ -1,12 +1,7 @@
-import { Prisma } from '@prisma/client';
-import { AttachedLiveSession } from '../../../middleware/session/live/live-session';
-
-// break time이 존재하지 않을 수 있다. 이 때, not found가 아닌 204로 처리한다.
-export type AttachedBreakTime =
-  Prisma.live_session_break_timeGetPayload<true> | null;
+import { PublicLiveSession } from '../../../types/contracts/live-session';
 
 export interface CreateBreakTimeInput {
-  liveSession: AttachedLiveSession;
+  liveSession: PublicLiveSession;
   interval: number;
   duration: number;
 }

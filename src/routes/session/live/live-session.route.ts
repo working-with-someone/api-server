@@ -48,6 +48,10 @@ router
     liveSessionMiddleware.checkOwnerOrForbidden,
     liveSessionController.updateLiveSessionThumbnail
   );
-router.use('/:live_session_id/break_time', breakTimeRouter);
+router.use(
+  '/:live_session_id/break_time',
+  liveSessionMiddleware.attachLiveSessionOrNotfound,
+  breakTimeRouter
+);
 
 export default router;

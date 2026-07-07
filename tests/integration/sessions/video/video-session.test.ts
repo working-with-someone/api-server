@@ -35,8 +35,8 @@ import { videoSessionFactory } from '../../../factories/video-session-factory';
 import { userFactory } from '../../../factories';
 import categoryFactory from '../../../factories/category-factory';
 import type { category } from '@prisma/client';
-import { VideoSessionWithAll } from '../../../../src/@types/video-session';
 import fs from 'node:fs';
+import { PublicVideoSession } from '../../../../src/types/contracts/video-session';
 
 describe('Video Session API', () => {
   let user1: user;
@@ -172,6 +172,138 @@ describe('Video Session API', () => {
         expect(res.statusCode).toEqual(httpStatusCode.OK);
         expect(res.body.data).toBeDefined();
         expect(res.body.data.length).toBeGreaterThanOrEqual(4);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 10,
+          hasMore: false,
+          prevPage: null,
+          nextPage: null,
+        });
+      });
+    });
+
+    describe('Sort', () => {
+      test('Response_200_With_Video_Sessions_Sorted_By_Recent', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 3, page: 1, sort: 'recent' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(3);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 3,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
+        expect(res.body.data).toEqual(
+          [...res.body.data].sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          )
+        );
+      });
+
+      test('Response_400_When_Sort_Value_Is_Invalid', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 1, sort: 'oldest' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+
+      test('Response_400_When_Sort_Value_Is_Empty_String', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 1, sort: '' });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+    });
+
+    describe('Pagination', () => {
+      beforeAll(async () => {
+        await videoSessionFactory.createManyAndSave({
+          count: 26,
+          overrides: {
+            access_level: access_level.PUBLIC,
+            organizer: { connect: { id: user1.id } },
+          },
+        });
+      });
+
+      test('Response_400_When_Page_Is_Zero', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 0 });
+
+        expect(res.statusCode).toEqual(httpStatusCode.BAD_REQUEST);
+      });
+
+      test('Response_First_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 1 });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 10,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
+      });
+
+      test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 2 });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 2,
+          per_page: 10,
+          hasMore: true,
+          prevPage: 1,
+          nextPage: 3,
+        });
+      });
+
+      test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 3 });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 3,
+          per_page: 10,
+          hasMore: false,
+          prevPage: 2,
+          nextPage: null,
+        });
+      });
+
+      test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+        const res = await request(server)
+          .get('/sessions/video')
+          .query({ per_page: 10, page: 4 });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(0);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 4,
+          per_page: 10,
+          hasMore: false,
+          prevPage: 3,
+          nextPage: null,
+        });
       });
     });
 
@@ -249,7 +381,7 @@ describe('Video Session API', () => {
   });
 
   describe('PUT /sessions/video/:video_session_id', () => {
-    let videoSession: VideoSessionWithAll;
+    let videoSession: PublicVideoSession;
 
     beforeEach(async () => {
       videoSession = await videoSessionFactory.createAndSave({

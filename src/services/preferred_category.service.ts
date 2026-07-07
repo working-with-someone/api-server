@@ -7,10 +7,11 @@ import type {
   DeletePreferredCategoryInput,
   UpdatePreferredCategoryPriorityInput,
 } from './preferred_category.service.d';
+import { PublicPreferredCategory } from '../types/contracts/category';
 
 export async function getPreferredCategories(
   data: GetPreferredCategoriesInput
-) {
+): Promise<PublicPreferredCategory[]> {
   const preferredCategories = await prismaClient.preferred_category.findMany({
     where: { user_id: data.userId },
     orderBy: { priority: 'asc' },
@@ -21,7 +22,7 @@ export async function getPreferredCategories(
 
 export async function createPreferredCategory(
   data: CreatePreferredCategoryInput
-) {
+): Promise<PublicPreferredCategory> {
   const exists = await prismaClient.preferred_category.findUnique({
     where: {
       user_id_category_label: {
@@ -64,7 +65,7 @@ export async function createPreferredCategory(
 
 export async function updatePreferredCategoryPriority(
   data: UpdatePreferredCategoryPriorityInput
-) {
+): Promise<PublicPreferredCategory> {
   const targetPreferredCategory =
     await prismaClient.preferred_category.findUnique({
       where: {
@@ -150,6 +151,13 @@ export async function updatePreferredCategoryPriority(
         },
       },
     });
+
+  if (!updatedPreferredCategory) {
+    throw new wwsError(
+      httpStatusCode.INTERNAL_SERVER_ERROR,
+      'preferred category update failed'
+    );
+  }
 
   return updatedPreferredCategory;
 }

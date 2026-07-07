@@ -1,7 +1,7 @@
-import type { Prisma } from '@prisma/client';
+import type { PublicVideoSessionLike } from '../../../types/contracts/like';
 
 export interface GetVideoSessionLikeInput {
-  like: Prisma.video_session_likeGetPayload<false>;
+  like: PublicVideoSessionLike;
 }
 
 export interface CreateVideoSessionLikeInput {

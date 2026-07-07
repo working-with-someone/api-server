@@ -12,13 +12,23 @@ export async function attachCommentOrNotfound(
 
   const comment = await prismaClient.video_session_comment.findFirst({
     where: { id: parseInt(comment_id) },
+    include: {
+      user: {
+        include: {
+          pfp: true,
+        },
+      },
+      video_session: true,
+    },
   });
 
   if (!comment) {
-    return next(new wwsError(httpStatusCode.NOT_FOUND, 'video session comment not found'));
+    return next(
+      new wwsError(httpStatusCode.NOT_FOUND, 'video session comment not found')
+    );
   }
 
-  res.locals.comment = comment;
+  res.locals.videoSessionComment = comment;
 
   return next();
 }
@@ -28,9 +38,9 @@ export async function checkOwnerOrForbidden(
   res: Response,
   next: NextFunction
 ) {
-  const comment = res.locals.comment;
+  const comment = res.locals.videoSessionComment;
 
-  if (req.session.userId !== comment?.user_id) {
+  if (req.session.userId !== comment.user_id) {
     return next(new wwsError(httpStatusCode.FORBIDDEN));
   }
 

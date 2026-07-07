@@ -3,14 +3,15 @@ import asyncCatch from '../utils/asyncCatch';
 import { followService } from '../services/';
 
 export const getFollowings = asyncCatch(async (req: Request, res: Response) => {
-  const followings = await followService.getFollowings({
+  const { follows, pagination } = await followService.getFollowings({
     userId: res.locals.user.id,
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
   });
 
   return res.status(200).json({
-    data: followings,
+    data: follows,
+    pagination,
   });
 });
 

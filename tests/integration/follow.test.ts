@@ -36,6 +36,10 @@ describe('Follow API', () => {
             following_user_id: user2.id,
           },
           {
+            follower_user_id: currUser.id,
+            following_user_id: user3.id,
+          },
+          {
             follower_user_id: user1.id,
             following_user_id: currUser.id,
           },
@@ -69,6 +73,13 @@ describe('Follow API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toHaveLength(1);
+      expect(res.body.pagination).toMatchObject({
+        currPage: 1,
+        per_page: 1,
+        hasMore: true,
+        prevPage: null,
+        nextPage: 2,
+      });
     });
 
     test('Response_200_With_Multiple_Followings', async () => {
@@ -93,6 +104,13 @@ describe('Follow API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toHaveLength(1);
+      expect(res.body.pagination).toMatchObject({
+        currPage: 2,
+        per_page: 1,
+        hasMore: false,
+        prevPage: 1,
+        nextPage: null,
+      });
     });
 
     test('Response_200_With_Other_Users_Multiple_Followings', async () => {
@@ -114,6 +132,95 @@ describe('Follow API', () => {
       });
 
       expect(res.statusCode).toEqual(404);
+    });
+
+    describe('Pagination', () => {
+      test('Response_400_When_Page_Is_Zero', async () => {
+        const res = await request(server)
+          .get(`/users/${currUser.id}/followings`)
+          .query({
+            per_page: 1,
+            page: 0,
+          });
+
+        expect(res.statusCode).toEqual(400);
+      });
+
+      test('Response_First_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get(`/users/${currUser.id}/followings`)
+          .query({
+            per_page: 1,
+            page: 1,
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 1,
+          hasMore: true,
+          prevPage: null,
+          nextPage: 2,
+        });
+      });
+
+      test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get(`/users/${currUser.id}/followings`)
+          .query({
+            per_page: 1,
+            page: 2,
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 2,
+          per_page: 1,
+          hasMore: true,
+          prevPage: 1,
+          nextPage: 3,
+        });
+      });
+
+      test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+        const res = await request(server)
+          .get(`/users/${currUser.id}/followings`)
+          .query({
+            per_page: 1,
+            page: 3,
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 3,
+          per_page: 1,
+          hasMore: false,
+          prevPage: 2,
+          nextPage: null,
+        });
+      });
+
+      test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+        const res = await request(server)
+          .get(`/users/${currUser.id}/followings`)
+          .query({
+            per_page: 1,
+            page: 4,
+          });
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.data).toHaveLength(0);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 4,
+          per_page: 1,
+          hasMore: false,
+          prevPage: 3,
+          nextPage: null,
+        });
+      });
     });
   });
 

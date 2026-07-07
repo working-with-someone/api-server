@@ -1,9 +1,10 @@
 import prismaClient from '../../../database/clients/prisma';
 import { Request, Response, NextFunction } from 'express';
+import { wwsError } from '../../../utils/wwsError';
+import httpStatusCode from 'http-status-codes';
 
 const breakTimeMiddleware = {
-  // break time이 존재하지 않을 때는, 404가 아닌 204다.
-  attachBreakTime: async function (
+  attachBreakTimeOrNotFound: async function (
     req: Request,
     res: Response,
     next: NextFunction
@@ -13,6 +14,12 @@ const breakTimeMiddleware = {
         session_id: res.locals.liveSession.id,
       },
     });
+
+    if (!breakTime) {
+      return next(
+        new wwsError(httpStatusCode.NOT_FOUND, 'Break time not found')
+      );
+    }
 
     res.locals.breakTime = breakTime;
 

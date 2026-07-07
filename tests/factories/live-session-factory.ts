@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { IFactory } from './factory';
+import { PrivateLiveASession } from '../../src/types/contracts/live-session';
 
 const prisma = new PrismaClient();
 
@@ -8,16 +9,7 @@ type OverRides = Prisma.live_sessionCreateInput & {
   organizer: { connect: { id: number } };
 };
 
-export type LiveSessionWithAll = Prisma.live_sessionGetPayload<{
-  include: {
-    organizer: true;
-    allow: true;
-    break_time: true;
-    live_session_transition_log: true;
-  };
-}>;
-
-class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
+class LiveSessionFactory implements IFactory<OverRides, PrivateLiveASession> {
   create(overrides?: Partial<OverRides>): OverRides {
     const id = overrides?.id || faker.string.uuid();
     const title = overrides?.title || faker.lorem.words(3);
@@ -68,12 +60,17 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
 
   async createAndSave(
     overrides?: Partial<OverRides>
-  ): Promise<LiveSessionWithAll> {
+  ): Promise<PrivateLiveASession> {
     const data = this.create(overrides);
     return await prisma.live_session.create({
       data,
       include: {
-        organizer: true,
+        organizer: {
+          include: {
+            pfp: true,
+          },
+        },
+        category: true,
         allow: true,
         break_time: true,
         live_session_transition_log: true,
@@ -92,19 +89,24 @@ class LiveSessionFactory implements IFactory<OverRides, LiveSessionWithAll> {
   async createManyAndSave(options?: {
     overrides?: Partial<OverRides>;
     count?: number;
-  }): Promise<LiveSessionWithAll[]> {
+  }): Promise<PrivateLiveASession[]> {
     const { overrides = {}, count = 1 } = options ?? {};
     const sessionsData = this.createMany({ overrides, count });
 
-    const savedSessions: LiveSessionWithAll[] = [];
+    const savedSessions: PrivateLiveASession[] = [];
     for (const data of sessionsData) {
       const saved = await prisma.live_session.create({
         data,
         include: {
-          organizer: true,
+          organizer: {
+            include: {
+              pfp: true,
+            },
+          },
           allow: true,
           break_time: true,
           live_session_transition_log: true,
+          category: true,
         },
       });
 

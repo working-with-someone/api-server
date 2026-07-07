@@ -3,6 +3,8 @@ import type { RequestSchema } from '../../../middleware/validate.middleware';
 import { access_level } from '@prisma/client';
 import { pagiNationQuerySchema } from '../../pagination.validation';
 
+const videoSessionSortKey = ['recent'];
+
 export const getVideoSession: RequestSchema = {
   params: joi.object().keys({
     video_session_id: joi.string().required(),
@@ -14,6 +16,10 @@ export const getVideoSessions: RequestSchema = {
   query: pagiNationQuerySchema.keys({
     category: joi.string().optional(),
     search: joi.string().optional(),
+    sort: joi
+      .string()
+      .valid(...videoSessionSortKey)
+      .optional(),
   }),
 };
 

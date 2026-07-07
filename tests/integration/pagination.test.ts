@@ -50,12 +50,10 @@ describe('Pagination', () => {
 
       expect(res.status).toBe(httpStatusCode.OK);
       expect(res.body.pagination).toMatchObject({
-        currentPage: 1,
-        totalPages: 10,
-        totalItems: 100,
+        currPage: 1,
         per_page: 10,
         hasMore: true,
-        previousPage: null,
+        prevPage: null,
         nextPage: 2,
       });
     });
@@ -68,12 +66,11 @@ describe('Pagination', () => {
 
       expect(res.status).toBe(httpStatusCode.OK);
       expect(res.body.pagination).toMatchObject({
-        currentPage: 5,
-        totalPages: 10,
-        totalItems: 100,
+        currPage: 5,
+
         per_page: 10,
         hasMore: true,
-        previousPage: 4,
+        prevPage: 4,
         nextPage: 6,
       });
     });
@@ -86,12 +83,10 @@ describe('Pagination', () => {
 
       expect(res.status).toBe(httpStatusCode.OK);
       expect(res.body.pagination).toMatchObject({
-        currentPage: 10,
-        totalPages: 10,
-        totalItems: 100,
+        currPage: 10,
         per_page: 10,
         hasMore: false,
-        previousPage: 9,
+        prevPage: 9,
         nextPage: null,
       });
     });
@@ -104,12 +99,10 @@ describe('Pagination', () => {
 
       expect(res.status).toBe(httpStatusCode.OK);
       expect(res.body.pagination).toMatchObject({
-        currentPage: 20,
-        totalPages: 10,
-        totalItems: 100,
+        currPage: 20,
         per_page: 10,
         hasMore: false,
-        previousPage: 19,
+        prevPage: 19,
         nextPage: null,
       });
     });

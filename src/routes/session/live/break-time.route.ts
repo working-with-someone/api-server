@@ -14,13 +14,11 @@ breakTimeRouter
   .route('/')
   .get(
     validate(breakTimeValidationSchema.getBreakTime),
-    liveSessionMiddleware.attachLiveSessionOrNotfound,
-    breakTimeMiddleware.attachBreakTime,
+    breakTimeMiddleware.attachBreakTimeOrNotFound,
     breakTimeController.getBreakTime
   )
   .post(
     validate(breakTimeValidationSchema.createBreakTime),
-    liveSessionMiddleware.attachLiveSessionOrNotfound,
     liveSessionMiddleware.checkOwnerOrForbidden,
     breakTimeController.createBreakTime
   );
