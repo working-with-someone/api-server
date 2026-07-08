@@ -25,7 +25,9 @@ export const getComment = asyncCatch(async (req: Request, res: Response) => {
     comment: res.locals.videoSessionComment,
   });
 
-  return res.status(httpStatusCode.OK).end();
+  return res.status(httpStatusCode.OK).json({
+    data: comment,
+  });
 });
 
 export const createComment = asyncCatch(async (req: Request, res: Response) => {

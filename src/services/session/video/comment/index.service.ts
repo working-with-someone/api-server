@@ -6,19 +6,34 @@ import {
   DeleteCommentInput,
 } from '.';
 import { Prisma } from '@prisma/client';
-import { PublicVideoSessionComment } from '../../../../types/contracts/comment';
+import {
+  PublicVideoSessionComment,
+  PublicVideoSessionCommentWithIsLiked,
+} from '../../../../types/contracts/comment';
 import { PaginatedResult } from '../../../../types/pagination';
 import { buildPagenationMeta } from '../../../../utils/pagination';
 
 export async function getComment(
   input: GetCommentInput
-): Promise<PublicVideoSessionComment> {
-  return input.comment;
+): Promise<PublicVideoSessionCommentWithIsLiked> {
+  const isLiked = await prismaClient.video_session_comment_like.findFirst({
+    where: {
+      user_id: input.comment.user_id,
+      video_session_comment_id: input.comment.id,
+    },
+  });
+
+  return {
+    ...input.comment,
+    isLiked: isLiked ? true : false,
+  };
 }
 
 export async function getComments(
   input: GetCommentsInput
-): Promise<PaginatedResult<PublicVideoSessionComment[], 'comments'>> {
+): Promise<
+  PaginatedResult<PublicVideoSessionCommentWithIsLiked[], 'comments'>
+> {
   const orderBy: Prisma.video_session_commentOrderByWithRelationInput = {};
 
   if (input.sort === 'recent') {
@@ -54,8 +69,13 @@ export async function getComments(
     comments.pop();
   }
 
+  const commentsWithIsLiked = comments.map(({ likes, ...comment }) => ({
+    ...comment,
+    isLiked: likes.length > 0,
+  }));
+
   return {
-    comments,
+    comments: commentsWithIsLiked,
     pagination,
   };
 }
@@ -77,7 +97,7 @@ export async function deleteComment(input: DeleteCommentInput) {
 
 export async function createComment(
   input: CreateCommentInput
-): Promise<PublicVideoSessionComment> {
+): Promise<PublicVideoSessionCommentWithIsLiked> {
   const [createdComment] = await prismaClient.$transaction([
     prismaClient.video_session_comment.create({
       data: {
@@ -100,5 +120,8 @@ export async function createComment(
     }),
   ]);
 
-  return createdComment;
+  return {
+    ...createdComment,
+    isLiked: false,
+  };
 }

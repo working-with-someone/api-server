@@ -65,6 +65,7 @@ describe('Comment API', () => {
         expect(res.statusCode).toEqual(httpStatusCode.OK);
         expect(res.body.data).toHaveLength(1);
         expect(res.body.data[0].video_session_id).toEqual(videoSession.id);
+        expect(res.body.data[0].isLiked).toEqual(false);
       });
 
       describe('Sort', () => {
@@ -216,6 +217,7 @@ describe('Comment API', () => {
         );
 
         expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveProperty('isLiked', false);
       });
 
       test('Response_404_When_Comment_Does_Not_Exist', async () => {
@@ -244,6 +246,7 @@ describe('Comment API', () => {
         );
         expect(res.body.data).toHaveProperty('user_id', currUser.id);
         expect(res.body.data).toHaveProperty('content', 'Test Comment');
+        expect(res.body.data).toHaveProperty('isLiked', false);
       });
 
       test('Response_201_And_Must_Be_Incremented_Video_Session_Comment_Count', async () => {
