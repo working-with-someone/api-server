@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+﻿import type { Prisma } from '../../../prisma/generated/prisma/client';
 
 export type PublicUser = Prisma.userGetPayload<{
   include: {
@@ -8,3 +8,4 @@ export type PublicUser = Prisma.userGetPayload<{
     encrypted_password: true;
   };
 }>;
+

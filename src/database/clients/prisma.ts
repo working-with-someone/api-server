@@ -1,6 +1,17 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../prisma/generated/prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { databaseLogger } from '../../logger/winston';
+
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required to initialize PrismaClient.');
+}
+
+const adapter = new PrismaMariaDb(databaseUrl);
+
 const prismaClient = new PrismaClient({
+  adapter,
   log: [
     {
       emit: 'event',

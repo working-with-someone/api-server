@@ -1,11 +1,11 @@
-import prismaClient from '../../../../database/clients/prisma';
+﻿import prismaClient from '../../../../database/clients/prisma';
 import {
   CreateCommentInput,
   GetCommentInput,
   GetCommentsInput,
   DeleteCommentInput,
 } from '.';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../../../prisma/generated/prisma/client';
 import {
   PublicVideoSessionComment,
   PublicVideoSessionCommentWithIsLiked,
@@ -51,7 +51,7 @@ export async function getComments(
         },
       },
       video_session: true,
-      // user의 해당 comment like 여부
+      // user???대떦 comment like ?щ?
       likes: {
         where: {
           user_id: input.userId,
@@ -125,3 +125,4 @@ export async function createComment(
     isLiked: false,
   };
 }
+

@@ -1,8 +1,9 @@
-import { Prisma, PrismaClient, video_session_like } from '@prisma/client';
+﻿import { Prisma, video_session_like } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
 import currUser from '../data/curr-user';
+import prismaClient from '../../src/database/clients/prisma';
 
-const prisma = new PrismaClient();
+const prisma = prismaClient;
 
 type CreateInput = {
   video_session: NonNullable<
@@ -67,3 +68,4 @@ class VideoSessionLikeFactory
 const videoSessionLikeFactory = new VideoSessionLikeFactory();
 
 export default videoSessionLikeFactory;
+

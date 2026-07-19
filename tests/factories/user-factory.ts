@@ -1,8 +1,9 @@
 import { faker } from '@faker-js/faker';
-import { Prisma, PrismaClient, user } from '@prisma/client';
+import { Prisma, user } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
+import prismaClient from '../../src/database/clients/prisma';
 
-const prisma = new PrismaClient();
+const prisma = prismaClient;
 
 type UserCreateInput = Prisma.userCreateInput;
 

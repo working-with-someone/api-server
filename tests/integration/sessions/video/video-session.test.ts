@@ -1,4 +1,4 @@
-// Mock mediabunny to avoid real media server calls during tests
+﻿// Mock mediabunny to avoid real media server calls during tests
 jest.mock('mediabunny', () => {
   class MockUrlSource {
     url: string;
@@ -29,12 +29,12 @@ import prismaClient from '../../../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../../../src';
 import currUser from '../../../data/curr-user';
-import { access_level, user } from '@prisma/client';
+import { access_level, user } from '../../../../prisma/generated/prisma/client';
 import httpStatusCode from 'http-status-codes';
 import { videoSessionFactory } from '../../../factories/video-session-factory';
 import { userFactory } from '../../../factories';
 import categoryFactory from '../../../factories/category-factory';
-import type { category } from '@prisma/client';
+import type { category } from '../../../../prisma/generated/prisma/client';
 import fs from 'node:fs';
 import { PublicVideoSession } from '../../../../src/types/contracts/video-session';
 
@@ -345,7 +345,7 @@ describe('Video Session API', () => {
   });
 
   describe('POST /sessions/video', () => {
-    // 생성된 session을 모두 제거
+    // ?앹꽦??session??紐⑤몢 ?쒓굅
     afterAll(async () => {
       await videoSessionFactory.cleanup();
     });
@@ -541,3 +541,4 @@ describe('Video Session API', () => {
     });
   });
 });
+

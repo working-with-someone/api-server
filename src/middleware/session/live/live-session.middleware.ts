@@ -1,9 +1,9 @@
-import { Request, Response, NextFunction } from 'express';
+﻿import { Request, Response, NextFunction } from 'express';
 import prismaClient from '../../../database/clients/prisma';
 import { wwsError } from '../../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import { isAllowedToLiveSession } from '../../../services/session/live/live-session.service';
-import { live_session_status } from '@prisma/client';
+import { live_session_status } from '../../../../prisma/generated/prisma/client';
 
 const liveSessionMiddleware = {
   attachLiveSessionOrNotfound: async function (
@@ -111,3 +111,4 @@ const liveSessionMiddleware = {
 };
 
 export default liveSessionMiddleware;
+

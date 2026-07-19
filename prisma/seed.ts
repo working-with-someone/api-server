@@ -1,11 +1,12 @@
-/* eslint-disable no-console */
+﻿/* eslint-disable no-console */
 
-import { category, PrismaClient, user } from '@prisma/client';
+import { category, user } from './generated/prisma/client';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 import path from 'node:path';
 import randomstring from 'randomstring';
-const prisma = new PrismaClient();
+import prismaClient from '../src/database/clients/prisma';
+const prisma = prismaClient;
 import { to } from '../src/config/path.config';
 const USERS_COUNT = 20;
 const FOLLOWS_COUNT = 30;
@@ -57,7 +58,7 @@ const clearDatabase = async () => {
 };
 
 async function main(): Promise<void> {
-  console.log('Starting seed data generation 🌱');
+  console.log('Starting seed data generation ?뙮');
 
   console.log('Clearing existing data...');
   await clearDatabase();
@@ -94,7 +95,7 @@ async function main(): Promise<void> {
       },
     });
 
-    console.log('✅  My user created');
+    console.log('?? My user created');
   }
 
   const users: user[] = [];
@@ -129,7 +130,7 @@ async function main(): Promise<void> {
     });
 
     users.push(user);
-    console.log(`✅  User created: ${user.username}`);
+    console.log(`?? User created: ${user.username}`);
   }
 
   // Create follow relationships
@@ -192,7 +193,7 @@ async function main(): Promise<void> {
       },
     });
     categories.push(category);
-    console.log(`✅  Category created: ${category.label}`);
+    console.log(`?? Category created: ${category.label}`);
   }
   console.log('Creating live sessions...');
   const liveSessionStatuses = ['READY', 'OPENED', 'BREAKED', 'CLOSED'];
@@ -233,7 +234,7 @@ async function main(): Promise<void> {
       });
 
       console.log(
-        `✅  Live Session Created : ${liveSession.title} / ${liveSession.status} / ${liveSession.category_label}`
+        `?? Live Session Created : ${liveSession.title} / ${liveSession.status} / ${liveSession.category_label}`
       );
 
       // Create allow list for private sessions
@@ -262,7 +263,7 @@ async function main(): Promise<void> {
           });
         }
 
-        console.log(`   ✅  allow list created`);
+        console.log(`   ?? allow list created`);
       }
 
       // Set break time for some sessions
@@ -275,7 +276,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ✅  live Session break time created`);
+        console.log(`   ?? live Session break time created`);
       }
 
       // Create status transition logs
@@ -290,7 +291,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ✅  live Session transition log created`);
+        console.log(`   ?? live Session transition log created`);
 
         if (status === 'BREAKED' || status === 'CLOSED') {
           // OPENED -> BREAKED or OPENED -> CLOSED
@@ -347,7 +348,7 @@ async function main(): Promise<void> {
       });
 
       console.log(
-        `✅  Video Session Created : ${videoSession.title} / ${videoSession.access_level} / ${videoSession.category_label}`
+        `?? Video Session Created : ${videoSession.title} / ${videoSession.access_level} / ${videoSession.category_label}`
       );
 
       // Create allow list for private sessions
@@ -376,7 +377,7 @@ async function main(): Promise<void> {
           });
         }
 
-        console.log(`   ✅  allow list created`);
+        console.log(`   ?? allow list created`);
       }
 
       // Set break time for some sessions
@@ -389,7 +390,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ✅  video Session break time created`);
+        console.log(`   ?? video Session break time created`);
       }
 
       const likedUserIndices = new Set<number>();
@@ -398,7 +399,10 @@ async function main(): Promise<void> {
       for (let j = 0; j < likeCount; j++) {
         let likedUserIndex = Math.floor(Math.random() * USERS_COUNT);
 
-        while (likedUserIndex === userIndex || likedUserIndices.has(likedUserIndex)) {
+        while (
+          likedUserIndex === userIndex ||
+          likedUserIndices.has(likedUserIndex)
+        ) {
           likedUserIndex = Math.floor(Math.random() * USERS_COUNT);
         }
 
@@ -419,7 +423,9 @@ async function main(): Promise<void> {
         });
       }
 
-      const commentCount = Math.floor(Math.random() * (VIDEO_SESSION_COMMENT_COUNT + 1));
+      const commentCount = Math.floor(
+        Math.random() * (VIDEO_SESSION_COMMENT_COUNT + 1)
+      );
 
       for (let j = 0; j < commentCount; j++) {
         const commentAuthorIndex = Math.floor(Math.random() * USERS_COUNT);
@@ -441,7 +447,8 @@ async function main(): Promise<void> {
 
         const commentLikedUserIndices = new Set<number>();
         const commentLikeCount = Math.floor(
-          Math.random() * (Math.min(VIDEO_SESSION_COMMENT_LIKE_COUNT, USERS_COUNT - 1) + 1)
+          Math.random() *
+            (Math.min(VIDEO_SESSION_COMMENT_LIKE_COUNT, USERS_COUNT - 1) + 1)
         );
 
         for (let k = 0; k < commentLikeCount; k++) {
@@ -481,7 +488,7 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('Seed data generation completed 🌱');
+  console.log('Seed data generation completed ?뙮');
 }
 
 main()
@@ -492,3 +499,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

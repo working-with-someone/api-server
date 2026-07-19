@@ -1,5 +1,5 @@
-import request from 'supertest';
-import { access_level, user } from '@prisma/client';
+﻿import request from 'supertest';
+import { access_level, user } from '../../../../../prisma/generated/prisma/client';
 import server from '../../../../../src';
 import currUser from '../../../../data/curr-user';
 import { userFactory } from '../../../../factories';
@@ -7,401 +7,449 @@ import { videoSessionFactory } from '../../../../factories/video-session-factory
 import prismaClient from '../../../../../src/database/clients/prisma';
 
 describe('User Video Session API', () => {
-    let otherUser: user;
+  let otherUser: user;
 
-    beforeAll(async () => {
-        otherUser = await userFactory.createAndSave();
-        await currUser.insert();
-    });
+  beforeAll(async () => {
+    otherUser = await userFactory.createAndSave();
+    await currUser.insert();
+  });
 
+  afterEach(async () => {
+    await videoSessionFactory.cleanup();
+  });
 
+  afterAll(async () => {
+    await currUser.delete();
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  describe('GET /users/:user_id/sessions/video', () => {
     afterEach(async () => {
-        await videoSessionFactory.cleanup();
+      await videoSessionFactory.cleanup();
+      await prismaClient.follow.deleteMany({});
     });
 
-    afterAll(async () => {
-        await currUser.delete();
+    test('Response_200_With_Current_User_Public_Video_Sessions', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PUBLIC,
+      });
+
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
+
+      for (const videoSession of res.body.data) {
+        expect(videoSession.organizer_id).toEqual(currUser.id);
+      }
     });
 
-    afterAll((done) => {
-        server.close(done);
+    test('Response_200_With_Other_User_Public_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.PUBLIC,
+      });
+
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
     });
 
-    describe('GET /users/:user_id/sessions/video', () => {
-        afterEach(async () => {
-            await videoSessionFactory.cleanup();
-            await prismaClient.follow.deleteMany({});
-        })
+    test('Response_200_WIth_100_Video_Sessions', async () => {
+      await videoSessionFactory.createManyAndSave({
+        count: 23,
+        overrides: {
+          organizer: { connect: { id: currUser.id } },
+          access_level: access_level.PUBLIC,
+        },
+      });
 
-        test('Response_200_With_Current_User_Public_Video_Sessions', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PUBLIC
-            });
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video?page=1&per_page=10`
+      );
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video`);
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(10);
+      expect(res.body.pagination).toMatchObject({
+        currPage: 1,
+        per_page: 10,
+        hasMore: true,
+        prevPage: null,
+        nextPage: 2,
+      });
+    });
 
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
+    describe('Pagination', () => {
+      test('Response_400_When_Page_Is_Zero', async () => {
+        const res = await request(server).get(
+          `/users/${currUser.id}/sessions/video?page=0&per_page=10`
+        );
 
-            for (const videoSession of res.body.data) {
-                expect(videoSession.organizer_id).toEqual(currUser.id);
-            }
+        expect(res.statusCode).toEqual(400);
+      });
+
+      test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
+        await videoSessionFactory.createManyAndSave({
+          count: 23,
+          overrides: {
+            organizer: { connect: { id: currUser.id } },
+            access_level: access_level.PUBLIC,
+          },
         });
 
-        test('Response_200_With_Other_User_Public_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.PUBLIC
-            });
+        const res = await request(server).get(
+          `/users/${currUser.id}/sessions/video?page=2&per_page=10`
+        );
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video`);
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toEqual(10);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 2,
+          per_page: 10,
+          hasMore: true,
+          prevPage: 1,
+          nextPage: 3,
+        });
+      });
 
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
-        })
-
-        test('Response_200_WIth_100_Video_Sessions', async () => {
-            await videoSessionFactory.createManyAndSave({
-                count: 23,
-                overrides: {
-                    organizer: { connect: { id: currUser.id } },
-                    access_level: access_level.PUBLIC
-                },
-            });
-
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=1&per_page=10`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(10);
-            expect(res.body.pagination).toMatchObject({
-                currPage: 1,
-                per_page: 10,
-                hasMore: true,
-                prevPage: null,
-                nextPage: 2,
-            });
-        })
-
-        describe('Pagination', () => {
-            test('Response_400_When_Page_Is_Zero', async () => {
-                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=0&per_page=10`);
-
-                expect(res.statusCode).toEqual(400);
-            });
-
-            test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
-                await videoSessionFactory.createManyAndSave({
-                    count: 23,
-                    overrides: {
-                        organizer: { connect: { id: currUser.id } },
-                        access_level: access_level.PUBLIC
-                    },
-                });
-
-                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=2&per_page=10`);
-
-                expect(res.statusCode).toEqual(200);
-                expect(Array.isArray(res.body.data)).toBe(true);
-                expect(res.body.data.length).toEqual(10);
-                expect(res.body.pagination).toMatchObject({
-                    currPage: 2,
-                    per_page: 10,
-                    hasMore: true,
-                    prevPage: 1,
-                    nextPage: 3,
-                });
-            });
-
-            test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
-                await videoSessionFactory.createManyAndSave({
-                    count: 23,
-                    overrides: {
-                        organizer: { connect: { id: currUser.id } },
-                        access_level: access_level.PUBLIC
-                    },
-                });
-
-                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=3&per_page=10`);
-
-                expect(res.statusCode).toEqual(200);
-                expect(Array.isArray(res.body.data)).toBe(true);
-                expect(res.body.data.length).toEqual(3);
-                expect(res.body.pagination).toMatchObject({
-                    currPage: 3,
-                    per_page: 10,
-                    hasMore: false,
-                    prevPage: 2,
-                    nextPage: null,
-                });
-            });
-
-            test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
-                await videoSessionFactory.createManyAndSave({
-                    count: 23,
-                    overrides: {
-                        organizer: { connect: { id: currUser.id } },
-                        access_level: access_level.PUBLIC
-                    },
-                });
-
-                const res = await request(server).get(`/users/${currUser.id}/sessions/video?page=4&per_page=10`);
-
-                expect(res.statusCode).toEqual(200);
-                expect(Array.isArray(res.body.data)).toBe(true);
-                expect(res.body.data.length).toEqual(0);
-                expect(res.body.pagination).toMatchObject({
-                    currPage: 4,
-                    per_page: 10,
-                    hasMore: false,
-                    prevPage: 3,
-                    nextPage: null,
-                });
-            });
+      test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
+        await videoSessionFactory.createManyAndSave({
+          count: 23,
+          overrides: {
+            organizer: { connect: { id: currUser.id } },
+            access_level: access_level.PUBLIC,
+          },
         });
 
-        // user는 본인의 private video session을 가져올 수 있다.
-        test('Response_200_With_Current_User_Private_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: "PRIVATE"
-            });
+        const res = await request(server).get(
+          `/users/${currUser.id}/sessions/video?page=3&per_page=10`
+        );
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video`);
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toEqual(3);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 3,
+          per_page: 10,
+          hasMore: false,
+          prevPage: 2,
+          nextPage: null,
+        });
+      });
 
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
-        })
-
-        // user는 본인이 allowed 되어있는 다른 user의 private video session을 가져올 수 있다.
-        test('Response_200_With_Allowed_Other_User_Private_Video_Session', async () => {
-            const otherUserPrivateVideoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: "PRIVATE"
-            });
-
-            await prismaClient.video_session_allow.create({
-                data: {
-                    user_id: currUser.id,
-                    video_session_id: otherUserPrivateVideoSession.id
-                }
-            });
-
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
-        })
-
-        // user는 본인이 allowed 되어있지 않은 다른 user의 private video session을 가져올 수 없다.
-        test('Response_200_With_Empty_Array_About_Not_Allowed_Other_User_Private_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: "PRIVATE"
-            });
-
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(0);
+      test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
+        await videoSessionFactory.createManyAndSave({
+          count: 23,
+          overrides: {
+            organizer: { connect: { id: currUser.id } },
+            access_level: access_level.PUBLIC,
+          },
         });
 
-        // user는 본인의 follower only video session을 가져올 수 있다.
-        test('Response_200_With_Current_User_Follower_Only_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PRIVATE
-            });
+        const res = await request(server).get(
+          `/users/${currUser.id}/sessions/video?page=4&per_page=10`
+        );
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
-        })
-
-        // user는 본인이 follow한 user의 follower only video session을 가져올 수 있다.
-        test('Response_200_With_Other_User_Follower_Only_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.FOLLOWER_ONLY
-            });
-
-            await prismaClient.follow.create({
-                data: {
-                    following_user_id: otherUser.id,
-                    follower_user_id: currUser.id
-                }
-            });
-
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(Array.isArray(res.body.data)).toBe(true);
-            expect(res.body.data.length).toEqual(1);
-        })
-
-        // user는 본인이 follow하지 않은 user의 follower only video session을 가져올 수 없다.
-        test('Response_200_With_Empty_Array_About_Other_User_Follower_Only_Video_Session', async () => {
-            await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.FOLLOWER_ONLY
-            });
-
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video`);
-
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.length).toEqual(0);
-        })
-
-        test('Response_400_user_id(?)', async () => {
-            const res = await request(server).get('/users/userIdMustBeNumber/sessions/video');
-
-            expect(res.statusCode).toEqual(400);
+        expect(res.statusCode).toEqual(200);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toEqual(0);
+        expect(res.body.pagination).toMatchObject({
+          currPage: 4,
+          per_page: 10,
+          hasMore: false,
+          prevPage: 3,
+          nextPage: null,
         });
-    })
+      });
+    });
 
-    describe('GET /users/:user_id/sessions/video/:video_session_id', () => {
-        afterEach(async () => {
-            await videoSessionFactory.cleanup();
-            await prismaClient.follow.deleteMany({});
-        })
+    // user??蹂몄씤??private video session??媛?몄삱 ???덈떎.
+    test('Response_200_With_Current_User_Private_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: 'PRIVATE',
+      });
 
-        test('Response_200_With_Current_User_Public_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PUBLIC
-            });
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video`
+      );
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video/${videoSession.id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
+    });
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+    // user??蹂몄씤??allowed ?섏뼱?덈뒗 ?ㅻⅨ user??private video session??媛?몄삱 ???덈떎.
+    test('Response_200_With_Allowed_Other_User_Private_Video_Session', async () => {
+      const otherUserPrivateVideoSession =
+        await videoSessionFactory.createAndSave({
+          organizer: { connect: { id: otherUser.id } },
+          access_level: 'PRIVATE',
+        });
 
-        test('Response_200_With_Other_User_Public_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.PUBLIC
-            });
+      await prismaClient.video_session_allow.create({
+        data: {
+          user_id: currUser.id,
+          video_session_id: otherUserPrivateVideoSession.id,
+        },
+      });
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video/${videoSession.id}`);
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video`
+      );
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
+    });
 
-        test('Response_200_With_Current_User_Private_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PRIVATE
-            });
+    // user??蹂몄씤??allowed ?섏뼱?덉? ?딆? ?ㅻⅨ user??private video session??媛?몄삱 ???녿떎.
+    test('Response_200_With_Empty_Array_About_Not_Allowed_Other_User_Private_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: 'PRIVATE',
+      });
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video/${videoSession.id}`);
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video`
+      );
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(0);
+    });
 
-        test('Response_200_With_Allowed_Other_User_Private_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.PRIVATE
-            });
+    // user??蹂몄씤??follower only video session??媛?몄삱 ???덈떎.
+    test('Response_200_With_Current_User_Follower_Only_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PRIVATE,
+      });
 
-            await prismaClient.video_session_allow.create({
-                data: {
-                    user_id: currUser.id,
-                    video_session_id: videoSession.id
-                }
-            });
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video`
+      );
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video/${videoSession.id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
+    });
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+    // user??蹂몄씤??follow??user??follower only video session??媛?몄삱 ???덈떎.
+    test('Response_200_With_Other_User_Follower_Only_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.FOLLOWER_ONLY,
+      });
 
-        test('Response_403_With_Not_Allowed_Other_User_Private_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.PRIVATE
-            });
+      await prismaClient.follow.create({
+        data: {
+          following_user_id: otherUser.id,
+          follower_user_id: currUser.id,
+        },
+      });
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video/${videoSession.id}`);
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video`
+      );
 
-            expect(res.statusCode).toEqual(403);
-        })
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data.length).toEqual(1);
+    });
 
-        test('Response_200_With_Current_User_Follower_Only_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.FOLLOWER_ONLY
-            });
+    // user??蹂몄씤??follow?섏? ?딆? user??follower only video session??媛?몄삱 ???녿떎.
+    test('Response_200_With_Empty_Array_About_Other_User_Follower_Only_Video_Session', async () => {
+      await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.FOLLOWER_ONLY,
+      });
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video/${videoSession.id}`);
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video`
+      );
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.length).toEqual(0);
+    });
 
-        test('Response_200_With_Other_User_Follower_Only_Video_Session_When_Following', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.FOLLOWER_ONLY
-            });
+    test('Response_400_user_id(?)', async () => {
+      const res = await request(server).get(
+        '/users/userIdMustBeNumber/sessions/video'
+      );
 
-            await prismaClient.follow.create({
-                data: {
-                    following_user_id: otherUser.id,
-                    follower_user_id: currUser.id
-                }
-            });
+      expect(res.statusCode).toEqual(400);
+    });
+  });
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video/${videoSession.id}`);
+  describe('GET /users/:user_id/sessions/video/:video_session_id', () => {
+    afterEach(async () => {
+      await videoSessionFactory.cleanup();
+      await prismaClient.follow.deleteMany({});
+    });
 
-            expect(res.statusCode).toEqual(200);
-            expect(res.body.data.id).toEqual(videoSession.id);
-        })
+    test('Response_200_With_Current_User_Public_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PUBLIC,
+      });
 
-        test('Response_403_With_Other_User_Follower_Only_Video_Session_When_Not_Following', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: otherUser.id } },
-                access_level: access_level.FOLLOWER_ONLY
-            });
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video/${videoSession.id}`
+      );
 
-            const res = await request(server).get(`/users/${otherUser.id}/sessions/video/${videoSession.id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
 
-            expect(res.statusCode).toEqual(403);
-        })
+    test('Response_200_With_Other_User_Public_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.PUBLIC,
+      });
 
-        test('Response_400_user_id(?)', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PUBLIC
-            });
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video/${videoSession.id}`
+      );
 
-            const res = await request(server).get(`/users/userIdMustBeNumber/sessions/video/${videoSession.id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
 
-            expect(res.statusCode).toEqual(400);
-        })
+    test('Response_200_With_Current_User_Private_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PRIVATE,
+      });
 
-        test('Response_404_Non_Existent_Video_Session', async () => {
-            const videoSession = await videoSessionFactory.createAndSave({
-                organizer: { connect: { id: currUser.id } },
-                access_level: access_level.PUBLIC
-            });
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video/${videoSession.id}`
+      );
 
-            const res = await request(server).get(`/users/${currUser.id}/sessions/video/999999`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
 
-            expect(res.statusCode).toEqual(404);
-        })
-    })
+    test('Response_200_With_Allowed_Other_User_Private_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.PRIVATE,
+      });
+
+      await prismaClient.video_session_allow.create({
+        data: {
+          user_id: currUser.id,
+          video_session_id: videoSession.id,
+        },
+      });
+
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
+
+    test('Response_403_With_Not_Allowed_Other_User_Private_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.PRIVATE,
+      });
+
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    test('Response_200_With_Current_User_Follower_Only_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.FOLLOWER_ONLY,
+      });
+
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
+
+    test('Response_200_With_Other_User_Follower_Only_Video_Session_When_Following', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.FOLLOWER_ONLY,
+      });
+
+      await prismaClient.follow.create({
+        data: {
+          following_user_id: otherUser.id,
+          follower_user_id: currUser.id,
+        },
+      });
+
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.id).toEqual(videoSession.id);
+    });
+
+    test('Response_403_With_Other_User_Follower_Only_Video_Session_When_Not_Following', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: otherUser.id } },
+        access_level: access_level.FOLLOWER_ONLY,
+      });
+
+      const res = await request(server).get(
+        `/users/${otherUser.id}/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    test('Response_400_user_id(?)', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PUBLIC,
+      });
+
+      const res = await request(server).get(
+        `/users/userIdMustBeNumber/sessions/video/${videoSession.id}`
+      );
+
+      expect(res.statusCode).toEqual(400);
+    });
+
+    test('Response_404_Non_Existent_Video_Session', async () => {
+      const videoSession = await videoSessionFactory.createAndSave({
+        organizer: { connect: { id: currUser.id } },
+        access_level: access_level.PUBLIC,
+      });
+
+      const res = await request(server).get(
+        `/users/${currUser.id}/sessions/video/999999`
+      );
+
+      expect(res.statusCode).toEqual(404);
+    });
+  });
 });
 

@@ -1,12 +1,7 @@
-import {
-  Prisma,
-  PrismaClient,
-  video_session_comment_like,
-} from '@prisma/client';
+﻿import { Prisma, video_session_comment_like } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
 import currUser from '../data/curr-user';
-
-const prismaClient = new PrismaClient();
+import prismaClient from '../../src/database/clients/prisma';
 
 type CreateInput = {
   user?: Prisma.video_session_likeCreateInput['user'];
@@ -40,3 +35,4 @@ class VideoSessionCommentLikeFactory
 const videoSessionCommentLikeFactory = new VideoSessionCommentLikeFactory();
 
 export default videoSessionCommentLikeFactory;
+

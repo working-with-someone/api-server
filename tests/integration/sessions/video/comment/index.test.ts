@@ -1,10 +1,10 @@
-import server from '../../../../../src';
+﻿import server from '../../../../../src';
 import httpStatusCode from 'http-status-codes';
 import { videoSessionFactory, commentFactory } from '../../../../factories';
 import request from 'supertest';
-import type { video_session_comment } from '@prisma/client';
+import type { video_session_comment } from '../../../../../prisma/generated/prisma/client';
 import currUser from '../../../../data/curr-user';
-import { user } from '@prisma/client';
+import { user } from '../../../../../prisma/generated/prisma/client';
 import { userFactory } from '../../../../factories';
 import prismaClient from '../../../../../src/database/clients/prisma';
 import { PublicVideoSession } from '../../../../../src/types/contracts/video-session';
@@ -381,3 +381,4 @@ describe('Comment API', () => {
     });
   });
 });
+

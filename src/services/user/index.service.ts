@@ -1,8 +1,8 @@
-import prismaClient from '../../database/clients/prisma';
+﻿import prismaClient from '../../database/clients/prisma';
 import { wwsError } from '../../utils/wwsError';
 import httpStatusCode from 'http-status-codes';
 import { deleteImage, uploadImage } from '../../lib/s3';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../../prisma/generated/prisma/client';
 import { to } from '../../config/path.config';
 import path from 'path';
 import type { UpdateUserInput } from './index.service.d';
@@ -26,7 +26,7 @@ export async function getUser(
   });
 
   if (!user) {
-    throw new wwsError(httpStatusCode.NOT_FOUND, '사용자를 찾을 수 없습니다.');
+    throw new wwsError(httpStatusCode.NOT_FOUND, '?ъ슜?먮? 李얠쓣 ???놁뒿?덈떎.');
   }
 
   return user;
@@ -43,17 +43,17 @@ export async function updateUser(
     include: { pfp: true },
   });
 
-  // 아무것도 전달되지 않았다면, 업데이트 되지 않은 user 그대로를 return한다.
+  // ?꾨Т寃껊룄 ?꾨떖?섏? ?딆븯?ㅻ㈃, ?낅뜲?댄듃 ?섏? ?딆? user 洹몃?濡쒕? return?쒕떎.
   if (!data.username && !data.pfpToDefault && !data.pfp) {
     return user;
   }
 
-  // username이 전달되었다면, 추가
+  // username???꾨떖?섏뿀?ㅻ㈃, 異붽?
   if (data.username) {
     _data.username = data.username;
   }
 
-  // pfp를 default나 새로운 image로 변경하려고할 때,user의 pfp가 default가 아니라면 제거한다.
+  // pfp瑜?default???덈줈??image濡?蹂寃쏀븯?ㅺ퀬????user??pfp媛 default媛 ?꾨땲?쇰㈃ ?쒓굅?쒕떎.
   if (data.pfpToDefault || data.pfp) {
     if (!user!.pfp!.is_default) {
       await deleteImage({
@@ -61,9 +61,9 @@ export async function updateUser(
       });
     }
   }
-  // default로 변경하려고한다면
+  // default濡?蹂寃쏀븯?ㅺ퀬?쒕떎硫?
   if (data.pfpToDefault) {
-    // 이미 default가 아니라면
+    // ?대? default媛 ?꾨땲?쇰㈃
     if (!user!.pfp!.is_default) {
       const pfpPath = path.posix.join(to.media.default.images, 'pfp');
 
@@ -74,11 +74,11 @@ export async function updateUser(
         },
       };
     }
-    // 이미 default라면 건들필요 없다.
+    // ?대? default?쇰㈃ 嫄대뱾?꾩슂 ?녿떎.
   }
-  // default로 변경하려는 것이 아니고, 다른 image로 변경하려고한다면
+  // default濡?蹂寃쏀븯?ㅻ뒗 寃껋씠 ?꾨땲怨? ?ㅻⅨ image濡?蹂寃쏀븯?ㅺ퀬?쒕떎硫?
   else if (data.pfp) {
-    // user의 pfp가 default라면, pfp만 upload해주면된다.
+    // user??pfp媛 default?쇰㈃, pfp留?upload?댁＜硫대맂??
     const key = await uploadImage('pfp', data.pfp);
 
     const pfpPath = path.posix.join(to.media.images, key);
@@ -101,3 +101,4 @@ export async function updateUser(
 
   return updatedUser;
 }
+

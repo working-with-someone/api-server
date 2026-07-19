@@ -1,8 +1,10 @@
-import { Prisma, PrismaClient, preferred_category } from '@prisma/client';
+﻿import { Prisma, preferred_category } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
-const prisma = new PrismaClient();
 import { CreatePreferredCategoryInput } from '../../src/services/preferred_category.service.d';
 import { preferredCategoryService } from '../../src/services';
+import prismaClient from '../../src/database/clients/prisma';
+
+const prisma = prismaClient;
 
 class PreferredCategoryFactory
   implements IFactory<CreatePreferredCategoryInput, preferred_category>
@@ -38,3 +40,4 @@ class PreferredCategoryFactory
 const preferredCategoryFactory = new PreferredCategoryFactory();
 
 export default preferredCategoryFactory;
+
