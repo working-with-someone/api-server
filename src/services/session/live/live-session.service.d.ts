@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client';
+﻿import { Prisma } from '../../../../prisma/generated/prisma/client';
 import { PagiNationData } from '../../../types/pagination';
-import { live_session_status } from '@prisma/client';
+import { live_session_status } from '../../../../prisma/generated/prisma/client';
 export interface GetLiveSessionsInput extends PagiNationData {
   userId: number;
   category: string;
@@ -17,3 +17,4 @@ export interface createSessionInput
   userId: number;
   thumbnail?: Express.Multer.File;
 }
+

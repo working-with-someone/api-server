@@ -1,4 +1,4 @@
-import type { live_session_status, Prisma } from '@prisma/client';
+﻿import type { live_session_status, Prisma } from '../../../prisma/generated/prisma/client';
 
 export type PublicLiveSession = Prisma.live_sessionGetPayload<{
   include: {
@@ -32,3 +32,4 @@ export type PrivateLiveASession = Prisma.live_sessionGetPayload<{
 export type PublicLiveSessionStatus = live_session_status;
 
 export type PublicLiveSessionThumbnailUri = string;
+

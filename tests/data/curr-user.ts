@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../prisma/generated/prisma/client';
 import prismaClient from '../../src/database/clients/prisma';
 
 type CurrentUser = Prisma.userGetPayload<{

@@ -1,10 +1,11 @@
-import { faker } from '@faker-js/faker';
-import { Prisma, PrismaClient } from '@prisma/client';
+﻿import { faker } from '@faker-js/faker';
+import { Prisma } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
 import { v4 } from 'uuid';
 import { PublicVideoSession } from '../../src/types/contracts/video-session';
+import prismaClient from '../../src/database/clients/prisma';
 
-const prisma = new PrismaClient();
+const prisma = prismaClient;
 
 type OverRides = Prisma.video_sessionCreateInput & {
   organizer: { connect: { id: number } };
@@ -29,13 +30,13 @@ class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
         connectOrCreate: overrides?.category?.connect
           ? undefined
           : {
-            where: {
-              label: 'test',
+              where: {
+                label: 'test',
+              },
+              create: {
+                label: 'test',
+              },
             },
-            create: {
-              label: 'test',
-            },
-          },
       },
       video_id: v4(),
       access_level,
@@ -61,8 +62,8 @@ class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
       include: {
         organizer: {
           include: {
-            pfp: true
-          }
+            pfp: true,
+          },
         },
         allow: true,
         break_time: true,
@@ -94,8 +95,8 @@ class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
         include: {
           organizer: {
             include: {
-              pfp: true
-            }
+              pfp: true,
+            },
           },
           allow: true,
           break_time: true,
@@ -123,3 +124,4 @@ class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
 }
 
 export const videoSessionFactory = new VideoSessionFactory();
+

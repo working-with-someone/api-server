@@ -1,4 +1,4 @@
-import { access_level } from '@prisma/client';
+﻿import { access_level } from '../../../../../prisma/generated/prisma/client';
 import prismaClient from '../../../../database/clients/prisma';
 import { isAllowedToVideoSession } from '../../../session/video/video-session.service';
 import type {
@@ -115,3 +115,4 @@ export async function getUserVideoSession(
 
   return videoSession;
 }
+

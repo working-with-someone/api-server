@@ -1,9 +1,10 @@
-import { faker } from '@faker-js/faker';
-import { Prisma, PrismaClient } from '@prisma/client';
+﻿import { faker } from '@faker-js/faker';
+import { Prisma } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
 import { PrivateLiveASession } from '../../src/types/contracts/live-session';
+import prismaClient from '../../src/database/clients/prisma';
 
-const prisma = new PrismaClient();
+const prisma = prismaClient;
 
 type OverRides = Prisma.live_sessionCreateInput & {
   organizer: { connect: { id: number } };
@@ -131,3 +132,4 @@ class LiveSessionFactory implements IFactory<OverRides, PrivateLiveASession> {
 
 const liveSessionFactory = new LiveSessionFactory();
 export default liveSessionFactory;
+

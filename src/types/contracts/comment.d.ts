@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+﻿import type { Prisma } from '../../../prisma/generated/prisma/client';
 
 export type PublicVideoSessionComment = Prisma.video_session_commentGetPayload<{
   include: {
@@ -14,3 +14,4 @@ export type PublicVideoSessionComment = Prisma.video_session_commentGetPayload<{
 export type PublicVideoSessionCommentWithIsLiked = PublicVideoSessionComment & {
   isLiked: boolean;
 };
+

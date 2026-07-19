@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+﻿import type { Prisma } from '../../../prisma/generated/prisma/client';
 
 export type PublicFollowing = Prisma.followGetPayload<{
   include: {
@@ -19,3 +19,4 @@ export type PublicFollower = Prisma.followGetPayload<{
     };
   };
 }>;
+

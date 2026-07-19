@@ -1,6 +1,6 @@
-import joi from 'joi';
+﻿import joi from 'joi';
 import type { RequestSchema } from '../../../middleware/validate.middleware';
-import { live_session_status, access_level } from '@prisma/client';
+import { live_session_status, access_level } from '../../../../prisma/generated/prisma/client';
 import { pagiNationQuerySchema } from '../../pagination.validation';
 
 export const getLiveSession: RequestSchema = {
@@ -10,7 +10,7 @@ export const getLiveSession: RequestSchema = {
 };
 
 export const getLiveSessions: RequestSchema = {
-  // pagination query schema를 extend
+  // pagination query schema瑜?extend
   query: pagiNationQuerySchema.keys({
     category: joi.string().optional(),
     search: joi.string().optional(),
@@ -64,3 +64,4 @@ export const updateLiveSessionThumbnail: RequestSchema = {
   }),
   file: joi.object().required(),
 };
+

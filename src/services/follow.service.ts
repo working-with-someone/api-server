@@ -1,4 +1,4 @@
-import prismaClient from '../database/clients/prisma';
+﻿import prismaClient from '../database/clients/prisma';
 import { wwsError } from '../utils/wwsError';
 import { PrismaError } from 'prisma-error-enum';
 import httpStatusCode from 'http-status-codes';
@@ -12,7 +12,7 @@ import type {
   GetFollowingsInput,
 } from './follow.service.d';
 
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../../prisma/generated/prisma/client';
 import { PublicFollower, PublicFollowing } from '../types/contracts/follow';
 import { PaginatedResult } from '../types/pagination';
 import { buildPagenationMeta } from '../utils/pagination';
@@ -77,8 +77,8 @@ export async function getFollowings(
 export async function createFollowing(
   data: CreateFollowingInput
 ): Promise<PublicFollowing> {
-  // follow record 생성과 user들의 following_count increment, follower count increment가 문제 없이 실행된다면
-  // 생성된 follow record를 반환한다.
+  // follow record ?앹꽦怨?user?ㅼ쓽 following_count increment, follower count increment媛 臾몄젣 ?놁씠 ?ㅽ뻾?쒕떎硫?
+  // ?앹꽦??follow record瑜?諛섑솚?쒕떎.
   try {
     const [follow] = await prismaClient.$transaction([
       prismaClient.follow.create({
@@ -91,7 +91,7 @@ export async function createFollowing(
           },
         },
       }),
-      // follower user의 following count를 감소시킨다.
+      // follower user??following count瑜?媛먯냼?쒗궓??
       prismaClient.user.update({
         where: {
           id: data.follower_user_id,
@@ -101,7 +101,7 @@ export async function createFollowing(
         },
       }),
 
-      // following user의 follower count를 감소시킨다.
+      // following user??follower count瑜?媛먯냼?쒗궓??
       prismaClient.user.update({
         where: { id: data.following_user_id },
         data: {
@@ -129,7 +129,7 @@ export async function deleteFollow(data: DeleteFollowInput) {
         follower_user_id_following_user_id: data,
       },
     }),
-    // follower user의 following count를 감소시킨다.
+    // follower user??following count瑜?媛먯냼?쒗궓??
     prismaClient.user.update({
       where: {
         id: data.follower_user_id,
@@ -139,7 +139,7 @@ export async function deleteFollow(data: DeleteFollowInput) {
       },
     }),
 
-    // following user의 follower count를 감소시킨다.
+    // following user??follower count瑜?媛먯냼?쒗궓??
     prismaClient.user.update({
       where: { id: data.following_user_id },
       data: {
@@ -151,7 +151,7 @@ export async function deleteFollow(data: DeleteFollowInput) {
   return;
 }
 
-// user의 follower 목록을 가져온다.
+// user??follower 紐⑸줉??媛?몄삩??
 export async function getFollowers(
   data: GetFollowersInput
 ): Promise<PublicFollower[]> {
@@ -172,3 +172,4 @@ export async function getFollowers(
 
   return followers;
 }
+

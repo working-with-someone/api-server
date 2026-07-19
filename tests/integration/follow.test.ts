@@ -1,9 +1,9 @@
-import prismaClient from '../../src/database/clients/prisma';
+﻿import prismaClient from '../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../src';
 import currUser from '../data/curr-user';
 import { userFactory } from '../factories';
-import { user } from '@prisma/client';
+import { user } from '../../prisma/generated/prisma/client';
 
 describe('Follow API', () => {
   let user1: user;
@@ -469,3 +469,4 @@ describe('Follow API', () => {
     });
   });
 });
+

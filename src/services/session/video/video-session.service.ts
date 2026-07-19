@@ -1,6 +1,6 @@
-import prismaClient from '../../../database/clients/prisma';
+﻿import prismaClient from '../../../database/clients/prisma';
 import { checkFollowing } from '../../follow.service';
-import { access_level, Prisma, PrismaClient } from '@prisma/client';
+import { access_level, Prisma, PrismaClient } from '../../../../prisma/generated/prisma/client';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
@@ -255,3 +255,4 @@ export async function getVideoSessions(data: {
     pagination,
   };
 }
+

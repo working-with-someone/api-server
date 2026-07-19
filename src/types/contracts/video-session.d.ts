@@ -1,4 +1,4 @@
-import type { Prisma } from '@prisma/client';
+﻿import type { Prisma } from '../../../prisma/generated/prisma/client';
 
 export type PublicVideoSession = Prisma.video_sessionGetPayload<{
   include: {
@@ -11,3 +11,4 @@ export type PublicVideoSession = Prisma.video_sessionGetPayload<{
     };
   };
 }>;
+

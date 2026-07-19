@@ -1,10 +1,11 @@
-import { Prisma, PrismaClient, video_session_comment } from '@prisma/client';
+﻿import { Prisma, video_session_comment } from '../../prisma/generated/prisma/client';
 import { IFactory } from './factory';
 import { faker } from '@faker-js/faker';
 import currUser from '../data/curr-user';
 import { PublicVideoSessionComment } from '../../src/types/contracts/comment';
+import prismaClient from '../../src/database/clients/prisma';
 
-const prisma = new PrismaClient();
+const prisma = prismaClient;
 
 class CommentFactory
   implements
@@ -101,3 +102,4 @@ class CommentFactory
 const commentFactory = new CommentFactory();
 
 export default commentFactory;
+

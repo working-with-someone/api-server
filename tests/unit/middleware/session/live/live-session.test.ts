@@ -1,8 +1,8 @@
-import { createRequest, createResponse } from 'node-mocks-http';
+﻿import { createRequest, createResponse } from 'node-mocks-http';
 import prismaClient from '../../../../../src/database/clients/prisma';
 import liveSessionMiddleware from '../../../../../src/middleware/session/live/live-session.middleware';
 import currUser from '../../../../data/curr-user';
-import { user } from '@prisma/client';
+import { user } from '../../../../../prisma/generated/prisma/client';
 import UserFactory from '../../../../factories/user-factory';
 import { liveSessionFactory } from '../../../../factories';
 
@@ -85,3 +85,4 @@ describe('session middleware', () => {
     });
   });
 });
+

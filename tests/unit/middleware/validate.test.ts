@@ -1,10 +1,10 @@
-import validate, {
+﻿import validate, {
   RequestSchema,
 } from '../../../src/middleware/validate.middleware';
 import joi from 'joi';
 import { createRequest, createResponse } from 'node-mocks-http';
 import { mockDeep } from 'jest-mock-extended';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../../prisma/generated/prisma/client';
 
 jest.mock('../../../src/database/clients/prisma', () => ({
   __esModule: true,
@@ -117,3 +117,4 @@ describe('validate middleware', () => {
     expect(mockNext.mock.calls[0][0]).toBeUndefined();
   });
 });
+

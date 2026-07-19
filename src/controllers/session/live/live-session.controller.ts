@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import asyncCatch from '../../../utils/asyncCatch';
 import { liveSessionService } from '../../../services';
-import { live_session_status } from '@prisma/client';
+import { live_session_status } from '../../../../prisma/generated/prisma/client';
 
 export const getLiveSession = asyncCatch(
   async (req: Request, res: Response) => {
@@ -74,3 +74,4 @@ export const updateLiveSessionThumbnail = asyncCatch(
     });
   }
 );
+

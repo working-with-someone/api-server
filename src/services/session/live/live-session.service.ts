@@ -1,4 +1,4 @@
-import prismaClient from '../../../database/clients/prisma';
+﻿import prismaClient from '../../../database/clients/prisma';
 import type {
   createSessionInput,
   GetLiveSessionsInput,
@@ -9,7 +9,7 @@ import path from 'node:path';
 import { to } from '../../../config/path.config';
 
 import { checkFollowing } from '../../follow.service';
-import { Prisma, live_session_status, access_level } from '@prisma/client';
+import { Prisma, live_session_status, access_level } from '../../../../prisma/generated/prisma/client';
 import randomString from 'randomstring';
 import { sanitize } from '../../../utils/sanitize';
 import {
@@ -29,24 +29,24 @@ export async function isAllowedToLiveSession(data: {
   const organizer_id = liveSession.organizer_id;
   const participant_id = data.userId;
 
-  // 자신의 session이라면, access level에 관계없이 접근 가능하다.
+  // ?먯떊??session?대씪硫? access level??愿怨꾩뾾???묎렐 媛?ν븯??
   if (organizer_id === participant_id) {
     return true;
   }
 
-  // access level follower only라면, follwing check
+  // access level follower only?쇰㈃, follwing check
   if (liveSession.access_level === access_level.FOLLOWER_ONLY) {
     const isFollowing = await checkFollowing({
       follower_user_id: participant_id,
       following_user_id: organizer_id,
     });
 
-    // organizer의 follower가 아니라면 false
+    // organizer??follower媛 ?꾨땲?쇰㈃ false
     if (!isFollowing) {
       return false;
     }
   }
-  // access level이 private라면 allowList check
+  // access level??private?쇰㈃ allowList check
   else if (liveSession.access_level === access_level.PRIVATE) {
     const isAllowed = await prismaClient.live_session_allow.findFirst({
       where: {
@@ -91,15 +91,15 @@ export async function getLiveSessions(
       in: statusArray,
     },
     OR: [
-      // curr user의 live session은 모두
+      // curr user??live session? 紐⑤몢
       {
         organizer_id: data.userId,
       },
-      // public live session이라면 모두
+      // public live session?대씪硫?紐⑤몢
       {
         access_level: access_level.PUBLIC,
       },
-      // allow된 private live session이라면 모두
+      // allow??private live session?대씪硫?紐⑤몢
       {
         access_level: access_level.PRIVATE,
         allow: {
@@ -108,7 +108,7 @@ export async function getLiveSessions(
           },
         },
       },
-      // following한 user의 followers only live session이라면 모두
+      // following??user??followers only live session?대씪硫?紐⑤몢
       {
         access_level: access_level.FOLLOWER_ONLY,
         organizer: {
@@ -224,7 +224,7 @@ export async function updateLiveSessionStatus(data: {
     status: data.status,
   };
 
-  // live session이 ready 상태에서 open될 때, started_at을 기록한다.
+  // live session??ready ?곹깭?먯꽌 open???? started_at??湲곕줉?쒕떎.
   if (
     liveSession.status == live_session_status.READY &&
     data.status == live_session_status.OPENED
@@ -277,3 +277,4 @@ export async function updateLiveSessionThumbnail(data: {
 
   return updatedLiveSession.thumbnail_uri;
 }
+

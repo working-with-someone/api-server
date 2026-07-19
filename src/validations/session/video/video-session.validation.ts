@@ -1,6 +1,6 @@
-import joi from 'joi';
+﻿import joi from 'joi';
 import type { RequestSchema } from '../../../middleware/validate.middleware';
-import { access_level } from '@prisma/client';
+import { access_level } from '../../../../prisma/generated/prisma/client';
 import { pagiNationQuerySchema } from '../../pagination.validation';
 
 const videoSessionSortKey = ['recent'];
@@ -12,7 +12,7 @@ export const getVideoSession: RequestSchema = {
 };
 
 export const getVideoSessions: RequestSchema = {
-  // pagination query schema를 extend
+  // pagination query schema瑜?extend
   query: pagiNationQuerySchema.keys({
     category: joi.string().optional(),
     search: joi.string().optional(),
@@ -80,3 +80,4 @@ export const updateVideoSession: RequestSchema = {
   }),
   file: joi.object().optional(),
 };
+
