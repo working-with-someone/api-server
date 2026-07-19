@@ -7,9 +7,6 @@ import {
   ListObjectsCommand,
   ObjectIdentifier,
 } from '@aws-sdk/client-s3';
-import currUser from '../../data/curr-user';
-import UserFactory from '../../factories/user-factory';
-import categoryFactory from '../../factories/category-factory';
 
 dotenv.config({
   path: path.posix.join(process.cwd(), '.env.test'),
@@ -17,9 +14,6 @@ dotenv.config({
 
 async function tearDown() {
   await deleteAllUploadedS3Object();
-  UserFactory.cleanup();
-  categoryFactory.cleanup();
-
   await clearDatabase();
 }
 
