@@ -2,11 +2,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import prismaClient from '../../../src/database/clients/prisma';
 import s3Client from '../../../src/database/clients/s3';
-import {
-  DeleteObjectsCommand,
-  ListObjectsCommand,
-  ObjectIdentifier,
-} from '@aws-sdk/client-s3';
+import { DeleteObjectsCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 
 dotenv.config({
   path: path.posix.join(process.cwd(), '.env.test'),
@@ -84,19 +80,31 @@ const getTableCounts = async () => {
  * test과정에서 upload한 과정에서 s3 test storage에 upload한 모든 object들을 제거한다.
  */
 async function deleteAllUploadedS3Object() {
+  const bucketName = process.env.AWS_BUCKET_NAME;
+
+  if (!bucketName) {
+    console.warn('Skipping S3 cleanup: AWS_BUCKET_NAME is not set.');
+    return;
+  }
+
   // test storage에 존재하는 모든 object를 가져온다.
-  const getObjectKeys = new ListObjectsCommand({
-    Bucket: process.env.AWS_BUCKET_NAME,
+  const getObjectKeys = new ListObjectsV2Command({
+    Bucket: bucketName,
   });
 
   const res = await s3Client.send(getObjectKeys);
+  const objects = (res.Contents ?? [])
+    .map((content) => content.Key)
+    .filter((key): key is string => Boolean(key))
+    .map((Key) => ({ Key }));
 
   // object가 존재한다면, object들을 모두 제거한다.
-  if (res.Contents) {
+  if (objects.length > 0) {
     const deleteObjectsCommand = new DeleteObjectsCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: bucketName,
       Delete: {
-        Objects: res.Contents as ObjectIdentifier[],
+        Objects: objects,
+        Quiet: true,
       },
     });
 
