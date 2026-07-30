@@ -21,8 +21,8 @@ export const createVideoSessionCommentLike = asyncCatch(
     const createdCommentLike =
       await videoSessionCommentLikeService.createVideoSessionCommentLike({
         userId: req.session.userId!,
-        commentId: parseInt(req.params.comment_id),
-        videoSessionId: req.params.video_session_id,
+        commentId: parseInt(req.params.comment_id as string),
+        videoSessionId: req.params.video_session_id as string,
       });
 
     return res
@@ -36,8 +36,8 @@ export const deleteVideoSessionCommentLike = asyncCatch(
     const deletedcommentLike =
       await videoSessionCommentLikeService.deleteVideoSessionCommentLike({
         userId: req.session.userId!,
-        commentId: parseInt(req.params.comment_id),
-        videoSessionId: req.params.video_session_id,
+        commentId: parseInt(req.params.comment_id as string),
+        videoSessionId: req.params.video_session_id as string,
       });
 
     return res.status(httpStatusCode.NO_CONTENT).end();

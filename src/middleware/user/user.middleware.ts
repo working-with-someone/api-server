@@ -8,12 +8,10 @@ const attachUserOrNotfound = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { user_id } = req.params;
-
   const user = await prismaClient.user.findFirst({
     where: {
       // validator에서 number임이 검증된다.
-      id: parseInt(user_id),
+      id: parseInt(req.params.user_id as string),
     },
     include: {
       pfp: true,

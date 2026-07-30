@@ -4,8 +4,8 @@ import { userService } from '../../services';
 
 export const getUser = asyncCatch(async (req: Request, res: Response) => {
   const user = await userService.getUser(
-    parseInt(req.params.user_id),
-    req.session.userId == parseInt(req.params.user_id)
+    parseInt(req.params.user_id as string),
+    req.session.userId == parseInt(req.params.user_id as string)
   );
 
   return res.status(200).json({

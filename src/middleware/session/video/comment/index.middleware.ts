@@ -8,10 +8,8 @@ export async function attachCommentOrNotfound(
   res: Response,
   next: NextFunction
 ) {
-  const { comment_id } = req.params;
-
   const comment = await prismaClient.video_session_comment.findFirst({
-    where: { id: parseInt(comment_id) },
+    where: { id: parseInt(req.params.comment_id as string) },
     include: {
       user: {
         include: {

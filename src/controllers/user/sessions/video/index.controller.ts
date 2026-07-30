@@ -6,7 +6,7 @@ export const getUserVideoSessions = asyncCatch(
   async (req: Request, res: Response) => {
     const { videoSessions, pagination } =
       await userVideoSessionService.getUserVideoSessions({
-        userId: parseInt(req.params.user_id),
+        userId: parseInt(req.params.user_id as string),
         currUserId: req.session.userId as number,
         page: parseInt(req.query.page as string),
         per_page: parseInt(req.query.per_page as string),
@@ -22,8 +22,8 @@ export const getUserVideoSessions = asyncCatch(
 export const getUserVideoSession = asyncCatch(
   async (req: Request, res: Response) => {
     const videoSession = await userVideoSessionService.getUserVideoSession({
-      userId: parseInt(req.params.user_id),
-      videoSessionId: req.params.video_session_id,
+      userId: parseInt(req.params.user_id as string),
+      videoSessionId: req.params.video_session_id as string,
       currUserId: req.session.userId as number,
     });
 

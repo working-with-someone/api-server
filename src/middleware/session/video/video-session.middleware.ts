@@ -10,11 +10,9 @@ const videoSessionMiddleware = {
     res: Response,
     next: NextFunction
   ) {
-    const { video_session_id } = req.params;
-
     const videoSession = await prismaClient.video_session.findFirst({
       where: {
-        id: video_session_id,
+        id: req.params.video_session_id as string,
       },
       include: {
         allow: true,

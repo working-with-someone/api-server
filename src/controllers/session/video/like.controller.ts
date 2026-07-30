@@ -15,7 +15,7 @@ const createVideoSessionLike = asyncCatch(
   async (req: Request, res: Response) => {
     const createdLike = await videoSessionLikeService.createVideoSessionLike({
       userId: req.session.userId!,
-      videoSessionId: req.params.video_session_id,
+      videoSessionId: req.params.video_session_id as string,
     });
 
     return res.status(httpStatusCodes.CREATED).json({ data: createdLike });
@@ -26,7 +26,7 @@ const deleteVideoSessionLike = asyncCatch(
   async (req: Request, res: Response) => {
     const deletedLike = await videoSessionLikeService.deleteVideoSessionLike({
       userId: req.session.userId!,
-      videoSessionId: req.params.video_session_id,
+      videoSessionId: req.params.video_session_id as string,
     });
 
     return res.status(httpStatusCodes.NO_CONTENT).end();

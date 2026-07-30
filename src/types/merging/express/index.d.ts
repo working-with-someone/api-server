@@ -15,6 +15,7 @@ declare global {
   namespace Express {
     interface Request {
       user: PublicUser;
+      params: Record<string, string>;
     }
 
     interface Locals {
@@ -26,6 +27,13 @@ declare global {
       following: PublicFollowing;
       like: PublicVideoSessionLike;
       video_session_comment_like: PublicVideoSessionCommentLike;
+    }
+
+    interface ParamsDictionary {
+      user_id: string;
+      video_session_id: string;
+      video_session_comment_id: string;
+      break_time_id: string;
     }
   }
 }

@@ -7,7 +7,7 @@ export const getComments = asyncCatch(async (req: Request, res: Response) => {
   const { comments, pagination } = await videoSessionCommentService.getComments(
     {
       userId: req.session.userId!,
-      videoSessionId: req.params.video_session_id,
+      videoSessionId: req.params.video_session_id as string,
       page: parseInt(req.query.page as string),
       per_page: parseInt(req.query.per_page as string),
       sort: req.query.sort as string,
@@ -33,7 +33,7 @@ export const getComment = asyncCatch(async (req: Request, res: Response) => {
 export const createComment = asyncCatch(async (req: Request, res: Response) => {
   const createdComment = await videoSessionCommentService.createComment({
     userId: req.session.userId!,
-    videoSessionId: req.params.video_session_id,
+    videoSessionId: req.params.video_session_id as string,
     content: req.body.content,
   });
 
@@ -45,7 +45,7 @@ export const createComment = asyncCatch(async (req: Request, res: Response) => {
 export const deleteComment = asyncCatch(async (req: Request, res: Response) => {
   await videoSessionCommentService.deleteComment({
     comment_id: res.locals.videoSessionComment.id,
-    videoSessionId: req.params.video_session_id,
+    videoSessionId: req.params.video_session_id as string,
     currUserId: req.session.userId!,
   });
 

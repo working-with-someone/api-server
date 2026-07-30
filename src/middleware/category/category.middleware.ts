@@ -9,16 +9,12 @@ export const checkCategoryExistOrNotFound = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { category_label } = req.params;
-
   const category = await prismaClient.category.findFirst({
-    where: { label: category_label },
+    where: { label: req.params.category_label as string },
   });
 
   if (!category) {
-    return next(
-      new wwsError(httpStatusCode.NOT_FOUND, 'category not found')
-    );
+    return next(new wwsError(httpStatusCode.NOT_FOUND, 'category not found'));
   }
 
   return next();

@@ -17,7 +17,7 @@ export const createPreferredCategory = asyncCatch(
   async (req: Request, res: Response) => {
     const created = await preferredCategoryService.createPreferredCategory({
       user_id: res.locals.user.id,
-      category_label: req.params.category_label,
+      category_label: req.params.category_label as string,
     });
 
     return res.status(httpStatusCodes.CREATED).json({ data: created });
@@ -28,7 +28,7 @@ export const deletePreferredCategory = asyncCatch(
   async (req: Request, res: Response) => {
     await preferredCategoryService.deletePreferredCategory({
       user_id: res.locals.user.id,
-      category_label: req.params.category_label,
+      category_label: req.params.category_label as string,
     });
 
     return res.status(httpStatusCodes.NO_CONTENT).end();
@@ -40,8 +40,8 @@ export const updatePreferredCategoryPriority = asyncCatch(
     const updated =
       await preferredCategoryService.updatePreferredCategoryPriority({
         user_id: res.locals.user.id,
-        category_label: req.params.category_label,
-        priority: Number(req.params.priority),
+        category_label: req.params.category_label as string,
+        priority: Number(req.params.priority as string),
       });
 
     return res.status(httpStatusCodes.OK).json({ data: updated });

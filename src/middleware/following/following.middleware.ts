@@ -9,12 +9,11 @@ export const attachFollowingOrNotFound = async (
   next: NextFunction
 ) => {
   const user = res.locals.user;
-  const { following_user_id } = req.params;
 
   const following = await prismaClient.follow.findFirst({
     where: {
       follower_user_id: user.id,
-      following_user_id: parseInt(following_user_id),
+      following_user_id: parseInt(req.params.following_user_id as string),
     },
     include: {
       following: {
@@ -39,11 +38,9 @@ export const checkTargetUserExistOrNotFound = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { following_user_id } = req.params;
-
   const user = await prismaClient.user.findFirst({
     where: {
-      id: parseInt(following_user_id),
+      id: parseInt(req.params.following_user_id as string),
     },
   });
 
@@ -62,12 +59,11 @@ export const checkFollowingDoesNotExistOrConflict = async (
   next: NextFunction
 ) => {
   const user = res.locals.user;
-  const { following_user_id } = req.params;
 
   const following = await prismaClient.follow.findFirst({
     where: {
       follower_user_id: user.id,
-      following_user_id: parseInt(following_user_id),
+      following_user_id: parseInt(req.params.following_user_id as string),
     },
   });
 

@@ -11,11 +11,9 @@ const liveSessionMiddleware = {
     res: Response,
     next: NextFunction
   ) {
-    const { live_session_id } = req.params;
-
     const liveSession = await prismaClient.live_session.findFirst({
       where: {
-        id: live_session_id,
+        id: req.params.live_session_id as string,
       },
       omit: {
         stream_key: true,
@@ -111,4 +109,3 @@ const liveSessionMiddleware = {
 };
 
 export default liveSessionMiddleware;
-
