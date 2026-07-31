@@ -1,6 +1,7 @@
 import { defineConfig } from 'tsup';
 import glob from 'fast-glob';
 import path from 'path';
+import fs from 'fs';
 
 export default defineConfig(async () => {
   const contractFiles = await glob(['prisma/contracts/**/*.{ts,d.ts}']);
@@ -14,8 +15,12 @@ export default defineConfig(async () => {
     entryObj[filename] = file;
   }
 
-  // include enums
-  entryObj['enums'] = 'prisma/generated/prisma/enums.ts';
+  const srcPath = 'prisma/generated/prisma/enums.ts';
+  const destPath = './api-contracts/enums.ts';
+
+  if (fs.existsSync(srcPath)) {
+    fs.copyFileSync(srcPath, destPath);
+  }
 
   return {
     entry: entryObj,
