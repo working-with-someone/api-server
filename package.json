@@ -24,9 +24,6 @@
     "test:single": "dotenvx run --env-file=.env.test -- jest --runInBand",
     "generate:contracts": "tsup --config tsup.config.ts"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.637.0",
     "@aws-sdk/lib-storage": "^3.645.0",
