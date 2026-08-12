@@ -3,7 +3,29 @@ import { videoSessionFactory } from '../factories';
 import { PublicVideoSession } from '../../src/types/contracts/video-session';
 import esClient from '../../src/database/searchService/client';
 import currUser from '../data/curr-user';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+
+const TEST_INDEX = 'video_sessions_test';
+
+async function createTestDocument(document: PublicVideoSession) {
+  await esClient.index({
+    index: TEST_INDEX,
+    id: document.id,
+    document,
+  });
+
+  await esClient.indices.refresh({ index: TEST_INDEX });
+}
+
+async function cleanupTestDocuments() {
+  await esClient
+    .deleteByQuery({
+      index: TEST_INDEX,
+      query: { match_all: {} },
+    })
+    .catch(() => undefined);
+
+  await esClient.indices.refresh({ index: TEST_INDEX });
+}
 
 describe('Environment Variables', () => {
   beforeAll(async () => {
@@ -25,141 +47,177 @@ describe('Elasticsearch Document Operations', () => {
   });
 
   afterAll(async () => {
+    cleanupTestDocuments();
     await videoSessionFactory.cleanup();
   });
 
   describe('Video Session Document', () => {
-    test('getDocument', async () => {
-      const document = await esClient.create({
-        index: 'video_sessions_test',
-        id: videoSession.id,
-        document: videoSession,
+    describe('Get Document', () => {
+      beforeEach(async () => {
+        await createTestDocument(videoSession);
       });
 
-      const retrievedDocument = await searchService.getDocument(
-        'video_session',
-        document._id
-      );
-
-      expect(retrievedDocument).toBeDefined();
-      expect((retrievedDocument._source as any).id).toEqual(videoSession.id);
-
-      await esClient.delete({
-        index: 'video_sessions_test',
-        id: document._id,
+      afterEach(async () => {
+        await cleanupTestDocuments();
       });
 
-      expect(
-        await esClient.exists({
-          index: 'video_sessions_test',
-          id: document._id,
-        })
-      ).toBe(false);
+      test('getDocument', async () => {
+        const retrievedDocument = await searchService.getDocument(
+          'video_session',
+          videoSession.id
+        );
+
+        expect(retrievedDocument).toBeDefined();
+        expect(retrievedDocument!.id).toEqual(videoSession.id);
+      });
+
+      test('getDocument_NonExistingDocument', async () => {
+        const nonExistingDocument = await videoSessionFactory.createAndSave();
+
+        await expect(
+          searchService.getDocument('video_session', nonExistingDocument.id)
+        ).rejects.toThrowError(
+          `Document with id ${nonExistingDocument.id} does not exist in index ${TEST_INDEX}`
+        );
+      });
     });
 
-    test('createDocument', async () => {
-      const document = await searchService.createDocument(
-        'video_session',
-        videoSession
-      );
-
-      expect(document).toBeDefined();
-
-      await esClient.delete({
-        index: 'video_sessions_test',
-        id: document._id,
+    describe('Create Document', () => {
+      afterEach(async () => {
+        cleanupTestDocuments();
       });
 
-      expect(
-        await esClient.exists({
-          index: 'video_sessions_test',
-          id: document._id,
-        })
-      ).toBe(false);
+      test('createDocument', async () => {
+        const document = await searchService.createDocument(
+          'video_session',
+          videoSession
+        );
+
+        expect(document).toBeDefined();
+        expect(document!.id).toEqual(videoSession.id);
+      });
+
+      test('createDocument_ExistingDocument', async () => {
+        await createTestDocument(videoSession);
+
+        await expect(
+          searchService.createDocument('video_session', videoSession)
+        ).rejects.toThrowError(
+          `Document with id ${videoSession.id} already exists in index ${TEST_INDEX}`
+        );
+      });
     });
 
-    test('searchDocument', async () => {
-      const document = await esClient.create({
-        index: 'video_sessions_test',
-        id: videoSession.id,
-        document: videoSession,
+    describe('Search Document', () => {
+      beforeEach(async () => {
+        await createTestDocument(videoSession);
       });
 
-      await esClient.indices.refresh({ index: 'video_sessions_test' });
-
-      const searchResult = await searchService.searchDocument(
-        'video_session',
-        videoSession.title
-      );
-
-      expect((searchResult.hits.total as SearchTotalHits).value).toBe(1);
-      expect((searchResult.hits.hits[0]._source as any).id).toEqual(
-        videoSession.id
-      );
-
-      await esClient.delete({
-        index: 'video_sessions_test',
-        id: document._id,
+      afterEach(async () => {
+        cleanupTestDocuments();
       });
 
-      expect(
-        await esClient.exists({
-          index: 'video_sessions_test',
-          id: document._id,
-        })
-      ).toBe(false);
+      test('searchDocument', async () => {
+        const searchResult = await searchService.searchDocument(
+          'video_session',
+          videoSession.title,
+          1,
+          10
+        );
+
+        expect(searchResult.data).toHaveLength(1);
+        expect(searchResult.data[0].id).toEqual(videoSession.id);
+        expect(searchResult.pagination).toMatchObject({
+          currPage: 1,
+          per_page: 10,
+          hasMore: false,
+          prevPage: null,
+          nextPage: null,
+        });
+      });
     });
 
-    test('updateDocument', async () => {
-      const document = await esClient.create({
-        index: 'video_sessions_test',
-        id: videoSession.id,
-        document: videoSession,
+    describe('Update Document', () => {
+      beforeEach(async () => {
+        await createTestDocument(videoSession);
       });
 
-      const updatedTitle = 'Updated Title';
-
-      await searchService.updateDocument('video_session', {
-        ...videoSession,
-        title: updatedTitle,
+      afterEach(async () => {
+        cleanupTestDocuments();
+        await videoSessionFactory.cleanup();
       });
 
-      await esClient.indices.refresh({ index: 'video_sessions_test' });
-      const updatedDocument = await esClient.get({
-        index: 'video_sessions_test',
-        id: document._id,
+      test('updateDocument', async () => {
+        const updatedTitle = 'Updated Title';
+
+        const updatedDocument = await searchService.updateDocument(
+          'video_session',
+          {
+            ...videoSession,
+            title: updatedTitle,
+          }
+        );
+
+        expect(updatedDocument).toBeDefined();
+        expect(updatedDocument!.title).toEqual(updatedTitle);
       });
 
-      expect((updatedDocument._source as any).title).toEqual(updatedTitle);
+      test('updateDocument_NonExistingDocument', async () => {
+        const nonExistingDocument = await videoSessionFactory.createAndSave();
 
-      await esClient.delete({
-        index: 'video_sessions_test',
-        id: document._id,
+        await expect(
+          searchService.updateDocument('video_session', nonExistingDocument)
+        ).rejects.toThrowError(
+          `Document with id ${nonExistingDocument.id} does not exist in index ${TEST_INDEX}`
+        );
       });
-
-      expect(
-        await esClient.exists({
-          index: 'video_sessions_test',
-          id: document._id,
-        })
-      ).toBe(false);
     });
 
-    test('deleteDocument', async () => {
-      const document = await esClient.create({
-        index: 'video_sessions_test',
-        id: videoSession.id,
-        document: videoSession,
+    describe('Update Document - Non Existing', () => {
+      afterEach(async () => {
+        cleanupTestDocuments();
       });
 
-      await searchService.deleteDocument('video_session', document._id);
+      test('updateDocument_NonExistingDocument', async () => {
+        const nonExistingDocument = await videoSessionFactory.createAndSave();
 
-      expect(
-        await esClient.exists({
-          index: 'video_sessions_test',
-          id: document._id,
-        })
-      ).toBe(false);
+        await expect(
+          searchService.updateDocument('video_session', nonExistingDocument)
+        ).rejects.toThrowError(
+          `Document with id ${nonExistingDocument.id} does not exist in index ${TEST_INDEX}`
+        );
+      });
+    });
+
+    describe('Delete Document', () => {
+      beforeEach(async () => {
+        await createTestDocument(videoSession);
+      });
+
+      afterEach(async () => {
+        cleanupTestDocuments();
+      });
+
+      test('deleteDocument', async () => {
+        await searchService.deleteDocument('video_session', videoSession.id);
+
+        expect(
+          await esClient.exists({
+            index: TEST_INDEX,
+            id: videoSession.id,
+          })
+        ).toBe(false);
+      });
+
+      test('deleteDocument_NonExistingDocument', async () => {
+        const nonExistingDocument = await videoSessionFactory.createAndSave();
+
+        await expect(
+          searchService.deleteDocument('video_session', nonExistingDocument.id)
+        ).rejects.toThrowError(
+          `Document with id ${nonExistingDocument.id} does not exist in index ${TEST_INDEX}`
+        );
+      });
     });
   });
 });
