@@ -1,8 +1,9 @@
 import searchService from '../../src/lib/search';
 import { videoSessionFactory } from '../factories';
 import { PublicVideoSession } from '../../src/types/contracts/video-session';
-import esClient from '../../src/database/searchService/client';
+import esClient from '../../src/lib/search/client';
 import currUser from '../data/curr-user';
+import { resolveIndex } from '../../src/lib/search/indices';
 
 const TEST_INDEX = 'video_sessions_test';
 
@@ -36,6 +37,29 @@ describe('Environment Variables', () => {
     expect(process.env.ES_SERVER_URL).toBeDefined();
     expect(process.env.ES_USERNAME).toBeDefined();
     expect(process.env.ES_PASSWORD).toBeDefined();
+  });
+});
+
+describe('Index Resolution', () => {
+  test('production', () => {
+    process.env.NODE_ENV = 'production';
+
+    expect(resolveIndex('video_session')).toEqual('video_sessions');
+    expect(resolveIndex('live_session')).toEqual('live_sessions');
+  });
+
+  test('development', () => {
+    process.env.NODE_ENV = 'development';
+
+    expect(resolveIndex('video_session')).toEqual('video_sessions_dev');
+    expect(resolveIndex('live_session')).toEqual('live_sessions_dev');
+  });
+
+  test('test', () => {
+    process.env.NODE_ENV = 'test';
+
+    expect(resolveIndex('video_session')).toEqual('video_sessions_test');
+    expect(resolveIndex('live_session')).toEqual('live_sessions_test');
   });
 });
 
