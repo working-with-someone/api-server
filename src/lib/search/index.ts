@@ -1,231 +1,360 @@
-import { PublicLiveSession } from '../../types/contracts/live-session';
-import { PublicVideoSession } from '../../types/contracts/video-session';
-import esClient from '../../database/searchService/client';
 import type { Client } from '@elastic/elasticsearch';
-import { buildPagenationMeta } from '../../utils/pagination';
-import { PaginatedResult } from '../../types/pagination';
-
-type Indexes = 'video_session' | 'live_session';
-
-const _Indexes = {
-  production: {
-    video_session: 'video_sessions',
-    live_session: 'live_sessions',
-  },
-  development: {
-    video_session: 'video_sessions_dev',
-    live_session: 'live_sessions_dev',
-  },
-  test: {
-    video_session: 'video_sessions_test',
-    live_session: 'live_sessions_test',
-  },
-};
+import {
+  BulkRequest,
+  DeleteByQueryRequest,
+  MappingTypeMapping,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
+import { Indices, indices, resolveIndex } from './indices';
+import esClient from './client';
+import mappings, { VideoSessionDocument, LiveSessionDocument } from './mapping';
+import { PublicVideoSession } from '../../types/contracts/video-session';
 
 type DocumentTypeMap = {
-  video_session: PublicVideoSession;
-  live_session: PublicLiveSession;
+  video_session: VideoSessionDocument;
+  live_session: LiveSessionDocument;
 };
 
-function resolveIndex(index: Indexes) {
-  switch (process.env.NODE_ENV) {
-    case 'production':
-      return _Indexes.production[index];
-    case 'development':
-      return _Indexes.development[index];
-    case 'test':
-      return _Indexes.test[index];
-    default:
-      throw new Error('Unknown NODE_ENV');
-  }
-}
+class ElasticEngine<T extends Indices> {
+  constructor(
+    private readonly client: Client,
+    private readonly index: T
+  ) {}
 
-// do not call referesh after every operation
-class SearchService {
-  esClient: Client;
-  constructor() {
-    this.esClient = esClient;
+  get resolvedIndex() {
+    return resolveIndex(this.index);
   }
 
-  async getDocument<T extends Indexes>(index: T, id: string) {
-    const isExist = await this.esClient.exists({
-      index: resolveIndex(index),
+  async findUnique(id: string) {
+    const res = await this.client.get<DocumentTypeMap[T]>({
+      index: this.resolvedIndex,
       id,
     });
 
-    if (!isExist) {
-      throw new Error(
-        `Document with id ${id} does not exist in index ${resolveIndex(index)}`
-      );
-    }
-
-    const res = await this.esClient.get<DocumentTypeMap[T]>({
-      index: resolveIndex(index),
-      id,
-    });
-
-    return res._source;
+    return res;
   }
 
-  async createDocument<T extends Indexes>(
-    index: T,
-    document: DocumentTypeMap[T]
-  ) {
-    const isExist = await this.esClient.exists({
-      index: resolveIndex(index),
+  async createDocument(document: DocumentTypeMap[T], refresh: boolean = true) {
+    const isExist = await this.client.exists({
+      index: this.resolvedIndex,
       id: document.id,
     });
 
     if (isExist) {
       throw new Error(
-        `Document with id ${document.id} already exists in index ${resolveIndex(index)}`
+        `Document with id ${document.id} already exists in index ${this.resolvedIndex}`
       );
     }
 
-    const res = await this.esClient.index({
-      index: resolveIndex(index),
+    const res = await this.client.index({
+      index: this.resolvedIndex,
       id: document.id,
       document,
+      refresh,
     });
 
     if (res.result !== 'created') {
       throw new Error(
-        `Failed to create document in index ${resolveIndex(index)} with id ${document.id}`
+        `Failed to create document in index ${this.resolvedIndex} with id ${document.id}`
       );
     }
 
-    return this.getDocument(index, document.id);
+    return res;
   }
 
-  async updateDocument<T extends Indexes>(
-    index: T,
-    document: DocumentTypeMap[T]
-  ) {
-    const isExist = await this.esClient.exists({
-      index: resolveIndex(index),
+  async updateDocument(document: DocumentTypeMap[T], refresh: boolean = true) {
+    const isExist = await this.client.exists({
+      index: this.resolvedIndex,
       id: document.id,
     });
 
     if (!isExist) {
       throw new Error(
-        `Document with id ${document.id} does not exist in index ${resolveIndex(index)}`
+        `Document with id ${document.id} does not exist in index ${this.resolvedIndex}`
       );
     }
 
-    const res = await this.esClient.update({
-      index: resolveIndex(index),
+    const res = await this.client.update({
+      index: this.resolvedIndex,
       id: document.id,
       doc: document,
+      refresh,
     });
 
     if (res.result !== 'updated') {
       throw new Error(
-        `Failed to update document in index ${resolveIndex(index)} with id ${document.id}`
+        `Failed to update document in index ${this.resolvedIndex} with id ${document.id}`
       );
     }
 
-    return this.getDocument(index, document.id);
+    return res;
   }
 
-  async deleteDocument(index: Indexes, id: string) {
-    const isExist = await this.esClient.exists({
-      index: resolveIndex(index),
+  async deleteDocument(id: string, refresh: boolean = true) {
+    return await this.client.delete({
+      index: this.resolvedIndex,
       id,
-    });
-
-    if (!isExist) {
-      throw new Error(
-        `Document with id ${id} does not exist in index ${resolveIndex(index)}`
-      );
-    }
-
-    return await this.esClient.delete({
-      index: resolveIndex(index),
-      id,
+      refresh,
     });
   }
 
-  async deleteAllDocuments(index: Indexes) {
-    await this.esClient.deleteByQuery({
-      index: resolveIndex(index),
-      query: {
-        match_all: {},
-      },
+  async searchDocument(
+    searchParams: Omit<SearchRequest, 'index'> & { index?: string } = {}
+  ) {
+    const result = await this.client.search<DocumentTypeMap[T]>({
+      index: this.resolvedIndex,
+      ...searchParams,
     });
+
+    return result;
   }
 
-  async searchDocument<T extends Indexes>(
-    index: T,
-    s: string,
-    page: number,
-    per_page: number
-  ): Promise<PaginatedResult<DocumentTypeMap[T][], 'data'>> {
-    if (!Number.isInteger(page) || page < 1) {
-      throw new Error('page must be an integer greater than 0');
-    }
+  async bulkDocument(req: BulkRequest, refresh: boolean = true) {
+    return await this.client.bulk({ ...req, refresh });
+  }
 
-    if (!Number.isInteger(per_page) || per_page < 1) {
-      throw new Error('per_page must be an integer greater than 0');
-    }
-
-    const result = await this.esClient.search<DocumentTypeMap[T]>({
-      index: resolveIndex(index),
-      from: (page - 1) * per_page,
-      size: per_page + 1,
-      query: s.trim()
-        ? {
-            bool: {
-              should: [
-                {
-                  match: {
-                    title: {
-                      query: s,
-                      boost: 10,
-                    },
-                  },
-                },
-                {
-                  match: {
-                    description: {
-                      query: s,
-                      boost: 1,
-                    },
-                  },
-                },
-                {
-                  match: {
-                    'organizer.username': {
-                      query: s,
-                      boost: 2,
-                    },
-                  },
-                },
-              ],
-            },
-          }
-        : { match_all: {} },
-    });
-
-    const data = result.hits.hits
-      .map((hit) => hit._source)
-      .filter(
-        (document): document is DocumentTypeMap[T] =>
-          typeof document !== 'undefined'
-      );
-
-    const pagination = buildPagenationMeta(data, page, per_page);
-
-    if (pagination.hasMore) {
-      data.pop();
-    }
-
-    return {
-      data,
-      pagination,
-    };
+  async deleteByQuery(query: DeleteByQueryRequest) {
+    return await this.client.deleteByQuery(query);
   }
 }
 
-const searchService = new SearchService();
+class VideoSessionModel {
+  private esEngine: ElasticEngine<'video_session'>;
 
-export default searchService;
+  constructor(esClient: Client) {
+    this.esEngine = new ElasticEngine(esClient, 'video_session');
+  }
+
+  async find(id: string): Promise<VideoSessionDocument | undefined> {
+    const findUniqueRes = await this.esEngine.findUnique(id);
+
+    return findUniqueRes._source;
+  }
+
+  async findMany(ids: string[]): Promise<VideoSessionDocument[]> {
+    const result: VideoSessionDocument[] = [];
+    const searchRes = await this.esEngine.searchDocument({
+      query: {
+        ids: {
+          values: ids,
+        },
+      },
+    });
+
+    for (const hit of searchRes.hits.hits) {
+      if (hit._source) {
+        result.push(hit._source);
+      }
+    }
+
+    return result;
+  }
+
+  async create(
+    videoSession: PublicVideoSession
+  ): Promise<VideoSessionDocument> {
+    const createRes = await this.esEngine.createDocument(
+      {
+        id: videoSession.id,
+        title: videoSession.title,
+        description: videoSession.description,
+        break_time: videoSession.break_time,
+        category: videoSession.category,
+        organizer_username: videoSession.organizer.username,
+        access_level: videoSession.access_level,
+        created_at: videoSession.created_at,
+        allowed_list: [],
+      },
+      true
+    );
+
+    const createdDocument = await this.find(createRes._id);
+
+    if (!createdDocument) {
+      throw new Error(
+        `Document with id ${createRes._id} not found in index ${this.esEngine.resolvedIndex} after creation`
+      );
+    }
+
+    return createdDocument;
+  }
+
+  async createMany(
+    videoSessions: PublicVideoSession[]
+  ): Promise<VideoSessionDocument[]> {
+    const bulkOps: BulkRequest['operations'] = videoSessions.flatMap(
+      (videoSession) => [
+        {
+          index: { _index: this.esEngine.resolvedIndex, _id: videoSession.id },
+        },
+        {
+          id: videoSession.id,
+          title: videoSession.title,
+          description: videoSession.description,
+          break_time: videoSession.break_time,
+          category: videoSession.category,
+          organizer_username: videoSession.organizer.username,
+          access_level: videoSession.access_level,
+          created_at: videoSession.created_at,
+          allowed_list: [],
+        },
+      ]
+    );
+
+    const createManyRes = await this.esEngine.bulkDocument({
+      operations: bulkOps,
+    });
+
+    if (createManyRes.errors) {
+      throw new Error(
+        `Failed to create some documents in index ${this.esEngine.resolvedIndex}`
+      );
+    }
+
+    const createdIds: string[] = [];
+
+    for (const [index, item] of createManyRes.items.entries()) {
+      const createRes = item.index;
+
+      if (!createRes || createRes.status !== 201 || !createRes._id) {
+        throw new Error(
+          `Failed to create document with id ${videoSessions[index].id}: ${createRes?.error?.reason ?? 'Unknown error'}`
+        );
+      }
+
+      createdIds.push(createRes._id);
+    }
+
+    return await this.findMany(createdIds);
+  }
+
+  async update(videoSession: PublicVideoSession) {
+    const updateRes = await this.esEngine.updateDocument(
+      {
+        id: videoSession.id,
+        title: videoSession.title,
+        description: videoSession.description,
+        break_time: videoSession.break_time,
+        category: videoSession.category,
+        organizer_username: videoSession.organizer.username,
+        access_level: videoSession.access_level,
+        created_at: videoSession.created_at,
+        allowed_list: [],
+      },
+      true
+    );
+
+    return await this.find(updateRes._id);
+  }
+
+  async search(searchParams: Omit<SearchRequest, 'index'>) {
+    const searchRes = await this.esEngine.searchDocument(searchParams);
+
+    const documents = searchRes.hits.hits
+      .map((hit) => hit._source)
+      .filter((doc): doc is VideoSessionDocument => doc !== undefined);
+
+    return documents;
+  }
+
+  async delete(id: string) {
+    try {
+      await this.esEngine.deleteDocument(id, true);
+    } catch (err: any) {
+      // document를 찾지 못했으면 굳이 에러를 throw하지 않는다.
+      if (err.meta?.statusCode == 404) {
+        return;
+      }
+
+      throw err;
+    }
+
+    return;
+  }
+
+  async deleteMany(ids?: string[]) {
+    if (!ids || ids.length === 0) {
+      return await this.esEngine.deleteByQuery({
+        index: this.esEngine.resolvedIndex,
+        refresh: true,
+        query: { match_all: {} },
+      });
+    }
+
+    const bulkOps: BulkRequest['operations'] = ids.flatMap((docId) => [
+      { delete: { _index: this.esEngine.resolvedIndex, _id: docId } },
+    ]);
+
+    const deleteManyRes = await this.esEngine.bulkDocument({
+      operations: bulkOps,
+    });
+
+    for (const [index, item] of deleteManyRes.items.entries()) {
+      const deleteRes = item.delete;
+
+      if (
+        !deleteRes ||
+        (deleteRes.status !== 200 && deleteRes.status !== 404)
+      ) {
+        throw deleteRes?.error;
+      }
+    }
+
+    return deleteManyRes;
+  }
+}
+
+class LiveSessionModel {
+  private esEngine: ElasticEngine<'live_session'>;
+
+  constructor(esClient: Client) {
+    this.esEngine = new ElasticEngine(esClient, 'live_session');
+  }
+}
+
+class ES {
+  esClient: Client;
+  initalized: boolean;
+
+  video_session: VideoSessionModel;
+  live_session: LiveSessionModel;
+
+  constructor() {
+    this.esClient = esClient;
+    this.initalized = false;
+
+    this.video_session = new VideoSessionModel(this.esClient);
+    this.live_session = new LiveSessionModel(this.esClient);
+  }
+
+  async init() {
+    const exists = await Promise.all(
+      indices.map((index) => esClient.indices.exists({ index }))
+    );
+
+    for (const isExist of exists) {
+      if (!isExist) {
+        const indexName = indices[exists.indexOf(isExist)];
+
+        let mapping: MappingTypeMapping = {};
+
+        switch (true) {
+          case indexName.startsWith('video_sessions'):
+            mapping = mappings.video_session;
+            break;
+          case indexName.startsWith('live_sessions'):
+            mapping = mappings.live_session;
+            break;
+        }
+
+        await esClient.indices.create({ index: indexName, mappings: mapping });
+      }
+    }
+
+    console.log('SearchService initialized');
+  }
+}
+
+const es = new ES();
+
+export default es;

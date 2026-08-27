@@ -124,4 +124,3 @@ class VideoSessionFactory implements IFactory<OverRides, PublicVideoSession> {
 }
 
 export const videoSessionFactory = new VideoSessionFactory();
-

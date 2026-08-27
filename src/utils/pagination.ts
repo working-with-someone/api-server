@@ -1,6 +1,6 @@
 import { PaginationMeta } from '../types/pagination';
 
-export function buildPagenationMeta(
+export function buildPaginationMeta(
   resource: any[],
   page: number,
   per_page: number

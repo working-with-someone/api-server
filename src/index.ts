@@ -3,10 +3,12 @@ import redisClient from './database/clients/redis';
 import app from './app';
 import prismaClient from './database/clients/prisma';
 import './patch/global';
+import searchService from './lib/search';
 
 const server = app.listen(process.env.PORT, () => {
   console.log(`Server is listening on port ${process.env.PORT} 🔥`);
   // prisma client는 connect를 명시적으로 call할 필요는 없지만 첫 request와 lazy connection을 방지
+  searchService.init();
   prismaClient.$connect();
   redisClient.connect();
 });
