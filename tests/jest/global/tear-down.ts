@@ -3,13 +3,21 @@ import path from 'path';
 import prismaClient from '../../../src/database/clients/prisma';
 import s3Client from '../../../src/database/clients/s3';
 import { DeleteObjectsCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { userFactory } from '../../factories';
 
 dotenv.config({
   path: path.posix.join(process.cwd(), '.env.test'),
 });
 
+// default export되는 function으로, Jest의 globalTeardown에서 호출되어, 테스트가 끝난 후에 실행된다.
 async function tearDown() {
+  // globalSetup에서 생성한 user들을 제거한다.
+  await userFactory.cleanup();
+
+  // 테스트 과정에서 upload한 모든 s3 object들을 제거한다.
   await deleteAllUploadedS3Object();
+
+  // 테스트 과정에서 생성된 모든 데이터들을 제거한다.
   await clearDatabase();
 }
 
