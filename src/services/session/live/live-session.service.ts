@@ -9,16 +9,19 @@ import path from 'node:path';
 import { to } from '../../../config/path.config';
 
 import { checkFollowing } from '../../follow.service';
-import { Prisma, live_session_status, access_level } from '../../../../prisma/generated/prisma/client';
+import {
+  Prisma,
+  live_session_status,
+  access_level,
+} from '../../../../prisma/generated/prisma/client';
 import randomString from 'randomstring';
-import { sanitize } from '../../../utils/sanitize';
 import {
   PublicLiveSession,
   PublicLiveSessionStatus,
   PublicLiveSessionThumbnailUri,
 } from '../../../types/contracts/live-session';
 import { PaginatedResult } from '../../../types/pagination';
-import { buildPagenationMeta } from '../../../utils/pagination';
+import { buildPaginationMeta } from '../../../utils/pagination';
 
 export async function isAllowedToLiveSession(data: {
   liveSession: PublicLiveSession;
@@ -145,7 +148,11 @@ export async function getLiveSessions(
     },
   });
 
-  const pagination = buildPagenationMeta(liveSessions, data.page, data.per_page);
+  const pagination = buildPaginationMeta(
+    liveSessions,
+    data.page,
+    data.per_page
+  );
 
   if (pagination.hasMore) {
     liveSessions.pop();
@@ -277,4 +284,3 @@ export async function updateLiveSessionThumbnail(data: {
 
   return updatedLiveSession.thumbnail_uri;
 }
-

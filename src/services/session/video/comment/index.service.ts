@@ -11,7 +11,7 @@ import {
   PublicVideoSessionCommentWithIsLiked,
 } from '../../../../types/contracts/comment';
 import { PaginatedResult } from '../../../../types/pagination';
-import { buildPagenationMeta } from '../../../../utils/pagination';
+import { buildPaginationMeta } from '../../../../utils/pagination';
 
 export async function getComment(
   input: GetCommentInput
@@ -63,7 +63,7 @@ export async function getComments(
     orderBy,
   });
 
-  const pagination = buildPagenationMeta(comments, input.page, input.per_page);
+  const pagination = buildPaginationMeta(comments, input.page, input.per_page);
 
   if (pagination.hasMore) {
     comments.pop();
@@ -125,4 +125,3 @@ export async function createComment(
     isLiked: false,
   };
 }
-

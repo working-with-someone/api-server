@@ -1,7 +1,7 @@
 import prismaClient from '../database/clients/prisma';
 import { PublicCategory } from '../types/contracts/category';
 import { PaginatedResult } from '../types/pagination';
-import { buildPagenationMeta } from '../utils/pagination';
+import { buildPaginationMeta } from '../utils/pagination';
 import type { GetCategoriesInput } from './category.service.d';
 
 const sortOptions: Record<string, any> = {
@@ -21,7 +21,7 @@ export async function getCategories(
     orderBy,
   });
 
-  const pagination = buildPagenationMeta(categories, data.page, data.per_page);
+  const pagination = buildPaginationMeta(categories, data.page, data.per_page);
 
   if (pagination.hasMore) {
     categories.pop();

@@ -15,7 +15,7 @@ import type {
 import { Prisma } from '../../prisma/generated/prisma/client';
 import { PublicFollower, PublicFollowing } from '../types/contracts/follow';
 import { PaginatedResult } from '../types/pagination';
-import { buildPagenationMeta } from '../utils/pagination';
+import { buildPaginationMeta } from '../utils/pagination';
 
 export async function getFollowing(
   data: GetFollowingInput
@@ -62,7 +62,7 @@ export async function getFollowings(
     take: data.per_page + 1,
   });
 
-  const pagination = buildPagenationMeta(follows, data.page, data.per_page);
+  const pagination = buildPaginationMeta(follows, data.page, data.per_page);
 
   if (pagination.hasMore) {
     follows.pop();
@@ -77,8 +77,6 @@ export async function getFollowings(
 export async function createFollowing(
   data: CreateFollowingInput
 ): Promise<PublicFollowing> {
-  // follow record ?앹꽦怨?user?ㅼ쓽 following_count increment, follower count increment媛 臾몄젣 ?놁씠 ?ㅽ뻾?쒕떎硫?
-  // ?앹꽦??follow record瑜?諛섑솚?쒕떎.
   try {
     const [follow] = await prismaClient.$transaction([
       prismaClient.follow.create({
@@ -91,7 +89,6 @@ export async function createFollowing(
           },
         },
       }),
-      // follower user??following count瑜?媛먯냼?쒗궓??
       prismaClient.user.update({
         where: {
           id: data.follower_user_id,
@@ -101,7 +98,6 @@ export async function createFollowing(
         },
       }),
 
-      // following user??follower count瑜?媛먯냼?쒗궓??
       prismaClient.user.update({
         where: { id: data.following_user_id },
         data: {
@@ -129,7 +125,6 @@ export async function deleteFollow(data: DeleteFollowInput) {
         follower_user_id_following_user_id: data,
       },
     }),
-    // follower user??following count瑜?媛먯냼?쒗궓??
     prismaClient.user.update({
       where: {
         id: data.follower_user_id,
@@ -139,7 +134,6 @@ export async function deleteFollow(data: DeleteFollowInput) {
       },
     }),
 
-    // following user??follower count瑜?媛먯냼?쒗궓??
     prismaClient.user.update({
       where: { id: data.following_user_id },
       data: {
@@ -151,7 +145,6 @@ export async function deleteFollow(data: DeleteFollowInput) {
   return;
 }
 
-// user??follower 紐⑸줉??媛?몄삩??
 export async function getFollowers(
   data: GetFollowersInput
 ): Promise<PublicFollower[]> {
@@ -164,7 +157,7 @@ export async function getFollowers(
     take: data.per_page + 1,
   });
 
-  const pagination = buildPagenationMeta(followers, data.page, data.per_page);
+  const pagination = buildPaginationMeta(followers, data.page, data.per_page);
 
   if (pagination.hasMore) {
     followers.pop();
@@ -172,4 +165,3 @@ export async function getFollowers(
 
   return followers;
 }
-
