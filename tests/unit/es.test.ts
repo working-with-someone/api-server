@@ -111,6 +111,7 @@ describe('Elasticsearch Document Operations', () => {
 
         expect(document).toBeDefined();
         expect(document!.id).toEqual(videoSession.id);
+        expect(document!.organizer.id).toEqual(videoSession.organizer.id);
       });
 
       test('create_ExistingDocument_Must_Reject', async () => {

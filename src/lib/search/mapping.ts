@@ -13,15 +13,13 @@ export interface Document {
 
 export interface VideoSessionDocument extends Pick<
   PublicVideoSession,
-  | 'id'
-  | 'title'
-  | 'description'
-  | 'access_level'
-  | 'break_time'
-  | 'category'
-  | 'created_at'
+  'id' | 'title' | 'description' | 'access_level' | 'break_time' | 'created_at'
 > {
-  organizer_username: string;
+  organizer: {
+    id: number;
+    username: string;
+  };
+  category?: string;
   allowed_list?: number[];
 }
 
@@ -30,7 +28,10 @@ export interface LiveSessionDocument extends Document {
   description: string;
   break_time?: BreakTime;
   category: string;
-  organizer_username: string;
+  organizer: {
+    id: number;
+    username: string;
+  };
   access_level: string;
   allowed_list?: number[];
 }
@@ -46,13 +47,11 @@ const mappings: { [key in Indices]: MappingTypeMapping } = {
       // 가중치가 높게 들어가는 검색의 대상
       description: {
         type: 'text',
-        boost: 2.0,
       },
 
       // 가중치가 매우 높게 들어가는 검색의 대상
       title: {
         type: 'text',
-        boost: 5.0,
       },
 
       // 검색 미활용, 필터 검색용
@@ -75,13 +74,17 @@ const mappings: { [key in Indices]: MappingTypeMapping } = {
       // 검색 미활용, 필터 정렬용
       // like_count: { type: 'integer' },
 
-      // 가중치가 들어가는 검색의 대상
-      organizer_username: {
-        boost: 1.0,
-        type: 'keyword',
+      // 접근 제어와 작성자 검색용
+      organizer: {
+        properties: {
+          id: { type: 'integer' },
+          username: {
+            type: 'text',
+          },
+        },
       },
 
-      // 검색 미활용, 필터링용
+      // 검색 미활용, 필터링용 (term 쿼리로 정확 일치해야 하므로 keyword)
       access_level: { type: 'keyword' },
 
       // 검색 미활용, 필터링용

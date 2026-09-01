@@ -9,6 +9,7 @@ import { Indices, indices, resolveIndex } from './indices';
 import esClient from './client';
 import mappings, { VideoSessionDocument, LiveSessionDocument } from './mapping';
 import { PublicVideoSession } from '../../types/contracts/video-session';
+import prismaClient from '../../database/clients/prisma';
 
 type DocumentTypeMap = {
   video_session: VideoSessionDocument;
@@ -81,7 +82,7 @@ class ElasticEngine<T extends Indices> {
       refresh,
     });
 
-    if (res.result !== 'updated') {
+    if (res.result !== 'updated' && res.result !== 'noop') {
       throw new Error(
         `Failed to update document in index ${this.resolvedIndex} with id ${document.id}`
       );
@@ -125,6 +126,35 @@ class VideoSessionModel {
     this.esEngine = new ElasticEngine(esClient, 'video_session');
   }
 
+  private async convertToDocument(
+    videoSession: PublicVideoSession
+  ): Promise<VideoSessionDocument> {
+    const document: VideoSessionDocument = {
+      id: videoSession.id,
+      title: videoSession.title,
+      description: videoSession.description,
+      break_time: videoSession.break_time,
+      category: videoSession.category?.label,
+      organizer: {
+        id: videoSession.organizer.id,
+        username: videoSession.organizer.username,
+      },
+      access_level: videoSession.access_level,
+      created_at: videoSession.created_at,
+      allowed_list: [],
+    };
+    if (videoSession.access_level === 'PRIVATE') {
+      const allowedUserIds = await prismaClient.video_session_allow.findMany({
+        where: { video_session_id: videoSession.id },
+        select: { user_id: true },
+      });
+
+      document.allowed_list = allowedUserIds.map((entry) => entry.user_id);
+    }
+
+    return document;
+  }
+
   async find(id: string): Promise<VideoSessionDocument | undefined> {
     const findUniqueRes = await this.esEngine.findUnique(id);
 
@@ -154,17 +184,7 @@ class VideoSessionModel {
     videoSession: PublicVideoSession
   ): Promise<VideoSessionDocument> {
     const createRes = await this.esEngine.createDocument(
-      {
-        id: videoSession.id,
-        title: videoSession.title,
-        description: videoSession.description,
-        break_time: videoSession.break_time,
-        category: videoSession.category,
-        organizer_username: videoSession.organizer.username,
-        access_level: videoSession.access_level,
-        created_at: videoSession.created_at,
-        allowed_list: [],
-      },
+      await this.convertToDocument(videoSession),
       true
     );
 
@@ -182,22 +202,16 @@ class VideoSessionModel {
   async createMany(
     videoSessions: PublicVideoSession[]
   ): Promise<VideoSessionDocument[]> {
+    const documents = await Promise.all(
+      videoSessions.map((session) => this.convertToDocument(session))
+    );
+
     const bulkOps: BulkRequest['operations'] = videoSessions.flatMap(
-      (videoSession) => [
+      (videoSession, index) => [
         {
           index: { _index: this.esEngine.resolvedIndex, _id: videoSession.id },
         },
-        {
-          id: videoSession.id,
-          title: videoSession.title,
-          description: videoSession.description,
-          break_time: videoSession.break_time,
-          category: videoSession.category,
-          organizer_username: videoSession.organizer.username,
-          access_level: videoSession.access_level,
-          created_at: videoSession.created_at,
-          allowed_list: [],
-        },
+        documents[index],
       ]
     );
 
@@ -230,17 +244,7 @@ class VideoSessionModel {
 
   async update(videoSession: PublicVideoSession) {
     const updateRes = await this.esEngine.updateDocument(
-      {
-        id: videoSession.id,
-        title: videoSession.title,
-        description: videoSession.description,
-        break_time: videoSession.break_time,
-        category: videoSession.category,
-        organizer_username: videoSession.organizer.username,
-        access_level: videoSession.access_level,
-        created_at: videoSession.created_at,
-        allowed_list: [],
-      },
+      await this.convertToDocument(videoSession),
       true
     );
 
