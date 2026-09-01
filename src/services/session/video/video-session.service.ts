@@ -1,10 +1,12 @@
-﻿import prismaClient from '../../../database/clients/prisma';
+import prismaClient from '../../../database/clients/prisma';
 import { checkFollowing } from '../../follow.service';
-import { access_level, Prisma, PrismaClient } from '../../../../prisma/generated/prisma/client';
+import {
+  access_level,
+  Prisma,
+} from '../../../../prisma/generated/prisma/client';
 import { v4 } from 'uuid';
 import { uploadImage } from '../../../lib/s3';
 import path from 'node:path';
-import { sanitize } from '../../../utils/sanitize';
 import {
   CreateVideoSessionInput,
   UpdateVideoSessionInput,
@@ -15,7 +17,9 @@ import { wwsError } from '../../../utils/wwsError';
 import httpStatusCodes from 'http-status-codes';
 import { PublicVideoSession } from '../../../types/contracts/video-session';
 import { PaginatedResult } from '../../../types/pagination';
-import { buildPagenationMeta } from '../../../utils/pagination';
+import { buildPaginationMeta } from '../../../utils/pagination';
+import es from '../../../lib/search';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export async function isAllowedToVideoSession(data: {
   videoSession: any;
@@ -77,7 +81,7 @@ export async function createVideoSession(
   });
 
   const duration = await mediaInfo.computeDuration();
-  const videoSession = await prismaClient.video_session.create({
+  const createdVideoSession = await prismaClient.video_session.create({
     data: {
       id: v4(),
       video_id: data.video_id,
@@ -110,7 +114,9 @@ export async function createVideoSession(
     },
   });
 
-  return videoSession;
+  await es.video_session.create(createdVideoSession);
+
+  return createdVideoSession;
 }
 
 export async function updateVideoSession(
@@ -153,7 +159,7 @@ export async function updateVideoSession(
     };
   }
 
-  const updated = await prismaClient.video_session.update({
+  const updatedVideoSession = await prismaClient.video_session.update({
     where: { id: data.videoSession.id },
     data: updateData,
     include: {
@@ -168,7 +174,9 @@ export async function updateVideoSession(
     },
   });
 
-  return updated;
+  await es.video_session.update(updatedVideoSession);
+
+  return updatedVideoSession;
 }
 
 export async function getVideoSession(data: {
@@ -180,55 +188,112 @@ export async function getVideoSession(data: {
 
 export async function getVideoSessions(data: {
   per_page: number;
+
   page: number;
+
   userId: number;
+
   category?: string;
+
   search?: string;
+
   sort?: string;
 }): Promise<PaginatedResult<PublicVideoSession[], 'videoSessions'>> {
-  const orderBy: Prisma.video_sessionOrderByWithRelationInput = {};
+  const followings = await prismaClient.follow.findMany({
+    where: { follower_user_id: data.userId },
 
-  if (data.sort === 'recent') {
-    orderBy['created_at'] = 'desc';
-  }
+    select: { following_user_id: true },
+  });
 
-  const whereCondition = {
-    category_label: data.category,
-    title: {
-      search: data.search || undefined,
-    },
-    description: {
-      search: data.search || undefined,
-    },
-    OR: [
-      { organizer_id: data.userId },
-      { access_level: access_level.PUBLIC },
-      {
-        access_level: access_level.PRIVATE,
-        allow: {
-          some: {
-            user_id: data.userId,
+  const followingUserIds = followings.map(
+    (following) => following.following_user_id
+  );
+
+  const mustQueries: QueryDslQueryContainer[] = [
+    data.search
+      ? {
+          multi_match: {
+            query: data.search,
+            // 가중치 부여
+            fields: ['title^5.0', 'description^2.0', 'organizer.username^1.0'],
           },
-        },
-      },
-      {
-        access_level: access_level.FOLLOWER_ONLY,
-        organizer: {
-          followers: {
-            some: {
-              follower_user_id: data.userId,
+        }
+      : { match_all: {} },
+  ];
+
+  const filterQueries: QueryDslQueryContainer[] = [
+    {
+      bool: {
+        should: [
+          { term: { 'organizer.id': data.userId } },
+
+          { term: { access_level: access_level.PUBLIC } },
+
+          {
+            bool: {
+              filter: [
+                { term: { access_level: access_level.PRIVATE } },
+
+                { term: { allowed_list: data.userId } },
+              ],
             },
           },
-        },
-      },
-    ],
-  };
 
-  const videoSessions = await prismaClient.video_session.findMany({
-    where: whereCondition,
-    skip: (data.page - 1) * data.per_page,
-    take: data.per_page + 1, // Fetch one extra item to check if there's a next page
-    orderBy,
+          ...(followingUserIds.length > 0
+            ? [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          access_level: access_level.FOLLOWER_ONLY,
+                        },
+                      },
+
+                      { terms: { 'organizer.id': followingUserIds } },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+
+  if (data.category) {
+    filterQueries.push({ term: { category: data.category } });
+  }
+
+  const sortOption =
+    data.sort === 'recent'
+      ? [{ created_at: { order: 'desc' as const } }]
+      : undefined;
+
+  const documents = await es.video_session.search({
+    from: (data.page - 1) * data.per_page,
+
+    size: data.per_page + 1,
+
+    sort: sortOption,
+
+    query: {
+      bool: {
+        must: mustQueries,
+
+        filter: filterQueries,
+      },
+    },
+  });
+
+  const sessionIds = documents.map((doc) => doc.id);
+
+  const videoSessionsFromDb = await prismaClient.video_session.findMany({
+    where: {
+      id: { in: sessionIds },
+    },
+
     include: {
       break_time: true,
       category: true,
@@ -240,14 +305,20 @@ export async function getVideoSessions(data: {
     },
   });
 
-  const pagination = buildPagenationMeta(
+  const sessionMap = new Map(videoSessionsFromDb.map((s) => [s.id, s]));
+
+  const videoSessions = sessionIds
+    .map((id) => sessionMap.get(id))
+    .filter(Boolean) as PublicVideoSession[];
+
+  const pagination = buildPaginationMeta(
     videoSessions,
     data.page,
     data.per_page
   );
 
   if (pagination.hasMore) {
-    videoSessions.pop(); // Remove the extra item used for pagination check
+    videoSessions.pop();
   }
 
   return {
@@ -255,4 +326,3 @@ export async function getVideoSessions(data: {
     pagination,
   };
 }
-

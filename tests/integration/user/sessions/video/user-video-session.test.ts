@@ -1,10 +1,14 @@
 ﻿import request from 'supertest';
-import { access_level, user } from '../../../../../prisma/generated/prisma/client';
+import {
+  access_level,
+  user,
+} from '../../../../../prisma/generated/prisma/client';
 import server from '../../../../../src';
 import currUser from '../../../../data/curr-user';
 import { userFactory } from '../../../../factories';
 import { videoSessionFactory } from '../../../../factories/video-session-factory';
 import prismaClient from '../../../../../src/database/clients/prisma';
+import es from '../../../../../src/lib/search';
 
 describe('User Video Session API', () => {
   let otherUser: user;
@@ -30,13 +34,17 @@ describe('User Video Session API', () => {
     afterEach(async () => {
       await videoSessionFactory.cleanup();
       await prismaClient.follow.deleteMany({});
+
+      await es.video_session.deleteMany();
     });
 
     test('Response_200_With_Current_User_Public_Video_Sessions', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: currUser.id } },
         access_level: access_level.PUBLIC,
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${currUser.id}/sessions/video`
@@ -52,10 +60,12 @@ describe('User Video Session API', () => {
     });
 
     test('Response_200_With_Other_User_Public_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: otherUser.id } },
         access_level: access_level.PUBLIC,
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${otherUser.id}/sessions/video`
@@ -66,14 +76,16 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(1);
     });
 
-    test('Response_200_WIth_100_Video_Sessions', async () => {
-      await videoSessionFactory.createManyAndSave({
+    test('Response_200_With_100_Video_Sessions', async () => {
+      const videoSessions = await videoSessionFactory.createManyAndSave({
         count: 23,
         overrides: {
           organizer: { connect: { id: currUser.id } },
           access_level: access_level.PUBLIC,
         },
       });
+
+      await es.video_session.createMany(videoSessions);
 
       const res = await request(server).get(
         `/users/${currUser.id}/sessions/video?page=1&per_page=10`
@@ -101,13 +113,15 @@ describe('User Video Session API', () => {
       });
 
       test('Response_Middle_Page_With_Correct_Pagination_Meta_Data', async () => {
-        await videoSessionFactory.createManyAndSave({
+        const videoSessions = await videoSessionFactory.createManyAndSave({
           count: 23,
           overrides: {
             organizer: { connect: { id: currUser.id } },
             access_level: access_level.PUBLIC,
           },
         });
+
+        await es.video_session.createMany(videoSessions);
 
         const res = await request(server).get(
           `/users/${currUser.id}/sessions/video?page=2&per_page=10`
@@ -126,13 +140,15 @@ describe('User Video Session API', () => {
       });
 
       test('Response_Last_Page_With_Correct_Pagination_Meta_Data', async () => {
-        await videoSessionFactory.createManyAndSave({
+        const videoSessions = await videoSessionFactory.createManyAndSave({
           count: 23,
           overrides: {
             organizer: { connect: { id: currUser.id } },
             access_level: access_level.PUBLIC,
           },
         });
+
+        await es.video_session.createMany(videoSessions);
 
         const res = await request(server).get(
           `/users/${currUser.id}/sessions/video?page=3&per_page=10`
@@ -151,13 +167,15 @@ describe('User Video Session API', () => {
       });
 
       test('Response_Empty_Page_When_Page_Exceeds_Total_Pages', async () => {
-        await videoSessionFactory.createManyAndSave({
+        const videoSessions = await videoSessionFactory.createManyAndSave({
           count: 23,
           overrides: {
             organizer: { connect: { id: currUser.id } },
             access_level: access_level.PUBLIC,
           },
         });
+
+        await es.video_session.createMany(videoSessions);
 
         const res = await request(server).get(
           `/users/${currUser.id}/sessions/video?page=4&per_page=10`
@@ -176,12 +194,14 @@ describe('User Video Session API', () => {
       });
     });
 
-    // user??蹂몄씤??private video session??媛?몄삱 ???덈떎.
+    // user는 본인의 private video session을 가져올 수 있다.
     test('Response_200_With_Current_User_Private_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: currUser.id } },
         access_level: 'PRIVATE',
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${currUser.id}/sessions/video`
@@ -192,7 +212,7 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(1);
     });
 
-    // user??蹂몄씤??allowed ?섏뼱?덈뒗 ?ㅻⅨ user??private video session??媛?몄삱 ???덈떎.
+    // user는 본인이 allowed 되어있는 다른 user의 private video session을 가져올 수 있다.
     test('Response_200_With_Allowed_Other_User_Private_Video_Session', async () => {
       const otherUserPrivateVideoSession =
         await videoSessionFactory.createAndSave({
@@ -207,6 +227,8 @@ describe('User Video Session API', () => {
         },
       });
 
+      await es.video_session.create(otherUserPrivateVideoSession);
+
       const res = await request(server).get(
         `/users/${otherUser.id}/sessions/video`
       );
@@ -216,12 +238,14 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(1);
     });
 
-    // user??蹂몄씤??allowed ?섏뼱?덉? ?딆? ?ㅻⅨ user??private video session??媛?몄삱 ???녿떎.
+    // user는 본인이 allowed 되어있지 않은 다른 user의 private video session을 가져올 수 없다.
     test('Response_200_With_Empty_Array_About_Not_Allowed_Other_User_Private_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: otherUser.id } },
         access_level: 'PRIVATE',
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${currUser.id}/sessions/video`
@@ -232,12 +256,14 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(0);
     });
 
-    // user??蹂몄씤??follower only video session??媛?몄삱 ???덈떎.
+    // user는 본인의 follower only video session을 가져올 수 있다.
     test('Response_200_With_Current_User_Follower_Only_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: currUser.id } },
-        access_level: access_level.PRIVATE,
+        access_level: access_level.FOLLOWER_ONLY,
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${currUser.id}/sessions/video`
@@ -248,9 +274,9 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(1);
     });
 
-    // user??蹂몄씤??follow??user??follower only video session??媛?몄삱 ???덈떎.
+    // user는 본인이 follow한 user의 follower only video session을 가져올 수 있다.
     test('Response_200_With_Other_User_Follower_Only_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: otherUser.id } },
         access_level: access_level.FOLLOWER_ONLY,
       });
@@ -262,6 +288,8 @@ describe('User Video Session API', () => {
         },
       });
 
+      await es.video_session.create(videoSession);
+
       const res = await request(server).get(
         `/users/${otherUser.id}/sessions/video`
       );
@@ -271,12 +299,14 @@ describe('User Video Session API', () => {
       expect(res.body.data.length).toEqual(1);
     });
 
-    // user??蹂몄씤??follow?섏? ?딆? user??follower only video session??媛?몄삱 ???녿떎.
+    // user는 본인이 follow하지 않은 user의 follower only video session을 가져올 수 없다.
     test('Response_200_With_Empty_Array_About_Other_User_Follower_Only_Video_Session', async () => {
-      await videoSessionFactory.createAndSave({
+      const videoSession = await videoSessionFactory.createAndSave({
         organizer: { connect: { id: otherUser.id } },
         access_level: access_level.FOLLOWER_ONLY,
       });
+
+      await es.video_session.create(videoSession);
 
       const res = await request(server).get(
         `/users/${otherUser.id}/sessions/video`
@@ -452,4 +482,3 @@ describe('User Video Session API', () => {
     });
   });
 });
-

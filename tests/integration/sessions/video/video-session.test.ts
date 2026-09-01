@@ -37,6 +37,7 @@ import categoryFactory from '../../../factories/category-factory';
 import type { category } from '../../../../prisma/generated/prisma/client';
 import fs from 'node:fs';
 import { PublicVideoSession } from '../../../../src/types/contracts/video-session';
+import es from '../../../../src/lib/search';
 
 describe('Video Session API', () => {
   let user1: user;
@@ -61,6 +62,7 @@ describe('Video Session API', () => {
       await prismaClient.video_session.deleteMany({});
       await prismaClient.follow.deleteMany({});
       await prismaClient.video_session_allow.deleteMany({});
+      await es.video_session.deleteMany();
     });
 
     test('Response_200_With_Public_Video_Session', async () => {
@@ -142,21 +144,15 @@ describe('Video Session API', () => {
 
   describe('GET /sessions/video', () => {
     beforeAll(async () => {
-      await videoSessionFactory.createManyAndSave({
-        count: 2,
+      const videoSessions = await videoSessionFactory.createManyAndSave({
+        count: 4,
         overrides: {
           access_level: access_level.PUBLIC,
           organizer: { connect: { id: user1.id } },
         },
       });
 
-      await videoSessionFactory.createManyAndSave({
-        count: 2,
-        overrides: {
-          access_level: access_level.PUBLIC,
-          organizer: { connect: { id: user1.id } },
-        },
-      });
+      await es.video_session.createMany(videoSessions);
     });
 
     afterAll(async () => {
@@ -225,13 +221,15 @@ describe('Video Session API', () => {
 
     describe('Pagination', () => {
       beforeAll(async () => {
-        await videoSessionFactory.createManyAndSave({
+        const videoSessions = await videoSessionFactory.createManyAndSave({
           count: 26,
           overrides: {
             access_level: access_level.PUBLIC,
             organizer: { connect: { id: user1.id } },
           },
         });
+
+        await es.video_session.createMany(videoSessions);
       });
 
       test('Response_400_When_Page_Is_Zero', async () => {
@@ -345,9 +343,9 @@ describe('Video Session API', () => {
   });
 
   describe('POST /sessions/video', () => {
-    // ?앹꽦??session??紐⑤몢 ?쒓굅
     afterAll(async () => {
       await videoSessionFactory.cleanup();
+      await es.video_session.deleteMany();
     });
 
     test('Response_201_With_Only_Required_Fields', async () => {
@@ -360,6 +358,8 @@ describe('Video Session API', () => {
       expect(res.statusCode).toEqual(201);
 
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
+
+      expect(es.video_session.find(res.body.data.id)).resolves.toBeDefined();
 
       const thumbnailRes = await request(server).get(
         res.body.data.thumbnail_uri
@@ -388,10 +388,13 @@ describe('Video Session API', () => {
         access_level: access_level.PUBLIC,
         organizer: { connect: { id: currUser.id } },
       });
+
+      await es.video_session.create(videoSession);
     });
 
     afterAll(async () => {
       await videoSessionFactory.cleanup();
+      await es.video_session.deleteMany();
     });
 
     test('Response_200_With_Updated_Title', async () => {
@@ -403,6 +406,10 @@ describe('Video Session API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toHaveProperty('title', newTitle);
+
+      const updatedDocument = await es.video_session.find(res.body.data.id);
+      expect(updatedDocument).toBeDefined();
+      expect(updatedDocument!.title).toEqual(newTitle);
     });
 
     test('Response_200_With_Updated_Description', async () => {
@@ -414,6 +421,10 @@ describe('Video Session API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toHaveProperty('description', newDescription);
+
+      const updatedDocument = await es.video_session.find(res.body.data.id);
+      expect(updatedDocument).toBeDefined();
+      expect(updatedDocument!.description).toEqual(newDescription);
     });
 
     test('Response_200_With_Updated_Access_Level', async () => {
@@ -425,6 +436,10 @@ describe('Video Session API', () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toHaveProperty('access_level', newAccessLevel);
+
+      const updatedDocument = await es.video_session.find(res.body.data.id);
+      expect(updatedDocument).toBeDefined();
+      expect(updatedDocument!.access_level).toEqual(newAccessLevel);
     });
 
     test('Response_200_With_Updated_Comment_Enabled', async () => {
@@ -453,6 +468,10 @@ describe('Video Session API', () => {
       expect(res.body.data.category).toHaveProperty('label', category.label);
 
       await categoryFactory.delete({ label: newCategoryLabel });
+
+      const updatedDocument = await es.video_session.find(res.body.data.id);
+      expect(updatedDocument).toBeDefined();
+      expect(updatedDocument!.category).toEqual(newCategoryLabel);
     });
 
     test('Response_200_With_Thumbnail', async () => {
@@ -541,4 +560,3 @@ describe('Video Session API', () => {
     });
   });
 });
-

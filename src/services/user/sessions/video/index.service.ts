@@ -9,44 +9,79 @@ import { wwsError } from '../../../../utils/wwsError';
 import httpStatusCodes from 'http-status-codes';
 import { PublicVideoSession } from '../../../../types/contracts/video-session';
 import { PaginatedResult } from '../../../../types/pagination';
-import { buildPagenationMeta } from '../../../../utils/pagination';
+import { buildPaginationMeta } from '../../../../utils/pagination';
+import es from '../../../../lib/search';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 export async function getUserVideoSessions(
   input: GetUserVideoSessionsInput
 ): Promise<PaginatedResult<PublicVideoSession[], 'videoSessions'>> {
-  const videoSessions = await prismaClient.video_session.findMany({
+  const followings = await prismaClient.follow.findMany({
+    where: { follower_user_id: input.currUserId },
+    select: { following_user_id: true },
+  });
+
+  const followingUserIds = followings.map(
+    (following) => following.following_user_id
+  );
+
+  const filterQueries: QueryDslQueryContainer[] = [
+    { term: { 'organizer.id': input.userId } },
+    {
+      bool: {
+        should: [
+          { term: { 'organizer.id': input.currUserId } },
+
+          { term: { access_level: access_level.PUBLIC } },
+
+          {
+            bool: {
+              filter: [
+                { term: { access_level: access_level.PRIVATE } },
+
+                { term: { allowed_list: input.currUserId } },
+              ],
+            },
+          },
+
+          ...(followingUserIds.length > 0
+            ? [
+                {
+                  bool: {
+                    filter: [
+                      {
+                        term: {
+                          access_level: access_level.FOLLOWER_ONLY,
+                        },
+                      },
+
+                      { terms: { 'organizer.id': followingUserIds } },
+                    ],
+                  },
+                },
+              ]
+            : []),
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ];
+
+  const documents = await es.video_session.search({
+    from: (input.page - 1) * input.per_page,
+    size: input.per_page + 1,
+    query: {
+      bool: {
+        filter: filterQueries,
+      },
+    },
+  });
+
+  const sessionIds = documents.map((doc) => doc.id);
+
+  const videoSessionsFromDb = await prismaClient.video_session.findMany({
     where: {
-      organizer_id: input.userId,
-      OR: [
-        // if organizer is current user
-        {
-          organizer_id: input.currUserId,
-        },
-        // if video session is public
-        {
-          access_level: access_level.PUBLIC,
-        },
-        // if video session is private and current user is allowed
-        {
-          access_level: access_level.PRIVATE,
-          allow: {
-            some: {
-              user_id: input.currUserId,
-            },
-          },
-        },
-        // if video session is follower only and current user is following the organizer
-        {
-          access_level: access_level.FOLLOWER_ONLY,
-          organizer: {
-            followers: {
-              some: {
-                follower_user_id: input.currUserId,
-              },
-            },
-          },
-        },
-      ],
+      id: { in: sessionIds },
     },
     include: {
       break_time: true,
@@ -57,11 +92,19 @@ export async function getUserVideoSessions(
         },
       },
     },
-    skip: (input.page - 1) * input.per_page,
-    take: input.per_page + 1,
   });
 
-  const pagination = buildPagenationMeta(videoSessions, input.page, input.per_page);
+  const sessionMap = new Map(videoSessionsFromDb.map((s) => [s.id, s]));
+
+  const videoSessions = sessionIds
+    .map((id) => sessionMap.get(id))
+    .filter(Boolean) as PublicVideoSession[];
+
+  const pagination = buildPaginationMeta(
+    videoSessions,
+    input.page,
+    input.per_page
+  );
 
   if (pagination.hasMore) {
     videoSessions.pop();
@@ -115,4 +158,3 @@ export async function getUserVideoSession(
 
   return videoSession;
 }
-
