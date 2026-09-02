@@ -33,7 +33,7 @@ describe('Live Session API', () => {
     });
 
     describe('Public Session', () => {
-      // public session? authenticated user 紐⑤몢媛 媛?몄삱 ???덈떎.
+      // public session은 authenticated user 모두가 가져올 수 있다.
       test('Response_200_With_Public_Live_Session', async () => {
         const liveSession = await liveSessionFactory.createAndSave({
           access_level: access_level.PUBLIC,
@@ -49,13 +49,13 @@ describe('Live Session API', () => {
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.data).toHaveProperty('organizer_id', user1.id);
-        // stream key???④꺼???덉뼱?쇳븳??
+        // stream key는 숨겨져있어야한다.
         expect(res.body.data.stream_key).toBeUndefined();
       });
     });
 
     describe('Follower Only Session', () => {
-      // user2媛 ?앹꽦??follower only session??follower???щ엺? 媛?몄삱 ???덈떎.'
+      // user2가 생성한 follower only session은 follower인 사람만 가져올 수 있다.
       test('Response_200_With_Follower_Only_Live_Session', async () => {
         const liveSession = await liveSessionFactory.createAndSave({
           access_level: access_level.FOLLOWER_ONLY,
@@ -78,7 +78,7 @@ describe('Live Session API', () => {
 
         expect(res.statusCode).toEqual(200);
         expect(res.body.data).toHaveProperty('organizer_id', user1.id);
-        // stream key???④꺼???덉뼱?쇳븳??
+        // stream key는 숨겨져있어야한다.
         expect(res.body.data.stream_key).toBeUndefined();
       });
 
@@ -440,7 +440,7 @@ describe('Live Session API', () => {
   });
 
   describe('POST /sessions/live', () => {
-    // ?앹꽦??session??紐⑤몢 ?쒓굅
+    // 생성한 session은 모두 제거
     afterAll(async () => {
       await prismaClient.live_session.deleteMany({});
     });
@@ -462,7 +462,7 @@ describe('Live Session API', () => {
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
-      // stream key???④꺼???덉뼱?쇳븳??
+      // stream key는 숨겨져있어야한다.
       expect(res.body.data.stream_key).toBeUndefined();
 
       const thumbnailRes = await request(server).get(
@@ -485,7 +485,7 @@ describe('Live Session API', () => {
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
-      // stream key???④꺼???덉뼱?쇳븳??
+      // stream key는 숨겨져있어야한다.
       expect(res.body.data.stream_key).toBeUndefined();
     });
 
@@ -506,7 +506,7 @@ describe('Live Session API', () => {
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
-      // stream key???④꺼???덉뼱?쇳븳??
+      // stream key는 숨겨져있어야한다.
       expect(res.body.data.stream_key).toBeUndefined();
 
       const thumbnailRes = await request(server).get(
@@ -529,7 +529,7 @@ describe('Live Session API', () => {
 
       expect(res.statusCode).toEqual(201);
       expect(res.body.data).toHaveProperty('organizer_id', currUser.id);
-      // stream key???④꺼???덉뼱?쇳븳??
+      // stream key는 숨겨져있어야한다.
       expect(res.body.data.stream_key).toBeUndefined();
     });
 
@@ -551,7 +551,7 @@ describe('Live Session API', () => {
   describe('PUT /sessions/live/:live_session_id/status', () => {
     afterEach(async () => {
       await prismaClient.live_session.deleteMany({});
-      // status update濡??앹꽦??transition log瑜??쒓굅?쒕떎.
+      // status update로 생성된 transition log를 제거한다.
       await prismaClient.live_session_transition_log.deleteMany({});
       await prismaClient.follow.deleteMany({});
     });
@@ -588,7 +588,7 @@ describe('Live Session API', () => {
         });
 
         expect(liveSession?.status).toEqual(statusTo);
-        // 泥?ready => open? started_at??吏?뺥븳??
+        // 첫 ready => open은 started_at을 지정한다.
         expect(liveSession?.started_at).toBeDefined();
 
         const transitionLog =
@@ -991,7 +991,7 @@ describe('Live Session API', () => {
       });
     });
 
-    // live session status 蹂寃??붿껌??status媛 吏?뺣릺吏 ?딆쑝硫?400???묐떟諛쏆븘?쇳븳??
+    // live session status 변경 요청에 status가 지정되지 않으면 400을 응답받아야한다.
     test('Response_400_status(x)', async () => {
       const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,
@@ -1010,7 +1010,7 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(400);
     });
 
-    // ?ㅻⅨ ?ъ슜?먯쓽 live session status 蹂寃쎌쓣 ?붿껌?섎㈃ 403???묐떟諛쏆븘?쇳븳??
+    // 다른 사용자의 live session status 변경을 요청하면 403을 응답받아야한다.
     test('Response_403', async () => {
       const organizer = user1;
 

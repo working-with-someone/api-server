@@ -51,7 +51,7 @@ export async function getComments(
         },
       },
       video_session: true,
-      // user???대떦 comment like ?щ?
+      // user가 해당 comment like 여부
       likes: {
         where: {
           user_id: input.userId,

@@ -9,9 +9,9 @@ type CategoryCreateInput = Prisma.categoryCreateInput;
 
 class CategoryFactory implements IFactory<CategoryCreateInput, category> {
   /**
-   * ?⑥씪 ?쒕뜡 移댄뀒怨좊━ ?앹꽦 (DB????ν븯吏 ?딆쓬)
-   * @param overrides - ?ㅻ쾭?쇱씠?쒗븷 ?꾨뱶 媛?
-   * @returns ?앹꽦??移댄뀒怨좊━ 媛앹껜
+   * 단일 랜덤 카테고리 생성 (DB에 저장하지 않음)
+   * @param overrides - 오버라이드할 필드 값
+   * @returns 생성된 카테고리 객체
    */
   create(overrides?: Partial<CategoryCreateInput>): CategoryCreateInput {
     const label = overrides?.label || faker.string.uuid();
@@ -24,9 +24,9 @@ class CategoryFactory implements IFactory<CategoryCreateInput, category> {
   }
 
   /**
-   * ?⑥씪 ?쒕뜡 移댄뀒怨좊━ ?앹꽦 諛?DB?????
-   * @param overrides - ?ㅻ쾭?쇱씠?쒗븷 ?꾨뱶 媛?
-   * @returns ??λ맂 移댄뀒怨좊━ 媛앹껜 (DB?먯꽌 諛섑솚??媛?
+   * 단일 랜덤 카테고리 생성 및 DB에 저장
+   * @param overrides - 오버라이드할 필드 값
+   * @returns 저장된 카테고리 객체 (DB에서 반환된 값)
    */
   async createAndSave(
     overrides?: Partial<CategoryCreateInput>
@@ -41,9 +41,9 @@ class CategoryFactory implements IFactory<CategoryCreateInput, category> {
   }
 
   /**
-   * ?щ윭 媛쒖쓽 ?쒕뜡 移댄뀒怨좊━ ?앹꽦 (DB????ν븯吏 ?딆쓬)
-   * @param options - ?ㅻ쾭?쇱씠???꾨뱶 媛?諛??앹꽦 媛쒖닔
-   * @returns ?앹꽦??移댄뀒怨좊━ 媛앹껜 諛곗뿴
+   * 여러 개의 랜덤 카테고리 생성 (DB에 저장하지 않음)
+   * @param options - 오버라이드 필드 값 및 생성 개수
+   * @returns 생성된 카테고리 객체 배열
    */
   createMany(options?: {
     overrides?: Partial<CategoryCreateInput>;
@@ -54,9 +54,9 @@ class CategoryFactory implements IFactory<CategoryCreateInput, category> {
   }
 
   /**
-   * ?щ윭 媛쒖쓽 ?쒕뜡 移댄뀒怨좊━ ?앹꽦 諛?DB?????
-   * @param options - ?ㅻ쾭?쇱씠???꾨뱶 媛?諛??앹꽦 媛쒖닔
-   * @returns ??λ맂 移댄뀒怨좊━ 媛앹껜 諛곗뿴
+   * 여러 개의 랜덤 카테고리 생성 및 DB에 저장
+   * @param options - 오버라이드 필드 값 및 생성 개수
+   * @returns 저장된 카테고리 객체 배열
    */
   async createManyAndSave(options?: {
     overrides?: Partial<CategoryCreateInput>;

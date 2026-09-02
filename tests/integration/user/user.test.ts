@@ -73,10 +73,10 @@ describe('User API', () => {
       afterEach(async () => {
         await currUser.restore();
       });
-      // current user??username, pfp瑜?update?섎뒗 ?붿껌??
-      // 200???묐떟諛쏆븘?쇳븳??
-      // response body??username??update?섏뿀?댁빞?쒕떎.
-      // response body??pfp媛 ?댁쟾??pfp? 媛숈? ?딆븘?쇳븳?? (== update ?섏뿀?댁빞?쒕떎.)
+      // current user의 username, pfp를 update하는 요청은
+      // 200으로 응답받아야한다.
+      // response body의 username은 update되었어야한다.
+      // response body의 pfp가 이전의 pfp와 같지않아야한다. (== update 되었어야한다.)
       test('Response_200_With_Updated_Current_User_username(o)', async () => {
         const newUsername = 'newUsername';
         const res = await request(server)
@@ -88,7 +88,7 @@ describe('User API', () => {
         expect(res.body.data.username).toEqual(newUsername);
       });
 
-      // other user??username??update?섎뒗 ?붿쿂??403???묐떟諛쏆븘?쇳븳??
+      // other user의 username을 update하는 요청은 403으로 응답받아야한다.
       test('Response_403', async () => {
         const newUsername = 'newUsername';
 
@@ -179,7 +179,7 @@ describe('User API', () => {
     describe('continuous request', () => {
       let uploadedPfpKey = '';
 
-      // curr user??username怨?pfp瑜??덈줈??image濡?update?쒕떎.
+      // curr user의 username과 pfp를 새로운 image로 update한다.
       test('1. Response_200_With_Updated_Current_User_pfpToDefault(x)', async () => {
         const res = await request(server)
           .put(`/users/${currUser.id}`)
@@ -188,14 +188,14 @@ describe('User API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        // pfp媛 default?ъ꽑 ?덈맂??
+        // pfp가 default여선 안된다.
         expect(res.body.data.pfp.curr).not.toEqual(currUser.pfp.curr);
 
-        // request 1 ?쇰줈 ?명빐 upload??pfp key
+        // request 1 로 인해 upload된 pfp key
         uploadedPfpKey = res.body.data.pfp.curr;
       });
 
-      // curr user??pfp瑜??덈줈??image濡?update?쒕떎.
+      // curr user의 pfp를 새로운 image로 update한다.
       test('2. Response_200_With_Updated_Current_User_And_Updated_Pfp_At_1_Must_Be_deleeted', async () => {
         const res = await request(server)
           .put(`/users/${currUser.id}`)
@@ -204,13 +204,13 @@ describe('User API', () => {
 
         expect(res.statusCode).toEqual(200);
 
-        // pfp媛 default?ъ꽑 ?덈맂??
+        // pfp가 default여선 안된다.
         expect(res.body.data.pfp.curr).not.toEqual(currUser.pfp.curr);
 
-        // req1?먯꽌 upload?섏뿀??pfp??delete?섏뿀?댁빞?쒕떎.
+        // req1에서 upload되었던 pfp는 delete되었어야한다.
         expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
 
-        // ?먮쾲吏?req??image媛 upload?섏뿀?댁빞??
+        // 두번째 req의 image가 upload되었어야함
 
         const pfpRes = await request(server).get(res.body.data.pfp.curr);
 
@@ -229,10 +229,9 @@ describe('User API', () => {
 
         expect(res.body.data.pfp.curr).toEqual(currUser.pfp.curr);
 
-        // req1?먯꽌 upload?섏뿀??pfp??delete?섏뿀?댁빞?쒕떎.
+        // req1에서 upload되었던 pfp는 delete되었어야한다.
         expect(loadImage({ key: uploadedPfpKey })).rejects.toThrow();
       });
     });
   });
 });
-

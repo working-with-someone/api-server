@@ -32,24 +32,24 @@ export async function isAllowedToLiveSession(data: {
   const organizer_id = liveSession.organizer_id;
   const participant_id = data.userId;
 
-  // ?먯떊??session?대씪硫? access level??愿怨꾩뾾???묎렐 媛?ν븯??
+  // 자신의 session이라면 access level에 관계없이 접근 가능하다.
   if (organizer_id === participant_id) {
     return true;
   }
 
-  // access level follower only?쇰㈃, follwing check
+  // access level이 follower only라면, following check
   if (liveSession.access_level === access_level.FOLLOWER_ONLY) {
     const isFollowing = await checkFollowing({
       follower_user_id: participant_id,
       following_user_id: organizer_id,
     });
 
-    // organizer??follower媛 ?꾨땲?쇰㈃ false
+    // organizer의 follower가 아니라면 false
     if (!isFollowing) {
       return false;
     }
   }
-  // access level??private?쇰㈃ allowList check
+  // access level이 private라면 allowList check
   else if (liveSession.access_level === access_level.PRIVATE) {
     const isAllowed = await prismaClient.live_session_allow.findFirst({
       where: {
@@ -94,15 +94,15 @@ export async function getLiveSessions(
       in: statusArray,
     },
     OR: [
-      // curr user??live session? 紐⑤몢
+      // curr user의 live session은 모두
       {
         organizer_id: data.userId,
       },
-      // public live session?대씪硫?紐⑤몢
+      // public live session이라면 모두
       {
         access_level: access_level.PUBLIC,
       },
-      // allow??private live session?대씪硫?紐⑤몢
+      // allowed된 private live session이라면 모두
       {
         access_level: access_level.PRIVATE,
         allow: {
@@ -111,7 +111,7 @@ export async function getLiveSessions(
           },
         },
       },
-      // following??user??followers only live session?대씪硫?紐⑤몢
+      // following하는 user의 followers only live session이라면 모두
       {
         access_level: access_level.FOLLOWER_ONLY,
         organizer: {
@@ -231,7 +231,7 @@ export async function updateLiveSessionStatus(data: {
     status: data.status,
   };
 
-  // live session??ready ?곹깭?먯꽌 open???? started_at??湲곕줉?쒕떎.
+  // live session이 ready 상태에서 open될 때 started_at을 기록한다.
   if (
     liveSession.status == live_session_status.READY &&
     data.status == live_session_status.OPENED

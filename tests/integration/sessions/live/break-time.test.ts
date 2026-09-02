@@ -50,7 +50,7 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(201);
     });
 
-    // 議댁옱?섏? ?딅뒗 live session??break time???앹꽦?섎젮???붿껌? 404瑜??묐떟諛쏆븘?쇳븳??
+    // 존재하지 않는 live session의 break time을 생성하려는 요청은 404를 응답받아야한다.
     test('Response_404', async () => {
       const res = await request(server)
         .post(`/sessions/live/doesNotExistLiveSession/break_time`)
@@ -63,7 +63,7 @@ describe('Live Session API', () => {
       expect(res.statusCode).toEqual(404);
     });
 
-    // ?ㅻⅨ ?ъ슜?먯쓽 live session??break time???앹꽦?섎젮???붿껌? 401???묐떟諛쏆븘?쇳븳??
+    // 다른 사용자의 live session의 break time을 생성하려는 요청은 403을 응답받아야한다.
     test('Response_401', async () => {
       const liveSession = await liveSessionFactory.createAndSave({
         access_level: access_level.PUBLIC,

@@ -16,7 +16,7 @@ const VIDEO_SESSION_COMMENT_COUNT = 4;
 const VIDEO_SESSION_LIKE_COUNT = 6;
 const VIDEO_SESSION_COMMENT_LIKE_COUNT = 3;
 
-// some keywords for '?? with me'
+// Some keywords for "?? with me".
 const categorieLabels = [
   'study',
   'code',
@@ -58,7 +58,7 @@ const clearDatabase = async () => {
 };
 
 async function main(): Promise<void> {
-  console.log('Starting seed data generation ?뙮');
+  console.log('Starting seed data generation 🚀');
 
   console.log('Clearing existing data...');
   await clearDatabase();
@@ -95,7 +95,7 @@ async function main(): Promise<void> {
       },
     });
 
-    console.log('?? My user created');
+    console.log('✅ My user created');
   }
 
   const users: user[] = [];
@@ -130,7 +130,7 @@ async function main(): Promise<void> {
     });
 
     users.push(user);
-    console.log(`?? User created: ${user.username}`);
+    console.log(`✅ User created: ${user.username}`);
   }
 
   // Create follow relationships
@@ -193,7 +193,7 @@ async function main(): Promise<void> {
       },
     });
     categories.push(category);
-    console.log(`?? Category created: ${category.label}`);
+    console.log(`✅ Category created: ${category.label}`);
   }
   console.log('Creating live sessions...');
   const liveSessionStatuses = ['READY', 'OPENED', 'BREAKED', 'CLOSED'];
@@ -234,7 +234,7 @@ async function main(): Promise<void> {
       });
 
       console.log(
-        `?? Live Session Created : ${liveSession.title} / ${liveSession.status} / ${liveSession.category_label}`
+        `✅ Live Session Created : ${liveSession.title} / ${liveSession.status} / ${liveSession.category_label}`
       );
 
       // Create allow list for private sessions
@@ -263,7 +263,7 @@ async function main(): Promise<void> {
           });
         }
 
-        console.log(`   ?? allow list created`);
+        console.log(`└✅ allow list created`);
       }
 
       // Set break time for some sessions
@@ -276,7 +276,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ?? live Session break time created`);
+        console.log(`└✅ live Session break time created`);
       }
 
       // Create status transition logs
@@ -291,7 +291,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ?? live Session transition log created`);
+        console.log(`└✅ live Session transition log created`);
 
         if (status === 'BREAKED' || status === 'CLOSED') {
           // OPENED -> BREAKED or OPENED -> CLOSED
@@ -348,7 +348,7 @@ async function main(): Promise<void> {
       });
 
       console.log(
-        `?? Video Session Created : ${videoSession.title} / ${videoSession.access_level} / ${videoSession.category_label}`
+        `✅ Video Session Created : ${videoSession.title} / ${videoSession.access_level} / ${videoSession.category_label}`
       );
 
       // Create allow list for private sessions
@@ -377,7 +377,7 @@ async function main(): Promise<void> {
           });
         }
 
-        console.log(`   ?? allow list created`);
+        console.log(`└✅ allow list created`);
       }
 
       // Set break time for some sessions
@@ -390,7 +390,7 @@ async function main(): Promise<void> {
           },
         });
 
-        console.log(`   ?? video Session break time created`);
+        console.log(`└✅ video Session break time created`);
       }
 
       const likedUserIndices = new Set<number>();
@@ -488,7 +488,7 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log('Seed data generation completed ?뙮');
+  console.log('Seed data generation completed 🚀');
 }
 
 main()
@@ -499,4 +499,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
