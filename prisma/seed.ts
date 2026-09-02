@@ -8,6 +8,8 @@ import randomstring from 'randomstring';
 import prismaClient from '../src/database/clients/prisma';
 const prisma = prismaClient;
 import { to } from '../src/config/path.config';
+import es from '../src/lib/search';
+
 const USERS_COUNT = 20;
 const FOLLOWS_COUNT = 30;
 const LIVE_SESSIONS_COUNT = 10;
@@ -421,6 +423,8 @@ async function main(): Promise<void> {
           where: { id: sessionId },
           data: { like_count: likeCount },
         });
+
+        console.log(`└✅ ${likeCount} likes created`);
       }
 
       const commentCount = Math.floor(
@@ -444,6 +448,8 @@ async function main(): Promise<void> {
             },
           },
         });
+
+        console.log(`└✅ comment created`);
 
         const commentLikedUserIndices = new Set<number>();
         const commentLikeCount = Math.floor(
@@ -476,6 +482,8 @@ async function main(): Promise<void> {
             where: { id: comment.id },
             data: { like_count: commentLikeCount },
           });
+
+          console.log(`  └✅ ${commentLikeCount} comment likes created`);
         }
       }
 
@@ -485,6 +493,23 @@ async function main(): Promise<void> {
           data: { comment_count: commentCount },
         });
       }
+
+      const updatedVideoSession = await prisma.video_session.findUnique({
+        where: { id: sessionId },
+        include: {
+          break_time: true,
+          category: true,
+          organizer: {
+            include: {
+              pfp: true,
+            },
+          },
+          allow: true,
+        },
+      });
+
+      await es.video_session.create(updatedVideoSession!);
+      console.log(`└✅ video session indexed in Elasticsearch`);
     }
   }
 
