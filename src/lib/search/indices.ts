@@ -1,5 +1,5 @@
-export const indices = ['video_session', 'live_session'];
 export type Indices = 'video_session' | 'live_session';
+export const indices: Indices[] = ['video_session', 'live_session'];
 
 const _indices = {
   production: {

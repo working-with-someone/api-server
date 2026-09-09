@@ -332,29 +332,19 @@ class ES {
   }
 
   async init() {
-    const exists = await Promise.all(
-      indices.map((index) => esClient.indices.exists({ index }))
-    );
+    for (const index of indices) {
+      const indexName = resolveIndex(index);
+      const isExist = await esClient.indices.exists({ index: indexName });
 
-    for (const isExist of exists) {
       if (!isExist) {
-        const indexName = indices[exists.indexOf(isExist)];
-
-        let mapping: MappingTypeMapping = {};
-
-        switch (true) {
-          case indexName.startsWith('video_sessions'):
-            mapping = mappings.video_session;
-            break;
-          case indexName.startsWith('live_sessions'):
-            mapping = mappings.live_session;
-            break;
-        }
-
-        await esClient.indices.create({ index: indexName, mappings: mapping });
+        await esClient.indices.create({
+          index: indexName,
+          mappings: mappings[index],
+        });
       }
     }
 
+    this.initalized = true;
     console.log('SearchService initialized');
   }
 }
