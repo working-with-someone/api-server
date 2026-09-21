@@ -1,10 +1,15 @@
 import server from '../../src';
+import { serverReady } from '../../src';
 import request from 'supertest';
 import s3Client from '../../src/database/clients/s3';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import fs from 'fs';
 
 describe('Media API', () => {
+  beforeAll(async () => {
+    await serverReady;
+  });
+
   afterAll((done) => {
     server.close(done);
   });

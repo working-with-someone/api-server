@@ -1,6 +1,7 @@
 ﻿import prismaClient from '../../src/database/clients/prisma';
 import request from 'supertest';
 import server from '../../src';
+import { serverReady } from '../../src';
 import currUser from '../data/curr-user';
 import { userFactory } from '../factories';
 import { user } from '../../prisma/generated/prisma/client';
@@ -11,6 +12,7 @@ describe('Follow API', () => {
   let user3: user;
 
   beforeAll(async () => {
+    await serverReady;
     await currUser.insert();
     [user1, user2, user3] = await userFactory.createManyAndSave({ count: 3 });
   });
@@ -469,4 +471,3 @@ describe('Follow API', () => {
     });
   });
 });
-

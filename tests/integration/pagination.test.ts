@@ -1,5 +1,6 @@
 import request from 'supertest';
 import server from '../../src';
+import { serverReady } from '../../src';
 import httpStatusCode from 'http-status-codes';
 
 import prismaClient from '../../src/database/clients/prisma';
@@ -8,6 +9,7 @@ import currUser from '../data/curr-user';
 
 describe('Pagination', () => {
   beforeAll(async () => {
+    await serverReady;
     await currUser.insert();
   });
 

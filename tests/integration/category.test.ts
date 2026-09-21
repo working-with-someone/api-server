@@ -1,5 +1,6 @@
 import request from 'supertest';
 import server from '../../src';
+import { serverReady } from '../../src';
 import httpStatusCode from 'http-status-codes';
 import categoryFactory from '../factories/category-factory';
 import { liveSessionFactory } from '../factories';
@@ -7,6 +8,7 @@ import currUser from '../data/curr-user';
 
 describe('Category API', () => {
   beforeAll(async () => {
+    await serverReady;
     await currUser.insert();
   });
 
