@@ -5,6 +5,7 @@ import httpStatusCode from 'http-status-codes';
 import categoryFactory from '../factories/category-factory';
 import { liveSessionFactory } from '../factories';
 import currUser from '../data/curr-user';
+import es from '../../src/lib/search';
 
 describe('Category API', () => {
   beforeAll(async () => {
@@ -194,6 +195,58 @@ describe('Category API', () => {
           prevPage: 3,
           nextPage: null,
         });
+      });
+    });
+
+    describe('Search', () => {
+      const searchableLabels = [
+        'searchable-category-alpha',
+        'searchable-category-beta',
+        'searchable-category-gamma',
+      ];
+
+      beforeAll(async () => {
+        const categories = await Promise.all(
+          searchableLabels.map((label) =>
+            categoryFactory.createAndSave({ label })
+          )
+        );
+
+        await es.category.createMany(categories);
+      });
+
+      afterAll(async () => {
+        await es.category.deleteMany();
+        await categoryFactory.deleteMany({
+          label: { in: searchableLabels },
+        });
+      });
+
+      test('Response_200_With_Categories_Matching_Search_Keyword', async () => {
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page: 10,
+          search: 'searchable-category-alpha',
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data.length).toBe(1);
+
+        const returnedLabels = res.body.data.map(
+          (category: any) => category.label
+        );
+        expect(returnedLabels).toEqual(['searchable-category-alpha']);
+      });
+
+      test('Response_200_With_Empty_Data_When_No_Category_Matches_Search_Keyword', async () => {
+        const res = await request(server).get('/categories').query({
+          page: 1,
+          per_page: 10,
+          search: 'no-such-category-label',
+        });
+
+        expect(res.statusCode).toEqual(httpStatusCode.OK);
+        expect(res.body.data).toHaveLength(0);
       });
     });
   });

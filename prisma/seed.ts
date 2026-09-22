@@ -196,6 +196,9 @@ async function main(): Promise<void> {
     });
     categories.push(category);
     console.log(`✅ Category created: ${category.label}`);
+
+    await es.category.create(category);
+    console.log(`└✅ category "${category.label}" indexed in Elasticsearch`);
   }
   console.log('Creating live sessions...');
   const liveSessionStatuses = ['READY', 'OPENED', 'BREAKED', 'CLOSED'];

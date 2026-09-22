@@ -36,6 +36,10 @@ export interface LiveSessionDocument extends Document {
   allowed_list?: number[];
 }
 
+export interface CategoryDocument extends Document {
+  label: string;
+}
+
 const mappings: { [key in Indices]: MappingTypeMapping } = {
   video_session: {
     properties: {
@@ -95,6 +99,12 @@ const mappings: { [key in Indices]: MappingTypeMapping } = {
     },
   },
   live_session: {},
+  category: {
+    // 가중치가 높게 들어가는 검색의 대상
+    properties: {
+      label: { type: 'keyword' },
+    },
+  },
 };
 
 export default mappings;

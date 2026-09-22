@@ -10,5 +10,6 @@ export const getCategories: RequestSchema = {
       .string()
       .valid(...categorySortKey)
       .optional(),
+    search: joi.string().optional(),
   }),
 };

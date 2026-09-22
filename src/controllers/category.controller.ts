@@ -8,6 +8,7 @@ export const getCategories = asyncCatch(async (req: Request, res: Response) => {
     per_page: parseInt(req.query.per_page as string),
     page: parseInt(req.query.page as string),
     sort: req.query.sort as CategorySortKey,
+    search: req.query.search as string | undefined,
   });
 
   return res.status(200).json({

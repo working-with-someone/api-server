@@ -1,18 +1,21 @@
-export type Indices = 'video_session' | 'live_session';
-export const indices: Indices[] = ['video_session', 'live_session'];
+export type Indices = 'video_session' | 'live_session' | 'category';
+export const indices: Indices[] = ['video_session', 'live_session', 'category'];
 
 const _indices = {
   production: {
     video_session: 'video_sessions',
     live_session: 'live_sessions',
+    category: 'categories',
   },
   development: {
     video_session: 'video_sessions_dev',
     live_session: 'live_sessions_dev',
+    category: 'categories_dev',
   },
   test: {
     video_session: 'video_sessions_test',
     live_session: 'live_sessions_test',
+    category: 'categories_test',
   },
 };
 
